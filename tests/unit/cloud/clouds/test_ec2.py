@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 
 # Import Python libs
@@ -104,5 +103,4 @@ class EC2TestCase(TestCase, LoaderModuleMockMixin):
 
         # Mock makes argument irrelevant; illustrates value used to obtain mock
         imageid = ec2._get_imageid_from_image_name('CentOS Linux 7*')
-
         assert imageid == 'ami-089ccd342f0be98ab'
