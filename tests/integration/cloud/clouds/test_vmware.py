@@ -46,6 +46,9 @@ class VMWareTest(CloudTest):
         for key, value in six.iteritems(profile_config.get('vmware-test', {})):
             assert value, "Instance config incomplete; missing '{}'".format(key)
 
+        for key, value in six.iteritems(profile_config.get('vmware-test', {})):
+            assert value, "Instance config incomplete; missing '{}'".format(key)
+
         instance = self.run_cloud('-p vmware-test {0}'.format(INSTANCE_NAME), timeout=TIMEOUT)
         assert instance, "Instance not found, are the '{}' provider credentials active?".format(PROVIDER_NAME)
         ret_str = '{0}:'.format(INSTANCE_NAME)
