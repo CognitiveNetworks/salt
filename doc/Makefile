@@ -9,14 +9,29 @@ BUILDDIR      = _build
 SPHINXLANG    =
 XELATEX       = xelatex
 
+# ----- Translations Support ------------------------------------------------>
+#  If language is set, also set translation options
+ifeq ($(shell [ "x$(SPHINXLANG)" != "x" ] && echo 0 || echo 1), 0)
+TRANSLATIONOPTS = -D language='$(SPHINXLANG)'
+else
+TRANSLATIONOPTS =
+endif
+
+#  Reset settings if sphinx-intl is not available
+ifeq ($(shell which sphinx-intl >/dev/null 2>&1; echo $$?), 1)
+SPHINXLANG =
+TRANSLATIONOPTS =
+endif
+# <---- Translations Support -------------------------------------------------
+
 # Internal variables.
 PAPEROPT_a4     = -D latex_paper_size=a4
 PAPEROPT_letter = -D latex_paper_size=letter
-ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
+ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(TRANSLATIONOPTS) $(SPHINXOPTS) .
 # the i18n builder cannot share the environment and doctrees with the others
 I18NSPHINXOPTS  = $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 
-.PHONY: help clean check_sphinx-build html dirhtml singlehtml pickle json htmlhelp qthelp devhelp epub latex latexpdf text man changes linkcheck doctest
+.PHONY: help clean check_sphinx-build html dirhtml singlehtml pickle json htmlhelp qthelp devhelp epub latex latexpdf text man changes linkcheck doctest gettext translations download-translations
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
@@ -38,6 +53,7 @@ help:
 	@echo "  man        to make manual pages"
 	@echo "  texinfo    to make Texinfo files"
 	@echo "  info       to make Texinfo files and run them through makeinfo"
+	@echo "  gettext    to make PO message catalogs"
 	@echo "  changes    to make an overview of all changed/added/deprecated items"
 	@echo "  xml        to make Docutils-native XML files"
 	@echo "  pseudoxml  to make pseudoxml-XML files for display purposes"
@@ -52,38 +68,38 @@ clean:
 check_sphinx-build:
 	@which $(SPHINXBUILD) >/dev/null 2>&1 || (echo "The '$(SPHINXBUILD)' command was not found. Make sure you have Sphinx installed, then set the SPHINXBUILD environment variable to point to the full path of the '$(SPHINXBUILD)' executable. Alternatively you can add the directory with the executable to your PATH. If you don't have Sphinx installed, grab it from http://www.sphinx-doc.org/en/master/)" >&2; false)
 
-html: check_sphinx-build
+html: check_sphinx-build translations
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
-dirhtml: check_sphinx-build
+dirhtml: check_sphinx-build translations
 	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/dirhtml."
 
-singlehtml: check_sphinx-build
+singlehtml: check_sphinx-build translations
 	$(SPHINXBUILD) -b singlehtml $(ALLSPHINXOPTS) $(BUILDDIR)/singlehtml
 	@echo
 	@echo "Build finished. The HTML page is in $(BUILDDIR)/singlehtml."
 
-pickle: check_sphinx-build
+pickle: check_sphinx-build translations
 	$(SPHINXBUILD) -b pickle $(ALLSPHINXOPTS) $(BUILDDIR)/pickle
 	@echo
 	@echo "Build finished; now you can process the pickle files."
 
-json: check_sphinx-build
+json: check_sphinx-build translations
 	$(SPHINXBUILD) -b json $(ALLSPHINXOPTS) $(BUILDDIR)/json
 	@echo
 	@echo "Build finished; now you can process the JSON files."
 
-htmlhelp: check_sphinx-build
+htmlhelp: check_sphinx-build translations
 	$(SPHINXBUILD) -b htmlhelp $(ALLSPHINXOPTS) $(BUILDDIR)/htmlhelp
 	@echo
 	@echo "Build finished; now you can run HTML Help Workshop with the" \
 	      ".hhp project file in $(BUILDDIR)/htmlhelp."
 
-qthelp: check_sphinx-build
+qthelp: check_sphinx-build translations
 	$(SPHINXBUILD) -b qthelp $(ALLSPHINXOPTS) $(BUILDDIR)/qthelp
 	@echo
 	@echo "Build finished; now you can run "qcollectiongenerator" with the" \
@@ -92,7 +108,7 @@ qthelp: check_sphinx-build
 	@echo "To view the help file:"
 	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/Salt.qhc"
 
-devhelp: check_sphinx-build
+devhelp: check_sphinx-build translations
 	$(SPHINXBUILD) -b devhelp $(ALLSPHINXOPTS) $(BUILDDIR)/devhelp
 	@echo
 	@echo "Build finished."
@@ -101,31 +117,31 @@ devhelp: check_sphinx-build
 	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/Salt"
 	@echo "# devhelp"
 
-epub: check_sphinx-build
+epub: check_sphinx-build translations
 	$(SPHINXBUILD) -b epub $(ALLSPHINXOPTS) $(BUILDDIR)/epub
 	@echo
 	@echo "Build finished. The epub file is in $(BUILDDIR)/epub."
 
-latex: check_sphinx-build
+latex: check_sphinx-build translations
 	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) $(BUILDDIR)/latex
 	@echo
 	@echo "Build finished; the LaTeX files are in $(BUILDDIR)/latex."
 	@echo "Run \`make' in that directory to run these through (pdf)latex" \
 	      "(use \`make latexpdf' here to do that automatically)."
 
-latexpdf: check_sphinx-build
+latexpdf: check_sphinx-build translations
 	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) $(BUILDDIR)/latex
 	@echo "Running LaTeX files through pdflatex..."
 	$(MAKE) -C $(BUILDDIR)/latex all-pdf
 	@echo "pdflatex finished; the PDF files are in $(BUILDDIR)/latex."
 
-latexpdfja: check_sphinx-build
+latexpdfja: check_sphinx-build translations
 	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) $(BUILDDIR)/latex
 	@echo "Running LaTeX files through platex and dvipdfmx..."
 	$(MAKE) -C $(BUILDDIR)/latex all-pdf-ja
 	@echo "pdflatex finished; the PDF files are in $(BUILDDIR)/latex."
 
-pdf: check_sphinx-build
+pdf: check_sphinx-build translations
 	@if [ "$(XELATEX)"  = "xelatex" ] || [ "x$(XELATEX)" = "x" ]; then \
 		echo "The '$(XELATEX)' command was not found."; \
 	fi
@@ -134,35 +150,40 @@ pdf: check_sphinx-build
 	$(MAKE) -C $(BUILDDIR)/latex -i "PDFLATEX=latexmk" "LATEXMKOPTS=-xelatex -interaction=nonstopmode -f -quiet"
 	@echo "xelatex finished; the PDF files are in $(BUILDDIR)/latex."
 
-cheatsheet:
+cheatsheet: translations
 	@echo "Running cheatsheet/salt.tex file through xelatex..."
 	cd cheatsheet &&  xelatex salt.tex && cp salt.pdf ../salt-cheatsheet.pdf
 	@echo "./salt-cheatsheet.pdf created."
 
-text: check_sphinx-build
+text: check_sphinx-build translations
 	$(SPHINXBUILD) -b text $(ALLSPHINXOPTS) $(BUILDDIR)/text
 	@echo
 	@echo "Build finished. The text files are in $(BUILDDIR)/text."
 
-man: check_sphinx-build
+man: check_sphinx-build translations
 	$(SPHINXBUILD) -b man $(ALLSPHINXOPTS) $(BUILDDIR)/man
 	@echo
 	@echo "Build finished. The manual pages are in $(BUILDDIR)/man."
 
-texinfo: check_sphinx-build
+texinfo: check_sphinx-build translations
 	$(SPHINXBUILD) -b texinfo $(ALLSPHINXOPTS) $(BUILDDIR)/texinfo
 	@echo
 	@echo "Build finished. The Texinfo files are in $(BUILDDIR)/texinfo."
 	@echo "Run \`make' in that directory to run these through makeinfo" \
 	      "(use \`make info' here to do that automatically)."
 
-info: check_sphinx-build
+info: check_sphinx-build translations
 	$(SPHINXBUILD) -b texinfo $(ALLSPHINXOPTS) $(BUILDDIR)/texinfo
 	@echo "Running Texinfo files through makeinfo..."
 	make -C $(BUILDDIR)/texinfo info
 	@echo "makeinfo finished; the Info files are in $(BUILDDIR)/texinfo."
 
-changes: check_sphinx-build
+gettext: check_sphinx-build
+	$(SPHINXBUILD) -b gettext $(I18NSPHINXOPTS) $(BUILDDIR)/locale
+	@echo
+	@echo "Build finished. The message catalogs are in $(BUILDDIR)/locale"
+
+changes: check_sphinx-build translations
 	$(SPHINXBUILD) -b changes $(ALLSPHINXOPTS) $(BUILDDIR)/changes
 	@echo
 	@echo "The overview file is in $(BUILDDIR)/changes."
@@ -184,12 +205,27 @@ doctest: check_sphinx-build
 	@echo "Testing of doctests in the sources finished, look at the " \
 	      "results in $(BUILDDIR)/doctest/output.txt."
 
-xml: check_sphinx-build
+xml: check_sphinx-build translations
 	$(SPHINXBUILD) -b xml $(ALLSPHINXOPTS) $(BUILDDIR)/xml
 	@echo
 	@echo "Build finished. The XML files are in $(BUILDDIR)/xml."
 
-pseudoxml: check_sphinx-build
+pseudoxml: check_sphinx-build translations
 	$(SPHINXBUILD) -b pseudoxml $(ALLSPHINXOPTS) $(BUILDDIR)/pseudoxml
 	@echo
 	@echo "Build finished. The pseudo-XML files are in $(BUILDDIR)/pseudoxml."
+
+translations:
+	@if [ "$(SPHINXLANG)" = "en" ] || [ "x$(SPHINXLANG)" = "x" ]; then \
+		echo "No need to update translations. Skipping..."; \
+	elif [ ! -d locale/$(SPHINXLANG) ]; then \
+		echo "The locale directory for $(SPHINXLANG) does not exist"; \
+		exit 1; \
+	else \
+		echo "Compiling exising message catalog for '$(SPHINXLANG)'"; \
+		.scripts/compile-translation-catalogs; \
+	fi
+
+download-translations:
+	@echo "Downloading $(SPHINXLANG) translations"
+	.scripts/download-translation-catalog $(SPHINXLANG)
