@@ -1406,20 +1406,11 @@ class FileModuleTestCase(TestCase, LoaderModuleMockMixin):
                 self.assertEqual(ret, "Replace text file with binary file")
 
             # Test diffing a binary file with a text file
-            with patch.dict(filemod.__utils__, {"files.is_text": mock_bin_text}):
 
-                ret = filemod.get_diff("binary1", "text1")
-                self.assertEqual(ret, "Replace binary file with text file")
+            with patch.dict(filemod.__utils__, {'files.is_text': mock_bin_text}):
 
-    def test_stats(self):
-        with patch(
-            "os.path.expanduser", MagicMock(side_effect=lambda path: path)
-        ), patch("os.path.exists", MagicMock(return_value=True)), patch(
-            "os.stat", MagicMock(return_value=DummyStat())
-        ):
-            ret = filemod.stats("dummy", None, True)
-            self.assertEqual(ret["mode"], "0644")
-            self.assertEqual(ret["type"], "file")
+                ret = filemod.get_diff('binary1', 'text1')
+                self.assertEqual(ret, 'Replace binary file with text file')
 
     def test_stats(self):
         with patch('os.path.expanduser', MagicMock(side_effect=lambda path: path)), \
@@ -1430,7 +1421,8 @@ class FileModuleTestCase(TestCase, LoaderModuleMockMixin):
             self.assertEqual(ret['type'], 'file')
 
 
-@skipIf(pytest is None, "PyTest required for this set of tests")
+
+@skipIf(pytest is None, 'PyTest required for this set of tests')
 class FilemodLineTests(TestCase, LoaderModuleMockMixin):
     """
     Unit tests for file.line
