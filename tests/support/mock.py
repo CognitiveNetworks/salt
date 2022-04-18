@@ -42,7 +42,8 @@ from mock import (
 
 # pylint: disable=no-name-in-module,no-member
 
-
+NO_MOCK = False
+NO_MOCK_REASON = ''
 __mock_version = tuple(
     [int(part) for part in mock.__version__.split(".") if part.isdigit()]
 )  # pylint: disable=no-member

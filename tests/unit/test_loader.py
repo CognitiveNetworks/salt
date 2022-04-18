@@ -18,6 +18,8 @@ import tempfile
 import textwrap
 
 import pytest
+import six
+
 import salt.config
 import salt.loader
 import salt.loader.context
@@ -1362,19 +1364,19 @@ class LoaderGlobalsTest(ModuleCase):
         """
         # find the globals
         global_vars = {}
-        for val in mod_dict.values():
+
+        for val in six.itervalues(mod_dict):
             # only find salty globals
-            if val.__module__.startswith("salt.loaded"):
-                if hasattr(val, "__globals__"):
-                    if hasattr(val, "__wrapped__") or "__wrapped__" in val.__globals__:
-                        global_vars[val.__module__] = sys.modules[
-                            val.__module__
-                        ].__dict__
+            if val.__module__.startswith('salt.loaded'):
+                if hasattr(val, '__globals__'):
+                    if '__wrapped__' in val.__globals__:
+                        global_vars[val.__module__] = sys.modules[val.__module__].__dict__
                     else:
                         global_vars[val.__module__] = val.__globals__
 
         # if we couldn't find any, then we have no modules -- so something is broken
-        self.assertNotEqual(global_vars, {}, msg="No modules were loaded.")
+
+        self.assertNotEqual(global_vars, {}, msg='No modules were loaded.')
 
         # get the names of the globals you should have
         func_name = inspect.stack()[1][3]
@@ -1383,7 +1385,8 @@ class LoaderGlobalsTest(ModuleCase):
         )
 
         # Now, test each module!
-        for item in global_vars.values():
+
+        for item in six.itervalues(global_vars):
             for name in names:
                 self.assertIn(name, list(item.keys()))
 

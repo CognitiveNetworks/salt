@@ -16,6 +16,55 @@ import threading
 import time
 import traceback
 import types
+import contextlib
+import multiprocessing
+from random import randint, shuffle
+from stat import S_IMODE
+import salt.serializers.msgpack
+from binascii import crc32
+
+# Import Salt Libs
+# pylint: disable=import-error,no-name-in-module,redefined-builtin
+from salt.ext import six
+from salt._compat import ipaddress
+from salt.utils.network import parse_host_port
+from salt.ext.six.moves import range
+from salt.template import SLS_ENCODING
+from salt.utils.zeromq import zmq, ZMQDefaultLoop, install_zmq, ZMQ_VERSION_INFO
+import salt.transport.client
+import salt.defaults.exitcodes
+
+from salt.utils.ctx import RequestContext
+
+# pylint: enable=no-name-in-module,redefined-builtin
+
+HAS_PSUTIL = False
+try:
+    import salt.utils.psutil_compat as psutil
+    HAS_PSUTIL = True
+except ImportError:
+    pass
+
+HAS_RESOURCE = False
+try:
+    import resource
+    HAS_RESOURCE = True
+except ImportError:
+    pass
+
+try:
+    import zmq.utils.monitor
+    HAS_ZMQ_MONITOR = True
+except ImportError:
+    HAS_ZMQ_MONITOR = False
+
+try:
+    import salt.utils.win_functions
+    HAS_WIN_FUNCTIONS = True
+except ImportError:
+    HAS_WIN_FUNCTIONS = False
+# pylint: enable=import-error
+>>>>>>> 2019.2
 
 import salt
 import salt.beacons
@@ -947,17 +996,50 @@ class SMinion(MinionBase):
             if self.opts["saltenv"] is not None:
                 penv = self.opts["saltenv"]
             else:
-                penv = "base"
-            cache_top = {penv: {self.opts["id"]: ["cache"]}}
-            with salt.utils.files.fopen(ptop, "wb") as fp_:
+                penv = 'base'
+            cache_top = {penv: {self.opts['id']: ['cache']}}
+            with salt.utils.files.fopen(ptop, 'wb') as fp_:
                 salt.utils.yaml.safe_dump(cache_top, fp_, encoding=SLS_ENCODING)
                 os.chmod(ptop, 0o600)
-            cache_sls = os.path.join(pdir, "cache.sls")
-            with salt.utils.files.fopen(cache_sls, "wb") as fp_:
-                salt.utils.yaml.safe_dump(
-                    self.opts["pillar"], fp_, encoding=SLS_ENCODING
-                )
+            cache_sls = os.path.join(pdir, 'cache.sls')
+            with salt.utils.files.fopen(cache_sls, 'wb') as fp_:
+                salt.utils.yaml.safe_dump(self.opts['pillar'], fp_, encoding=SLS_ENCODING)
                 os.chmod(cache_sls, 0o600)
+
+    def gen_modules(self, initial_load=False):
+        '''
+        Tell the minion to reload the execution modules
+
+        CLI Example:
+
+        .. code-block:: bash
+
+            salt '*' sys.reload_modules
+        '''
+        self.opts['pillar'] = salt.pillar.get_pillar(
+            self.opts,
+            self.opts['grains'],
+            self.opts['id'],
+            self.opts['saltenv'],
+            pillarenv=self.opts.get('pillarenv'),
+        ).compile_pillar()
+
+        self.utils = salt.loader.utils(self.opts)
+        self.functions = salt.loader.minion_mods(self.opts, utils=self.utils)
+        self.serializers = salt.loader.serializers(self.opts)
+        self.returners = salt.loader.returners(self.opts, self.functions)
+        self.proxy = salt.loader.proxy(self.opts, self.functions, self.returners, None)
+        # TODO: remove
+        self.function_errors = {}  # Keep the funcs clean
+        self.states = salt.loader.states(self.opts,
+                self.functions,
+                self.utils,
+                self.serializers)
+        self.rend = salt.loader.render(self.opts, self.functions)
+#        self.matcher = Matcher(self.opts, self.functions)
+        self.matchers = salt.loader.matchers(self.opts)
+        self.functions['sys.reload_modules'] = self.gen_modules
+        self.executors = salt.loader.executors(self.opts, self.functions, proxy=self.proxy)
 
 
 class MasterMinion:

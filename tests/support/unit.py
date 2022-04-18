@@ -33,8 +33,8 @@ from unittest import TestSuite as _TestSuite
 from unittest import TextTestResult as _TextTestResult
 from unittest import TextTestRunner as _TextTestRunner
 from unittest import expectedFailure, skip, skipIf
-from unittest.case import SkipTest, _id
-
+if sys.version_info < (2, 7):
+    from unittest2.case import _id
 try:
     import psutil
 

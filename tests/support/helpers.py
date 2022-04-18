@@ -30,7 +30,7 @@ import threading
 import time
 import types
 from contextlib import contextmanager
-
+from tests.support.unit import skip, _id
 import attr
 import pytest
 import salt.ext.tornado.ioloop
@@ -43,14 +43,25 @@ import salt.utils.versions
 from saltfactories.exceptions import FactoryFailure as ProcessFailed
 from saltfactories.utils.ports import get_unused_localhost_port
 from saltfactories.utils.processes import ProcessResult
+
+from tests.pytests.unit.modules.test_mac_user import pwd
 from tests.support.mock import patch
 from tests.support.runtests import RUNTIME_VARS
 from tests.support.sminion import create_sminion
-from tests.support.unit import SkipTest, _id, skip
+from tests.support.unit import skip, _id
 
 log = logging.getLogger(__name__)
 
 HAS_SYMLINKS = None
+
+
+def this_user():
+    '''
+    Get the user associated with the current process.
+    '''
+    if salt.utils.platform.is_windows():
+        return salt.utils.win_functions.get_current_user(with_domain=False)
+    return pwd.getpwuid(os.getuid())[0]
 
 
 PRE_PYTEST_SKIP_OR_NOT = "PRE_PYTEST_DONT_SKIP" not in os.environ
@@ -90,79 +101,57 @@ def no_symlinks():
 
 
 def destructiveTest(caller):
-    """
+    '''
     Mark a test case as a destructive test for example adding or removing users
     from your system.
-
     .. code-block:: python
-
         class MyTestCase(TestCase):
-
             @destructiveTest
             def test_create_user(self):
                 pass
-    """
-    salt.utils.versions.warn_until_date(
-        "20220101",
-        "Please stop using `@destructiveTest`, it will be removed in {date}, and"
-        " instead use `@pytest.mark.destructive_test`.",
-        stacklevel=3,
-    )
-    setattr(caller, "__destructive_test__", True)
+    '''
+    if inspect.isclass(caller):
+        # We're decorating a class
+        old_setup = getattr(caller, 'setUp', None)
 
-    if os.environ.get("DESTRUCTIVE_TESTS", "False").lower() == "false":
-        reason = "Destructive tests are disabled"
-
-        if not isinstance(caller, type):
-
-            @functools.wraps(caller)
-            def skip_wrapper(*args, **kwargs):
-                raise SkipTest(reason)
-
-            caller = skip_wrapper
-
-        caller.__unittest_skip__ = True
-        caller.__unittest_skip_why__ = reason
-
-    return caller
+        def setUp(self, *args, **kwargs):
+            if os.environ.get('DESTRUCTIVE_TESTS', 'False').lower() == 'false':
+                self.skipTest('Destructive tests are disabled')
+            if old_setup is not None:
+                old_setup(self, *args, **kwargs)
+        caller.setUp = setUp
+        return caller
 
 
 def expensiveTest(caller):
-    """
+    '''
     Mark a test case as an expensive test, for example, a test which can cost
     money(Salt's cloud provider tests).
-
     .. code-block:: python
-
         class MyTestCase(TestCase):
-
             @expensiveTest
             def test_create_user(self):
                 pass
-    """
-    salt.utils.versions.warn_until_date(
-        "20220101",
-        "Please stop using `@expensiveTest`, it will be removed in {date}, and instead"
-        " use `@pytest.mark.expensive_test`.",
-        stacklevel=3,
-    )
-    setattr(caller, "__expensive_test__", True)
+    '''
+    if inspect.isclass(caller):
+        # We're decorating a class
+        old_setup = getattr(caller, 'setUp', None)
 
-    if os.environ.get("EXPENSIVE_TESTS", "False").lower() == "false":
-        reason = "Expensive tests are disabled"
+        def setUp(self, *args, **kwargs):
+            if os.environ.get('EXPENSIVE_TESTS', 'False').lower() == 'false':
+                self.skipTest('Expensive tests are disabled')
+            if old_setup is not None:
+                old_setup(self, *args, **kwargs)
+        caller.setUp = setUp
+        return caller
 
-        if not isinstance(caller, type):
-
-            @functools.wraps(caller)
-            def skip_wrapper(*args, **kwargs):
-                raise SkipTest(reason)
-
-            caller = skip_wrapper
-
-        caller.__unittest_skip__ = True
-        caller.__unittest_skip_why__ = reason
-
-    return caller
+    # We're simply decorating functions
+    @functools.wraps(caller)
+    def wrap(cls):
+        if os.environ.get('EXPENSIVE_TESTS', 'False').lower() == 'false':
+            cls.skipTest('Expensive tests are disabled')
+        return caller(cls)
+    return wrap
 
 
 def slowTest(caller):
@@ -241,26 +230,18 @@ def flaky(caller=None, condition=True, attempts=4):
                     # Run through setUp again
                     # We only run it after the first iteration(>0) because the regular
                     # test runner will have already ran setUp the first time
-                    setup = getattr(cls, "setUp", None)
+
+                    setup = getattr(cls, 'setUp', None)
                     if callable(setup):
                         setup()
                 return caller(cls)
-            except SkipTest as exc:
-                cls.skipTest(exc.args[0])
-            except Exception as exc:  # pylint: disable=broad-except
-                exc_info = sys.exc_info()
-                if isinstance(exc, SkipTest):
-                    raise exc_info[0].with_traceback(exc_info[1], exc_info[2])
-                if not isinstance(exc, AssertionError) and log.isEnabledFor(
-                    logging.DEBUG
-                ):
-                    log.exception(exc, exc_info=exc_info)
-                if attempt >= attempts - 1:
+            except Exception as exc:
+                if attempt >= attempts -1:
                     # We won't try to run tearDown once the attempts are exhausted
                     # because the regular test runner will do that for us
-                    raise exc_info[0].with_traceback(exc_info[1], exc_info[2])
+                    raise exc
                 # Run through tearDown again
-                teardown = getattr(cls, "tearDown", None)
+                teardown = getattr(cls, 'tearDown', None)
                 if callable(teardown):
                     teardown()
                 backoff_time = attempt ** 2
@@ -1086,57 +1067,6 @@ def requires_system_grains(func):
     return decorator
 
 
-@requires_system_grains
-def runs_on(grains=None, **kwargs):
-    """
-    Skip the test if grains don't match the values passed into **kwargs
-    if a kwarg value is a list then skip if the grains don't match any item in the list
-    """
-    reason = kwargs.pop("reason", None)
-    for kw, value in kwargs.items():
-        if isinstance(value, list):
-            if not any(str(grains.get(kw)).lower() != str(v).lower() for v in value):
-                if reason is None:
-                    reason = "This test does not run on {}={}".format(
-                        kw, grains.get(kw)
-                    )
-                return skip(reason)
-        else:
-            if str(grains.get(kw)).lower() != str(value).lower():
-                if reason is None:
-                    reason = "This test runs on {}={}, not {}".format(
-                        kw, value, grains.get(kw)
-                    )
-                return skip(reason)
-    return _id
-
-
-@requires_system_grains
-def not_runs_on(grains=None, **kwargs):
-    """
-    Reverse of `runs_on`.
-    Skip the test if any grains match the values passed into **kwargs
-    if a kwarg value is a list then skip if the grains match any item in the list
-    """
-    reason = kwargs.pop("reason", None)
-    for kw, value in kwargs.items():
-        if isinstance(value, list):
-            if any(str(grains.get(kw)).lower() == str(v).lower() for v in value):
-                if reason is None:
-                    reason = "This test does not run on {}={}".format(
-                        kw, grains.get(kw)
-                    )
-                return skip(reason)
-        else:
-            if str(grains.get(kw)).lower() == str(value).lower():
-                if reason is None:
-                    reason = "This test does not run on {}={}, got {}".format(
-                        kw, value, grains.get(kw)
-                    )
-                return skip(reason)
-    return _id
-
-
 def _check_required_sminion_attributes(sminion_attr, *required_items):
     """
     :param sminion_attr: The name of the sminion attribute to check, such as 'functions' or 'states'
@@ -1173,73 +1103,35 @@ def _check_required_sminion_attributes(sminion_attr, *required_items):
     return not_available_items
 
 
-def requires_salt_states(*names):
-    """
-    Makes sure the passed salt state is available. Skips the test if not
-
-    .. versionadded:: 3000
-    """
-    salt.utils.versions.warn_until_date(
-        "20220101",
-        "Please stop using `@requires_salt_states`, it will be removed in {date}, and"
-        " instead use `@pytest.mark.requires_salt_states`.",
-        stacklevel=3,
-    )
-    not_available = _check_required_sminion_attributes("states", *names)
-    if not_available:
-        return skip("Unavailable salt states: {}".format(*not_available))
-    return _id
-
-
-def requires_salt_modules(*names):
-    """
-    Makes sure the passed salt module is available. Skips the test if not
-
-    .. versionadded:: 0.5.2
-    """
-    salt.utils.versions.warn_until_date(
-        "20220101",
-        "Please stop using `@requires_salt_modules`, it will be removed in {date}, and"
-        " instead use `@pytest.mark.requires_salt_modules`.",
-        stacklevel=3,
-    )
-    not_available = _check_required_sminion_attributes("functions", *names)
-    if not_available:
-        return skip("Unavailable salt modules: {}".format(*not_available))
-    return _id
-
 
 def skip_if_binaries_missing(*binaries, **kwargs):
-    salt.utils.versions.warn_until_date(
-        "20220101",
-        "Please stop using `@skip_if_binaries_missing`, it will be removed in {date},"
-        " and instead use `@pytest.mark.skip_if_binaries_missing`.",
-        stacklevel=3,
-    )
     import salt.utils.path
-
     if len(binaries) == 1:
         if isinstance(binaries[0], (list, tuple, set, frozenset)):
             binaries = binaries[0]
-    check_all = kwargs.pop("check_all", False)
-    message = kwargs.pop("message", None)
+    check_all = kwargs.pop('check_all', False)
+    message = kwargs.pop('message', None)
     if kwargs:
         raise RuntimeError(
-            "The only supported keyword argument is 'check_all' and "
-            "'message'. Invalid keyword arguments: {}".format(", ".join(kwargs.keys()))
+            'The only supported keyword argument is \'check_all\' and '
+            '\'message\'. Invalid keyword arguments: {0}'.format(
+                ', '.join(kwargs.keys())
+            )
         )
     if check_all:
         for binary in binaries:
             if salt.utils.path.which(binary) is None:
                 return skip(
-                    "{}The {!r} binary was not found".format(
-                        message and "{}. ".format(message) or "", binary
+                    '{0}The {1!r} binary was not found'.format(
+                        message and '{0}. '.format(message) or '',
+                        binary
                     )
                 )
     elif salt.utils.path.which_bin(binaries) is None:
         return skip(
-            "{}None of the following binaries was found: {}".format(
-                message and "{}. ".format(message) or "", ", ".join(binaries)
+            '{0}None of the following binaries was found: {1}'.format(
+                message and '{0}. '.format(message) or '',
+                ', '.join(binaries)
             )
         )
     return _id

@@ -1,9 +1,10 @@
 import pytest
+from salt.ext import six
+
 import salt.utils.platform
 from tests.support.case import ModuleCase
 
 
-@pytest.mark.windows_whitelisted
 class StdTest(ModuleCase):
     """
     Test standard client calls
@@ -76,36 +77,41 @@ class StdTest(ModuleCase):
         """
         terrible_yaml_string = 'foo: ""\n# \''
         ret = self.client.cmd_full_return(
-            "minion",
-            "test.arg_type",
-            ["a", 1],
-            kwarg={"outer": {"a": terrible_yaml_string}, "inner": "value"},
-            timeout=self.TIMEOUT,
-        )
-        data = ret["minion"]["ret"]
-        self.assertIn(str.__name__, data["args"][0])
-        self.assertIn("int", data["args"][1])
-        self.assertIn("dict", data["kwargs"]["outer"])
-        self.assertIn(str.__name__, data["kwargs"]["inner"])
+
+                'minion',
+                'test.arg_type',
+                ['a', 1],
+                timeout=self.TIMEOUT,
+                kwarg={'outer': {'a': terrible_yaml_string},
+                       'inner': 'value'}
+                )
+        data = ret['minion']['ret']
+        self.assertIn(six.text_type.__name__, data['args'][0])
+        self.assertIn('int', data['args'][1])
+        self.assertIn('dict', data['kwargs']['outer'])
+        self.assertIn(six.text_type.__name__, data['kwargs']['inner'])
 
     @pytest.mark.slow_test
     def test_full_return_kwarg(self):
         ret = self.client.cmd(
-            "minion",
-            "test.ping",
-            full_return=True,
-            timeout=self.TIMEOUT,
+
+            'minion', 'test.ping', full_return=True, timeout=self.TIMEOUT,
         )
         for mid, data in ret.items():
             self.assertIn("retcode", data)
 
     @pytest.mark.slow_test
     def test_cmd_arg_kwarg_parsing(self):
-        ret = self.client.cmd(
-            "minion",
-            "test.arg_clean",
-            arg=["foo", "bar=off", "baz={qux: 123}"],
-            kwarg={"quux": "Quux"},
+
+        ret = self.client.cmd('minion', 'test.arg_clean',
+            arg=[
+                'foo',
+                'bar=off',
+                'baz={qux: 123}'
+            ],
+            kwarg={
+                'quux': 'Quux',
+            },
             timeout=self.TIMEOUT,
         )
         self.assertEqual(

@@ -602,11 +602,14 @@ class IPCMessagePublisher:
         if hasattr(self.sock, "close"):
             self.sock.close()
 
-    def __enter__(self):
-        return self
 
-    def __exit__(self, *args):
-        self.close()
+    def __del__(self):
+        try:
+            self.close()
+        except TypeError:
+            # This is raised when Python's GC has collected objects which
+            # would be needed when calling self.close()
+            pass
 
 
 class IPCMessageSubscriber(IPCClient):

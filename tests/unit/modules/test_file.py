@@ -40,7 +40,7 @@ here
 """
 
 
-class DummyStat:
+class DummyStat(object):
     st_mode = 33188
     st_ino = 115331251
     st_dev = 44
@@ -1420,6 +1420,14 @@ class FileModuleTestCase(TestCase, LoaderModuleMockMixin):
             ret = filemod.stats("dummy", None, True)
             self.assertEqual(ret["mode"], "0644")
             self.assertEqual(ret["type"], "file")
+
+    def test_stats(self):
+        with patch('os.path.expanduser', MagicMock(side_effect=lambda path: path)), \
+                patch('os.path.exists', MagicMock(return_value=True)), \
+                patch('os.stat', MagicMock(return_value=DummyStat())):
+            ret = filemod.stats('dummy', None, True)
+            self.assertEqual(ret['mode'], '0644')
+            self.assertEqual(ret['type'], 'file')
 
 
 @skipIf(pytest is None, "PyTest required for this set of tests")
