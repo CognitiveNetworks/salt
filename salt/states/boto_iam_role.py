@@ -88,8 +88,6 @@ on the IAM role to be persistent. This functionality was added in 2015.8.0.
 
 import logging
 
-import six
-
 import salt.utils.dictdiffer
 import salt.utils.dictupdate as dictupdate
 from salt.utils.odict import OrderedDict
@@ -363,7 +361,7 @@ def _sort_policy(doc):
         if isinstance(doc, list):
             return sorted((_sort_policy(i) for i in doc), key=lambda d: sorted(d.items()))
         elif isinstance(doc, (dict, OrderedDict)):
-            return dict([(k, _sort_policy(v)) for k, v in six.iteritems(doc)])
+            return dict([(k, _sort_policy(v)) for k, v in doc.items()])
     except Exception as e:
         log.info('Can not sort, returning unsorted')
     return doc
