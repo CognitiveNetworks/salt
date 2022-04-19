@@ -64,7 +64,6 @@ try:
 except ImportError:
     HAS_WIN_FUNCTIONS = False
 # pylint: enable=import-error
->>>>>>> 2019.2
 
 import salt
 import salt.beacons
