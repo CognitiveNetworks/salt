@@ -172,6 +172,7 @@ execution modules
     gentoolkitmod
     git
     github
+    glance
     glanceng
     glassfish
     glusterfs

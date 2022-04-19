@@ -45,9 +45,9 @@ class JobsTest(ShellCase):
         """
         jobs.lookup_jid
         """
-        ret = self.run_run_plus("jobs.lookup_jid", _output="json")
-        expected = "Passed invalid arguments:"
-        self.assertIn(expected, ret["return"])
+        ret = self.run_run_plus('jobs.lookup_jid')
+        expected = 'Passed invalid arguments:'
+        self.assertRaises(TypeError, expected)
 
     @pytest.mark.slow_test
     def test_list_jobs(self):
