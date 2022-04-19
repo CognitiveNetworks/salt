@@ -1,14 +1,19 @@
+# -*- coding: utf-8 -*-
 """
 The networking module for Windows based systems
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import Python libs
 import logging
 import time
 
+# Import Salt libs
 import salt.utils.network
 import salt.utils.platform
 import salt.utils.validate.net
 from salt.exceptions import CommandExecutionError, SaltInvocationError
+from salt.ext.six.moves import range
 
 # Set up logging
 log = logging.getLogger(__name__)
@@ -132,14 +137,14 @@ def is_enabled(iface):
 
         salt -G 'os_family:Windows' ip.is_enabled 'Local Area Connection #2'
     """
-    cmd = ["netsh", "interface", "show", "interface", "name={}".format(iface)]
+    cmd = ["netsh", "interface", "show", "interface", "name={0}".format(iface)]
     iface_found = False
     for line in __salt__["cmd.run"](cmd, python_shell=False).splitlines():
         if "Connect state:" in line:
             iface_found = True
             return line.split()[-1] == "Connected"
     if not iface_found:
-        raise CommandExecutionError("Interface '{}' not found".format(iface))
+        raise CommandExecutionError("Interface '{0}' not found".format(iface))
     return False
 
 
@@ -173,7 +178,7 @@ def enable(iface):
         "interface",
         "set",
         "interface",
-        "name={}".format(iface),
+        "name={0}".format(iface),
         "admin=ENABLED",
     ]
     __salt__["cmd.run"](cmd, python_shell=False)
@@ -197,7 +202,7 @@ def disable(iface):
         "interface",
         "set",
         "interface",
-        "name={}".format(iface),
+        "name={0}".format(iface),
         "admin=DISABLED",
     ]
     __salt__["cmd.run"](cmd, python_shell=False)
@@ -215,7 +220,7 @@ def get_subnet_length(mask):
         salt -G 'os_family:Windows' ip.get_subnet_length 255.255.255.0
     """
     if not salt.utils.validate.net.netmask(mask):
-        raise SaltInvocationError("'{}' is not a valid netmask".format(mask))
+        raise SaltInvocationError("'{0}' is not a valid netmask".format(mask))
     return salt.utils.network.get_net_size(mask)
 
 
@@ -258,17 +263,17 @@ def set_static_ip(iface, addr, gateway=None, append=False):
         return {}
 
     if not salt.utils.validate.net.ipv4_addr(addr):
-        raise SaltInvocationError("Invalid address '{}'".format(addr))
+        raise SaltInvocationError("Invalid address '{0}'".format(addr))
 
     if gateway and not salt.utils.validate.net.ipv4_addr(addr):
-        raise SaltInvocationError("Invalid default gateway '{}'".format(gateway))
+        raise SaltInvocationError("Invalid default gateway '{0}'".format(gateway))
 
     if "/" not in addr:
         addr += "/32"
 
     if append and _find_addr(iface, addr):
         raise CommandExecutionError(
-            "Address '{}' already exists on interface '{}'".format(addr, iface)
+            "Address '{0}' already exists on interface " "'{1}'".format(addr, iface)
         )
 
     cmd = ["netsh", "interface", "ip"]
@@ -276,17 +281,17 @@ def set_static_ip(iface, addr, gateway=None, append=False):
         cmd.append("add")
     else:
         cmd.append("set")
-    cmd.extend(["address", "name={}".format(iface)])
+    cmd.extend(["address", "name={0}".format(iface)])
     if not append:
         cmd.append("source=static")
-    cmd.append("address={}".format(addr))
+    cmd.append("address={0}".format(addr))
     if gateway:
-        cmd.append("gateway={}".format(gateway))
+        cmd.append("gateway={0}".format(gateway))
 
     result = __salt__["cmd.run_all"](cmd, python_shell=False)
     if result["retcode"] != 0:
         raise CommandExecutionError(
-            "Unable to set IP address: {}".format(result["stderr"])
+            "Unable to set IP address: {0}".format(result["stderr"])
         )
 
     new_addr = _find_addr(iface, addr, timeout=10)
@@ -348,7 +353,7 @@ def set_static_dns(iface, *addrs):
             "ip",
             "set",
             "dns",
-            "name={}".format(iface),
+            "name={0}".format(iface),
             "source=static",
             "address=none",
         ]
@@ -363,9 +368,9 @@ def set_static_dns(iface, *addrs):
                 "ip",
                 "set",
                 "dns",
-                "name={}".format(iface),
+                "name={0}".format(iface),
                 "source=static",
-                "address={}".format(addr),
+                "address={0}".format(addr),
                 "register=primary",
             ]
             __salt__["cmd.run"](cmd, python_shell=False)
@@ -377,9 +382,9 @@ def set_static_dns(iface, *addrs):
                 "ip",
                 "add",
                 "dns",
-                "name={}".format(iface),
-                "address={}".format(addr),
-                "index={}".format(addr_index),
+                "name={0}".format(iface),
+                "address={0}".format(addr),
+                "index={0}".format(addr_index),
             ]
             __salt__["cmd.run"](cmd, python_shell=False)
             addr_index = addr_index + 1

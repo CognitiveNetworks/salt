@@ -1,7 +1,10 @@
+# -*- coding: utf-8 -*-
 """
     :codeauthor: Erik Johnson <erik@saltstack.com>
 """
 
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import copy
 import logging
@@ -9,7 +12,11 @@ import os
 import subprocess
 
 import salt.modules.git as git_mod  # Don't potentially shadow GitPython
+
+# Import Salt Libs
 from salt.utils.versions import LooseVersion
+
+# Import Salt Testing Libs
 from tests.support.mixins import LoaderModuleMockMixin
 from tests.support.mock import MagicMock, Mock, patch
 from tests.support.unit import TestCase
@@ -81,10 +88,10 @@ class GitTestCase(TestCase, LoaderModuleMockMixin):
             """
             Build 'git worktree list' output for a given path
             """
-            return "worktree {}\nHEAD {}\n{}\n".format(
+            return "worktree {0}\nHEAD {1}\n{2}\n".format(
                 path,
                 WORKTREE_INFO[path]["HEAD"],
-                "branch {}".format(WORKTREE_INFO[path]["branch"])
+                "branch {0}".format(WORKTREE_INFO[path]["branch"])
                 if WORKTREE_INFO[path]["branch"] != "detached"
                 else "detached",
             )
@@ -142,21 +149,25 @@ class GitTestCase(TestCase, LoaderModuleMockMixin):
                 # return data.
                 self.assertEqual(
                     git_mod.list_worktrees(WORKTREE_ROOT, all=False, stale=False),
-                    {
-                        x: worktree_ret[x]
-                        for x in WORKTREE_INFO
-                        if not WORKTREE_INFO[x].get("stale", False)
-                    },
+                    dict(
+                        [
+                            (x, worktree_ret[x])
+                            for x in WORKTREE_INFO
+                            if not WORKTREE_INFO[x].get("stale", False)
+                        ]
+                    ),
                 )
                 # Test stale=True. Exclude non-stale worktrees from return
                 # data.
                 self.assertEqual(
                     git_mod.list_worktrees(WORKTREE_ROOT, all=False, stale=True),
-                    {
-                        x: worktree_ret[x]
-                        for x in WORKTREE_INFO
-                        if WORKTREE_INFO[x].get("stale", False)
-                    },
+                    dict(
+                        [
+                            (x, worktree_ret[x])
+                            for x in WORKTREE_INFO
+                            if WORKTREE_INFO[x].get("stale", False)
+                        ]
+                    ),
                 )
 
     def test__git_run_tmp_wrapper(self):

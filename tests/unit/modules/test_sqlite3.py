@@ -1,14 +1,20 @@
+# -*- coding: utf-8 -*-
 """
     :codeauthor: Jayesh Kariya <jayeshk@saltstack.com>
 """
 
+# Import Python Libs
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import Salt Libs
 import salt.modules.sqlite3 as sqlite3
+
+# Import Salt Testing Libs
 from tests.support.mixins import LoaderModuleMockMixin
 from tests.support.unit import TestCase
 
 
-class MockSqlite3:
+class MockSqlite3(object):
     """
     Mock sqlite3 class
     """

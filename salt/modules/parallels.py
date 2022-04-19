@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Manage Parallels Desktop VMs with ``prlctl`` and ``prlsrvctl``.  Only some of
 the prlctl commands implemented so far.  Of those that have been implemented,
@@ -20,15 +21,22 @@ necessary):
 
 .. versionadded:: 2016.3.0
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
+
+# Import python libs
 import re
 import shlex
 
+# Import salt libs
 import salt.utils.data
 import salt.utils.path
 import salt.utils.yaml
 from salt.exceptions import CommandExecutionError, SaltInvocationError
+
+# Import 3rd party libs
+from salt.ext import six
 
 __virtualname__ = "parallels"
 __func_alias__ = {
@@ -45,13 +53,13 @@ def _normalize_args(args):
     """
     Return args as a list of strings
     """
-    if isinstance(args, str):
+    if isinstance(args, six.string_types):
         return shlex.split(args)
 
     if isinstance(args, (tuple, list)):
-        return [str(arg) for arg in args]
+        return [six.text_type(arg) for arg in args]
     else:
-        return [str(args)]
+        return [six.text_type(args)]
 
 
 def _find_guids(guid_string):
@@ -277,7 +285,7 @@ def exists(name, runas=None):
     """
     vm_info = list_vms(name, info=True, runas=runas).splitlines()
     for info_line in vm_info:
-        if "Name: {}".format(name) in info_line:
+        if "Name: {0}".format(name) in info_line:
             return True
     return False
 
@@ -453,7 +461,7 @@ def snapshot_id_to_name(name, snap_id, strict=False, runas=None):
     name = salt.utils.data.decode(name)
     if not re.match(GUID_REGEX, snap_id):
         raise SaltInvocationError(
-            'Snapshot ID "{}" is not a GUID'.format(salt.utils.data.decode(snap_id))
+            'Snapshot ID "{0}" is not a GUID'.format(salt.utils.data.decode(snap_id))
         )
 
     # Get the snapshot information of the snapshot having the requested ID
@@ -462,7 +470,7 @@ def snapshot_id_to_name(name, snap_id, strict=False, runas=None):
     # Parallels desktop returned no information for snap_id
     if not info:
         raise SaltInvocationError(
-            'No snapshots for VM "{}" have ID "{}"'.format(name, snap_id)
+            'No snapshots for VM "{0}" have ID "{1}"'.format(name, snap_id)
         )
 
     # Try to interpret the information
@@ -489,9 +497,8 @@ def snapshot_id_to_name(name, snap_id, strict=False, runas=None):
     # Raise or return the result
     if not snap_name and strict:
         raise SaltInvocationError(
-            'Could not find a snapshot name for snapshot ID "{}" of VM "{}"'.format(
-                snap_id, name
-            )
+            'Could not find a snapshot name for snapshot ID "{0}" of VM '
+            '"{1}"'.format(snap_id, name)
         )
     return salt.utils.data.decode(snap_name)
 
@@ -540,12 +547,12 @@ def snapshot_name_to_id(name, snap_name, strict=False, runas=None):
     # non-singular names
     if len(named_ids) == 0:
         raise SaltInvocationError(
-            'No snapshots for VM "{}" have name "{}"'.format(name, snap_name)
+            'No snapshots for VM "{0}" have name "{1}"'.format(name, snap_name)
         )
     elif len(named_ids) == 1:
         return named_ids[0]
     else:
-        multi_msg = 'Multiple snapshots for VM "{}" have name "{}"'.format(
+        multi_msg = 'Multiple snapshots for VM "{0}" have name ' '"{1}"'.format(
             name, snap_name
         )
         if strict:
@@ -631,7 +638,7 @@ def list_snapshots(name, snap_name=None, tree=False, names=False, runas=None):
         snap_ids = _find_guids(res)
 
         # Try to find the snapshot names
-        ret = "{:<38}  {}\n".format("Snapshot ID", "Snapshot Name")
+        ret = "{0:<38}  {1}\n".format("Snapshot ID", "Snapshot Name")
         for snap_id in snap_ids:
             snap_name = snapshot_id_to_name(name, snap_id, runas=runas)
             ret += "{{{0}}}  {1}\n".format(snap_id, salt.utils.data.decode(snap_name))
@@ -717,7 +724,7 @@ def delete_snapshot(name, snap_name, runas=None, all=False):
     # Validate VM and snapshot names
     name = salt.utils.data.decode(name)
     snap_ids = _validate_snap_name(name, snap_name, strict=strict, runas=runas)
-    if isinstance(snap_ids, str):
+    if isinstance(snap_ids, six.string_types):
         snap_ids = [snap_ids]
 
     # Delete snapshot(s)

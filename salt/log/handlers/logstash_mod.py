@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     Logstash Logging Handler
     ========================
@@ -154,6 +155,8 @@
 
 """
 
+# Import python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import datetime
 import logging
@@ -163,7 +166,12 @@ import os
 import salt.utils.json
 import salt.utils.network
 import salt.utils.stringutils
+
+# Import Third party libs
+from salt.ext import six
 from salt.log.mixins import NewStyleClassMixIn
+
+# Import salt libs
 from salt.log.setup import LOG_LEVELS
 
 try:
@@ -266,8 +274,8 @@ class LogstashFormatter(logging.Formatter, NewStyleClassMixIn):
         self.msg_path = msg_path
         self.msg_type = msg_type
         self.version = version
-        self.format = getattr(self, "format_v{}".format(version))
-        super().__init__(fmt=None, datefmt=None)
+        self.format = getattr(self, "format_v{0}".format(version))
+        super(LogstashFormatter, self).__init__(fmt=None, datefmt=None)
 
     def formatTime(self, record, datefmt=None):
         return datetime.datetime.utcfromtimestamp(record.created).isoformat()[:-3] + "Z"
@@ -287,7 +295,7 @@ class LogstashFormatter(logging.Formatter, NewStyleClassMixIn):
                 "processName": record.processName,
             },
             "@message": record.getMessage(),
-            "@source": "{}://{}/{}".format(self.msg_type, host, self.msg_path),
+            "@source": "{0}://{1}/{2}".format(self.msg_type, host, self.msg_path),
             "@source_host": host,
             "@source_path": self.msg_path,
             "@tags": ["salt"],
@@ -298,7 +306,7 @@ class LogstashFormatter(logging.Formatter, NewStyleClassMixIn):
             message_dict["@fields"]["exc_info"] = self.formatException(record.exc_info)
 
         # Add any extra attributes to the message field
-        for key, value in record.__dict__.items():
+        for key, value in six.iteritems(record.__dict__):
             if key in (
                 "args",
                 "asctime",
@@ -331,7 +339,7 @@ class LogstashFormatter(logging.Formatter, NewStyleClassMixIn):
                 message_dict["@fields"][key] = value
                 continue
 
-            if isinstance(value, (str, bool, dict, float, int, list)):
+            if isinstance(value, (six.string_types, bool, dict, float, int, list)):
                 message_dict["@fields"][key] = value
                 continue
 
@@ -360,7 +368,7 @@ class LogstashFormatter(logging.Formatter, NewStyleClassMixIn):
             message_dict["exc_info"] = self.formatException(record.exc_info)
 
         # Add any extra attributes to the message field
-        for key, value in record.__dict__.items():
+        for key, value in six.iteritems(record.__dict__):
             if key in (
                 "args",
                 "asctime",
@@ -393,7 +401,7 @@ class LogstashFormatter(logging.Formatter, NewStyleClassMixIn):
                 message_dict[key] = value
                 continue
 
-            if isinstance(value, (str, bool, dict, float, int, list)):
+            if isinstance(value, (six.string_types, bool, dict, float, int, list)):
                 message_dict[key] = value
                 continue
 
@@ -416,7 +424,7 @@ class ZMQLogstashHander(logging.Handler, NewStyleClassMixIn):
     """
 
     def __init__(self, address, level=logging.NOTSET, zmq_hwm=1000):
-        super().__init__(level=level)
+        super(ZMQLogstashHander, self).__init__(level=level)
         self._context = self._publisher = None
         self._address = address
         self._zmq_hwm = zmq_hwm

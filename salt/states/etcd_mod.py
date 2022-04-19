@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """
 Manage etcd Keys
 ================
@@ -115,6 +117,8 @@ Available Functions
             - file: /some/file.txt
 """
 
+# Import Python Libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 # Define the module's virtual name
 __virtualname__ = "etcd"
@@ -124,6 +128,7 @@ __func_alias__ = {
     "set_": "set",
 }
 
+# Import third party libs
 try:
     import salt.utils.etcd_util  # pylint: disable=W0611
 
@@ -329,9 +334,7 @@ def mod_watch(name, **kwargs):
     return {
         "name": name,
         "changes": {},
-        "comment": (
-            "etcd.{0[sfun]} does not work with the watch requisite, "
-            "please use etcd.wait_set or etcd.wait_rm".format(kwargs)
-        ),
+        "comment": "etcd.{0[sfun]} does not work with the watch requisite, "
+        "please use etcd.wait_set or etcd.wait_rm".format(kwargs),
         "result": False,
     }

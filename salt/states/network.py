@@ -554,10 +554,9 @@ def managed(name, enabled=True, **kwargs):
                 elif old != new:
                     diff = difflib.unified_diff(old, new, lineterm="")
                     ret["result"] = None
-                    ret[
-                        "comment"
-                    ] = "Bond interface {} is set to be updated:\n{}".format(
-                        name, "\n".join(diff)
+                    ret["comment"] = (
+                        "Bond interface {} is set to be "
+                        "updated:\n{}".format(name, "\n".join(diff))
                     )
             else:
                 if not old and new:
@@ -720,10 +719,9 @@ def routes(name, **kwargs):
             elif old != new:
                 diff = difflib.unified_diff(old, new, lineterm="")
                 ret["result"] = None
-                ret[
-                    "comment"
-                ] = "Interface {} routes are set to be updated:\n{}".format(
-                    name, "\n".join(diff)
+                ret["comment"] = (
+                    "Interface {} routes are set to be "
+                    "updated:\n{}".format(name, "\n".join(diff))
                 )
                 return ret
         if not old and new:
@@ -785,10 +783,9 @@ def system(name, **kwargs):
             elif old != new:
                 diff = difflib.unified_diff(old, new, lineterm="")
                 ret["result"] = None
-                ret[
-                    "comment"
-                ] = "Global network settings are set to be updated:\n{}".format(
-                    "\n".join(diff)
+                ret["comment"] = (
+                    "Global network settings are set to be "
+                    "updated:\n{}".format("\n".join(diff))
                 )
                 return ret
         if not old and new:

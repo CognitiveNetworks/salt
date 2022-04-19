@@ -1,11 +1,17 @@
+# -*- coding: utf-8 -*-
 """
     :codeauthor: Jayesh Kariya <jayeshk@saltstack.com>
 """
 
+# Import Python Libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import textwrap
 
+# Import Salt Libs
 import salt.modules.rh_service as rh_service
+
+# Import Salt Testing Libs
 from tests.support.mixins import LoaderModuleMockMixin
 from tests.support.mock import MagicMock, patch
 from tests.support.unit import TestCase
@@ -64,7 +70,7 @@ class RhServiceTestCase(TestCase, LoaderModuleMockMixin):
         chkconfig_out = textwrap.dedent(
             """\
 
-            {}           0:off   1:off   2:off   3:on    4:on    5:on    6:off
+            {0}           0:off   1:off   2:off   3:on    4:on    5:on    6:off
             """.format(
                 name
             )
@@ -72,7 +78,7 @@ class RhServiceTestCase(TestCase, LoaderModuleMockMixin):
         xinetd_out = textwrap.dedent(
             """\
             xinetd based services:
-                    {}  on
+                    {0}  on
             """.format(
                 name
             )

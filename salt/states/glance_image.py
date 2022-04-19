@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Management of OpenStack Glance Images
 ========================================
@@ -22,6 +23,7 @@ Example States
         - name: cirros
 """
 
+from __future__ import absolute_import, print_function, unicode_literals
 
 __virtualname__ = "glance_image"
 
@@ -31,8 +33,7 @@ def __virtual__():
         return __virtualname__
     return (
         False,
-        "The glanceng execution module failed to load: shade python module is not"
-        " available",
+        "The glanceng execution module failed to load: shade python module is not available",
     )
 
 

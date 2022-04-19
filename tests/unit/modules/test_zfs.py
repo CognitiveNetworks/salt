@@ -43,10 +43,9 @@ class ZfsTestCase(TestCase, LoaderModuleMockMixin):
         Tests successful return of exists function
         """
         ret = {}
-        ret["stdout"] = (
-            "NAME        USED  AVAIL  REFER  MOUNTPOINT\nmyzpool/mydataset    30K  "
-            " 157G    30K  /myzpool/mydataset"
-        )
+        ret[
+            "stdout"
+        ] = "NAME        USED  AVAIL  REFER  MOUNTPOINT\nmyzpool/mydataset    30K   157G    30K  /myzpool/mydataset"
         ret["stderr"] = ""
         ret["retcode"] = 0
         mock_cmd = MagicMock(return_value=ret)
@@ -205,8 +204,7 @@ class ZfsTestCase(TestCase, LoaderModuleMockMixin):
                 ("created", False),
                 (
                     "error",
-                    "cannot create 'myzpool/mydataset/mysubdataset': parent does not"
-                    " exist",
+                    "cannot create 'myzpool/mydataset/mysubdataset': parent does not exist",
                 ),
             ]
         )
@@ -268,8 +266,7 @@ class ZfsTestCase(TestCase, LoaderModuleMockMixin):
                     "error",
                     "\n".join(
                         [
-                            "cannot destroy 'myzpool/mydataset': filesystem has"
-                            " children",
+                            "cannot destroy 'myzpool/mydataset': filesystem has children",
                             "use 'recursive=True' to destroy the following datasets:",
                             "myzpool/mydataset@snapshot",
                         ]
@@ -690,10 +687,8 @@ class ZfsTestCase(TestCase, LoaderModuleMockMixin):
                     "error",
                     "\n".join(
                         [
-                            "cannot rollback to 'myzpool/mydataset@yesterday': more"
-                            " recent snapshots or bookmarks exist",
-                            "use 'recursive=True' to force deletion of the following"
-                            " snapshots and bookmarks:",
+                            "cannot rollback to 'myzpool/mydataset@yesterday': more recent snapshots or bookmarks exist",
+                            "use 'recursive=True' to force deletion of the following snapshots and bookmarks:",
                             "myzpool/mydataset@today",
                         ]
                     ),
@@ -703,11 +698,9 @@ class ZfsTestCase(TestCase, LoaderModuleMockMixin):
         ret = {
             "pid": 57471,
             "retcode": 1,
-            "stderr": (
-                "cannot rollback to 'myzpool/mydataset@yesterday': more recent"
-                " snapshots or bookmarks exist\nuse '-r' to force deletion of the"
-                " following snapshots and bookmarks:\nmyzpool/mydataset@today"
-            ),
+            "stderr": "cannot rollback to 'myzpool/mydataset@yesterday': more recent snapshots or bookmarks "
+            "exist\nuse '-r' to force deletion of the following snapshots and "
+            "bookmarks:\nmyzpool/mydataset@today",
             "stdout": "",
         }
         mock_cmd = MagicMock(return_value=ret)
@@ -746,9 +739,7 @@ class ZfsTestCase(TestCase, LoaderModuleMockMixin):
         ret = {
             "pid": 64864,
             "retcode": 1,
-            "stderr": (
-                "cannot create 'myzpool/archive/yesterday': parent does not exist"
-            ),
+            "stderr": "cannot create 'myzpool/archive/yesterday': parent does not exist",
             "stdout": "",
         }
         mock_cmd = MagicMock(return_value=ret)
@@ -832,10 +823,7 @@ class ZfsTestCase(TestCase, LoaderModuleMockMixin):
             "pid": 40216,
             "retcode": 0,
             "stderr": "",
-            "stdout": (
-                "myzpool/mydataset@baseline\timportant  \tWed Dec 23 21:06"
-                " 2015\nmyzpool/mydataset@baseline\trelease-1.0\tWed Dec 23 21:08 2015"
-            ),
+            "stdout": "myzpool/mydataset@baseline\timportant  \tWed Dec 23 21:06 2015\nmyzpool/mydataset@baseline\trelease-1.0\tWed Dec 23 21:08 2015",
         }
         mock_cmd = MagicMock(return_value=ret)
         with patch.dict(zfs.__salt__, {"cmd.run_all": mock_cmd}), patch.dict(
@@ -858,9 +846,7 @@ class ZfsTestCase(TestCase, LoaderModuleMockMixin):
         ret = {
             "pid": 40993,
             "retcode": 1,
-            "stderr": (
-                "cannot open 'myzpool/mydataset@baseline': dataset does not exist"
-            ),
+            "stderr": "cannot open 'myzpool/mydataset@baseline': dataset does not exist",
             "stdout": "no datasets available",
         }
         mock_cmd = MagicMock(return_value=ret)
@@ -897,18 +883,14 @@ class ZfsTestCase(TestCase, LoaderModuleMockMixin):
                 ("held", False),
                 (
                     "error",
-                    "cannot hold snapshot 'myzpool/mydataset@baseline': tag already"
-                    " exists on this dataset",
+                    "cannot hold snapshot 'myzpool/mydataset@baseline': tag already exists on this dataset",
                 ),
             ]
         )
         ret = {
             "pid": 51006,
             "retcode": 1,
-            "stderr": (
-                "cannot hold snapshot 'myzpool/mydataset@baseline': tag already exists"
-                " on this dataset"
-            ),
+            "stderr": "cannot hold snapshot 'myzpool/mydataset@baseline': tag already exists on this dataset",
             "stdout": "",
         }
         mock_cmd = MagicMock(return_value=ret)
@@ -946,18 +928,14 @@ class ZfsTestCase(TestCase, LoaderModuleMockMixin):
                 ("released", False),
                 (
                     "error",
-                    "cannot release hold from snapshot 'myzpool/mydataset@baseline': no"
-                    " such tag on this dataset",
+                    "cannot release hold from snapshot 'myzpool/mydataset@baseline': no such tag on this dataset",
                 ),
             ]
         )
         ret = {
             "pid": 51006,
             "retcode": 1,
-            "stderr": (
-                "cannot release hold from snapshot 'myzpool/mydataset@baseline': no"
-                " such tag on this dataset"
-            ),
+            "stderr": "cannot release hold from snapshot 'myzpool/mydataset@baseline': no such tag on this dataset",
             "stdout": "",
         }
         mock_cmd = MagicMock(return_value=ret)
@@ -989,18 +967,14 @@ class ZfsTestCase(TestCase, LoaderModuleMockMixin):
                 ("snapshotted", False),
                 (
                     "error",
-                    "cannot create snapshot 'myzpool/mydataset@baseline': dataset"
-                    " already exists",
+                    "cannot create snapshot 'myzpool/mydataset@baseline': dataset already exists",
                 ),
             ]
         )
         ret = {
             "pid": 68526,
             "retcode": 1,
-            "stderr": (
-                "cannot create snapshot 'myzpool/mydataset@baseline': dataset already"
-                " exists"
-            ),
+            "stderr": "cannot create snapshot 'myzpool/mydataset@baseline': dataset already exists",
             "stdout": "",
         }
         mock_cmd = MagicMock(return_value=ret)
@@ -1022,12 +996,7 @@ class ZfsTestCase(TestCase, LoaderModuleMockMixin):
         ret = {
             "pid": 69256,
             "retcode": 2,
-            "stderr": (
-                "cannot open 'myzpool/mydataset': dataset does not"
-                " exist\nusage:\n\tsnapshot [-r] [-o property=value] ..."
-                " <filesystem|volume>@<snap> ...\n\nFor the property list, run: zfs"
-                " set|get\n\nFor the delegated permission list, run: zfs allow|unallow"
-            ),
+            "stderr": "cannot open 'myzpool/mydataset': dataset does not exist\nusage:\n\tsnapshot [-r] [-o property=value] ... <filesystem|volume>@<snap> ...\n\nFor the property list, run: zfs set|get\n\nFor the delegated permission list, run: zfs allow|unallow",
             "stdout": "",
         }
         mock_cmd = MagicMock(return_value=ret)
@@ -1058,18 +1027,14 @@ class ZfsTestCase(TestCase, LoaderModuleMockMixin):
                 ("set", False),
                 (
                     "error",
-                    "cannot set property for 'myzpool/mydataset': 'canmount' must be"
-                    " one of 'on | off | noauto'",
+                    "cannot set property for 'myzpool/mydataset': 'canmount' must be one of 'on | off | noauto'",
                 ),
             ]
         )
         ret = {
             "pid": 79887,
             "retcode": 1,
-            "stderr": (
-                "cannot set property for 'myzpool/mydataset': 'canmount' must be one of"
-                " 'on | off | noauto'"
-            ),
+            "stderr": "cannot set property for 'myzpool/mydataset': 'canmount' must be one of 'on | off | noauto'",
             "stdout": "",
         }
         mock_cmd = MagicMock(return_value=ret)

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     salt.utils.vt_helper
     ~~~~~~~~~~~~~~~~~~~~
@@ -8,11 +9,14 @@
     allowing users to programmatically execute commands on a remote server using
     Salt VT.
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import python libs
 import logging
 import os
 import re
 
+# Import salt's Libs
 from salt.utils.vt import Terminal, TerminalException
 
 SSH_PASSWORD_PROMPT_RE = re.compile(r"(?:.*)[Pp]assword(?: for .*)?:", re.M)
@@ -21,7 +25,7 @@ KEY_VALID_RE = re.compile(r".*\(yes\/no\).*")
 log = logging.getLogger(__name__)
 
 
-class SSHConnection:
+class SSHConnection(object):
     """
     SSH Connection to a remote server.
     """
@@ -61,7 +65,7 @@ class SSHConnection:
              Example: '-o PubkeyAuthentication=no'
         """
         self.conn = Terminal(
-            "ssh {} -l {} {}".format(ssh_args, username, host),
+            "ssh {0} -l {1} {2}".format(ssh_args, username, host),
             shell=True,
             log_stdout=True,
             log_stdout_level="trace",

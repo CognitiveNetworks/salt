@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Management of Gentoo make.conf
 ==============================
@@ -10,6 +11,10 @@ A state module to manage Gentoo's ``make.conf`` file
       makeconf.present:
         - value: '-j3'
 """
+from __future__ import absolute_import, print_function, unicode_literals
+
+# Import 3rd-party libs
+from salt.ext import six
 
 
 def __virtual__():
@@ -28,7 +33,7 @@ def _make_set(var):
     if var is None:
         return set()
     if not isinstance(var, list):
-        if isinstance(var, str):
+        if isinstance(var, six.string_types):
             var = var.split()
         else:
             var = list(var)
@@ -131,11 +136,11 @@ def present(name, value=None, contains=None, excludes=None):
                 ret["comment"] = msg.format(name)
             else:
                 if __opts__["test"]:
-                    msg = "Variable {} is set to".format(name)
+                    msg = "Variable {0} is set to".format(name)
                     if len(to_append) > 0:
-                        msg += ' append "{}"'.format(list(to_append))
+                        msg += ' append "{0}"'.format(list(to_append))
                     if len(to_trim) > 0:
-                        msg += ' trim "{}"'.format(list(to_trim))
+                        msg += ' trim "{0}"'.format(list(to_trim))
                     msg += " in make.conf"
                     ret["comment"] = msg
                     ret["result"] = None

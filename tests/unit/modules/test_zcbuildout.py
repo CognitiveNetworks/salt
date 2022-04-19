@@ -3,8 +3,8 @@ import os
 import shutil
 import subprocess
 import tempfile
-import urllib.error
-import urllib.request
+from urllib.error import URLError
+from urllib.request import urlopen
 
 import pytest
 import salt.modules.cmdmod as cmd
@@ -34,13 +34,8 @@ log = logging.getLogger(__name__)
 
 
 def download_to(url, dest):
-    req = urllib.request.Request(url)
-    req.add_header(
-        "User-Agent",
-        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36",
-    )
     with salt.utils.files.fopen(dest, "wb") as fic:
-        fic.write(urllib.request.urlopen(req, timeout=10).read())
+        fic.write(urlopen(url, timeout=10).read())
 
 
 class Base(TestCase, LoaderModuleMockMixin):
@@ -68,8 +63,8 @@ class Base(TestCase, LoaderModuleMockMixin):
             dest = os.path.join(cls.rdir, "{}_bootstrap.py".format(idx))
             try:
                 download_to(url, dest)
-            except urllib.error.URLError as exc:
-                log.debug("Failed to download %s: %s", url, exc)
+            except URLError:
+                log.debug("Failed to download %s", url)
         # creating a new setuptools install
         cls.ppy_st = os.path.join(cls.rdir, "psetuptools")
         if salt.utils.platform.is_windows():
@@ -189,7 +184,11 @@ class BuildoutTestCase(Base):
         ret2 = buildout._salt_callback(callback2)(2, b=6)
         self.assertEqual(ret2["status"], False)
         self.assertTrue(ret2["logs_by_level"]["error"][0].startswith("Traceback"))
-        self.assertTrue("Unexpected response from buildout" in ret2["comment"])
+        self.assertTrue(
+            "We did not get any "
+            "expectable answer "
+            "from buildout" in ret2["comment"]
+        )
         self.assertEqual(ret2["out"], None)
         for l in buildout.LOG.levels:
             self.assertTrue(0 == len(buildout.LOG.by_level[l]))
@@ -361,8 +360,7 @@ class BuildoutOnlineTestCase(Base):
                 "/d/distribute/distribute-0.6.43.tar.gz"
             )
             download_to(
-                url,
-                os.path.join(cls.ppy_dis, "distribute-0.6.43.tar.gz"),
+                url, os.path.join(cls.ppy_dis, "distribute-0.6.43.tar.gz"),
             )
 
             subprocess.check_call(
@@ -455,8 +453,7 @@ class BuildoutOnlineTestCase(Base):
     def test_run_buildout(self):
         if salt.modules.virtualenv_mod.virtualenv_ver(self.ppy_st) >= (20, 0, 0):
             self.skipTest(
-                "Skiping until upstream resolved"
-                " https://github.com/pypa/virtualenv/issues/1715"
+                "Skiping until upstream resolved https://github.com/pypa/virtualenv/issues/1715"
             )
 
         b_dir = os.path.join(self.tdir, "b")
@@ -471,8 +468,7 @@ class BuildoutOnlineTestCase(Base):
     def test_buildout(self):
         if salt.modules.virtualenv_mod.virtualenv_ver(self.ppy_st) >= (20, 0, 0):
             self.skipTest(
-                "Skiping until upstream resolved"
-                " https://github.com/pypa/virtualenv/issues/1715"
+                "Skiping until upstream resolved https://github.com/pypa/virtualenv/issues/1715"
             )
 
         b_dir = os.path.join(self.tdir, "b")

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Read pillar data from a Redis backend
 =====================================
@@ -29,7 +30,10 @@ Configuring the Redis ext_pillar
           - redis: {function: key_value}
 
 """
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import Salt libs
 import salt.utils.json
 
 __virtualname__ = "redis"

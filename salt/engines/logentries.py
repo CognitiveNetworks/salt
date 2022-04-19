@@ -128,7 +128,9 @@ class PlainTextSocketAppender:
 
     def put(self, data):
         # Replace newlines with Unicode line separator for multi-line events
-        multiline = data.replace("\n", self.LINE_SEP) + "\n"
+        multiline = data.replace("\n", self.LINE_SEP) + str(
+            "\n"
+        )  # future lint: disable=blacklisted-function
         # Send data, reconnect if needed
         while True:
             try:
@@ -208,6 +210,7 @@ def start(
         while True:
             event = event_bus.get_event()
             if event:
+                # future lint: disable=blacklisted-function
                 msg = " ".join(
                     (
                         salt.utils.stringutils.to_str(token),
@@ -215,6 +218,7 @@ def start(
                         salt.utils.json.dumps(event),
                     )
                 )
+                # future lint: enable=blacklisted-function
                 appender.put(msg)
 
         appender.close_connection()

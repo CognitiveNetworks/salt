@@ -203,8 +203,9 @@ def info(hosts=None, profile=None):
         return es.info()
     except elasticsearch.TransportError as e:
         raise CommandExecutionError(
-            "Cannot retrieve server information, server returned code {} with"
-            " message {}".format(e.status_code, e.error)
+            "Cannot retrieve server information, server returned code {} with message {}".format(
+                e.status_code, e.error
+            )
         )
 
 
@@ -262,8 +263,9 @@ def cluster_health(index=None, level="cluster", local=False, hosts=None, profile
         return es.cluster.health(index=index, level=level, local=local)
     except elasticsearch.TransportError as e:
         raise CommandExecutionError(
-            "Cannot retrieve health information, server returned code {} with"
-            " message {}".format(e.status_code, e.error)
+            "Cannot retrieve health information, server returned code {} with message {}".format(
+                e.status_code, e.error
+            )
         )
 
 
@@ -395,8 +397,9 @@ def alias_create(indices, alias, hosts=None, body=None, profile=None, source=Non
         return result.get("acknowledged", False)
     except elasticsearch.TransportError as e:
         raise CommandExecutionError(
-            "Cannot create alias {} in index {}, server returned code {} with"
-            " message {}".format(alias, indices, e.status_code, e.error)
+            "Cannot create alias {} in index {}, server returned code {} with message {}".format(
+                alias, indices, e.status_code, e.error
+            )
         )
 
 
@@ -431,8 +434,9 @@ def alias_delete(indices, aliases, hosts=None, body=None, profile=None, source=N
         return True
     except elasticsearch.TransportError as e:
         raise CommandExecutionError(
-            "Cannot delete alias {} in index {}, server returned code {} with"
-            " message {}".format(aliases, indices, e.status_code, e.error)
+            "Cannot delete alias {} in index {}, server returned code {} with message {}".format(
+                aliases, indices, e.status_code, e.error
+            )
         )
 
 
@@ -528,8 +532,9 @@ def document_create(
         return es.index(index=index, doc_type=doc_type, body=body, id=id)
     except elasticsearch.TransportError as e:
         raise CommandExecutionError(
-            "Cannot create document in index {}, server returned code {} with"
-            " message {}".format(index, e.status_code, e.error)
+            "Cannot create document in index {}, server returned code {} with message {}".format(
+                index, e.status_code, e.error
+            )
         )
 
 
@@ -558,8 +563,9 @@ def document_delete(index, doc_type, id, hosts=None, profile=None):
         return None
     except elasticsearch.TransportError as e:
         raise CommandExecutionError(
-            "Cannot delete document {} in index {}, server returned code {} with"
-            " message {}".format(id, index, e.status_code, e.error)
+            "Cannot delete document {} in index {}, server returned code {} with message {}".format(
+                id, index, e.status_code, e.error
+            )
         )
 
 
@@ -588,8 +594,9 @@ def document_exists(index, id, doc_type="_all", hosts=None, profile=None):
         return False
     except elasticsearch.TransportError as e:
         raise CommandExecutionError(
-            "Cannot retrieve document {} from index {}, server returned code {} with"
-            " message {}".format(id, index, e.status_code, e.error)
+            "Cannot retrieve document {} from index {}, server returned code {} with message {}".format(
+                id, index, e.status_code, e.error
+            )
         )
 
 
@@ -618,8 +625,9 @@ def document_get(index, id, doc_type="_all", hosts=None, profile=None):
         return None
     except elasticsearch.TransportError as e:
         raise CommandExecutionError(
-            "Cannot retrieve document {} from index {}, server returned code {} with"
-            " message {}".format(id, index, e.status_code, e.error)
+            "Cannot retrieve document {} from index {}, server returned code {} with message {}".format(
+                id, index, e.status_code, e.error
+            )
         )
 
 
@@ -1589,8 +1597,7 @@ def snapshot_get(
         )
     except elasticsearch.TransportError as e:
         raise CommandExecutionError(
-            "Cannot obtain details of snapshot {} in repository {}, server returned"
-            " code {} with message {}".format(
+            "Cannot obtain details of snapshot {} in repository {}, server returned code {} with message {}".format(
                 snapshot, repository, e.status_code, e.error
             )
         )
@@ -1625,8 +1632,9 @@ def snapshot_create(repository, snapshot, body=None, hosts=None, profile=None):
         return response.get("accepted", False)
     except elasticsearch.TransportError as e:
         raise CommandExecutionError(
-            "Cannot create snapshot {} in repository {}, server returned code {} with"
-            " message {}".format(snapshot, repository, e.status_code, e.error)
+            "Cannot create snapshot {} in repository {}, server returned code {} with message {}".format(
+                snapshot, repository, e.status_code, e.error
+            )
         )
 
 
@@ -1659,8 +1667,9 @@ def snapshot_restore(repository, snapshot, body=None, hosts=None, profile=None):
         return response.get("accepted", False)
     except elasticsearch.TransportError as e:
         raise CommandExecutionError(
-            "Cannot restore snapshot {} in repository {}, server returned code {} with"
-            " message {}".format(snapshot, repository, e.status_code, e.error)
+            "Cannot restore snapshot {} in repository {}, server returned code {} with message {}".format(
+                snapshot, repository, e.status_code, e.error
+            )
         )
 
 
@@ -1691,8 +1700,9 @@ def snapshot_delete(repository, snapshot, hosts=None, profile=None):
         return True
     except elasticsearch.TransportError as e:
         raise CommandExecutionError(
-            "Cannot delete snapshot {} from repository {}, server returned code {} with"
-            " message {}".format(snapshot, repository, e.status_code, e.error)
+            "Cannot delete snapshot {} from repository {}, server returned code {} with message {}".format(
+                snapshot, repository, e.status_code, e.error
+            )
         )
 
 

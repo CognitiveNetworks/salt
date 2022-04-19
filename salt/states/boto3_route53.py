@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Manage Route53 records with Boto 3
 
@@ -63,12 +64,16 @@ passed in as a dict, or as a string to pull from pillars or minion config:
 # pylint: disable=W0106
 # pylint: disable=E1320
 
+# Import Python Libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 import uuid
 
 import salt.utils.data
 import salt.utils.dictupdate
+
+# Import Salt Libs
 from salt.exceptions import SaltInvocationError
 
 log = logging.getLogger(__name__)  # pylint: disable=W1699
@@ -183,7 +188,7 @@ def hosted_zone_present(
                 VPCs = [v for v in VPCs if v["region"] == VPCRegion]
             if not VPCs:
                 ret["comment"] = (
-                    "A VPC matching given criteria (vpc: {} / vpc_region: {}) not "
+                    "A VPC matching given criteria (vpc: {0} / vpc_region: {1}) not "
                     "found.".format(VPCName or VPCId, VPCRegion)
                 )
                 log.error(ret["comment"])
@@ -191,8 +196,8 @@ def hosted_zone_present(
                 return ret
             if len(VPCs) > 1:
                 ret["comment"] = (
-                    "Multiple VPCs matching given criteria (vpc: {} / vpc_region: "
-                    "{}) found: {}.".format(
+                    "Multiple VPCs matching given criteria (vpc: {0} / vpc_region: "
+                    "{1}) found: {2}.".format(
                         VPCName or VPCId, VPCRegion, ", ".join([v["id"] for v in VPCs])
                     )
                 )
@@ -226,7 +231,9 @@ def hosted_zone_present(
         if len(fixed_vpcs) > 1:
             add_vpcs = fixed_vpcs[1:]
             fixed_vpcs = fixed_vpcs[:1]
-        CallerReference = CallerReference if CallerReference else str(uuid.uuid4())
+        CallerReference = (
+            CallerReference if CallerReference else str(uuid.uuid4())
+        )  # future lint: disable=blacklisted-function
     else:
         # Currently the only modifiable traits about a zone are associated VPCs and the comment.
         zone = zone[0]
@@ -241,7 +248,7 @@ def hosted_zone_present(
             update_comment = True
 
     if not (create or add_vpcs or del_vpcs or update_comment):
-        ret["comment"] = "Hostd Zone {} already in desired state".format(Name)
+        ret["comment"] = "Hostd Zone {0} already in desired state".format(Name)
         return ret
 
     if create:
@@ -641,7 +648,7 @@ def rr_present(
 
     if Type is None:
         raise SaltInvocationError(
-            "'Type' is a required parameter when adding or updating resource records."
+            "'Type' is a required parameter when adding or updating" "resource records."
         )
     ret = {"name": name, "result": True, "comment": "", "changes": {}}
 

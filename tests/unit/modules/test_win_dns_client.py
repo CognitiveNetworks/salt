@@ -1,12 +1,18 @@
+# -*- coding: utf-8 -*-
 """
     :codeauthor: Jayesh Kariya <jayeshk@saltstack.com>
 """
 
+# Import Python Libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import types
 
+# Import Salt Libs
 import salt.modules.win_dns_client as win_dns_client
 import salt.utils.stringutils
+
+# Import Salt Testing Libs
 from tests.support.mixins import LoaderModuleMockMixin
 from tests.support.mock import MagicMock, Mock, patch
 from tests.support.unit import TestCase, skipIf
@@ -19,7 +25,7 @@ except ImportError:
     HAS_WMI = False
 
 
-class Mockwmi:
+class Mockwmi(object):
     """
     Mock wmi class
     """
@@ -34,7 +40,7 @@ class Mockwmi:
         pass
 
 
-class Mockwinapi:
+class Mockwinapi(object):
     """
     Mock winapi class
     """
@@ -42,7 +48,7 @@ class Mockwinapi:
     def __init__(self):
         pass
 
-    class winapi:
+    class winapi(object):
         """
         Mock winapi class
         """

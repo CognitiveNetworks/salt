@@ -1,10 +1,14 @@
+# -*- coding: utf-8 -*-
 """
 Use composer to install PHP dependencies for a directory
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import python libs
 import logging
 import os.path
 
+# Import salt libs
 import salt.utils.args
 import salt.utils.path
 from salt.exceptions import (
@@ -48,7 +52,7 @@ def did_composer_install(dir):
 
         salt '*' composer.did_composer_install /var/www/application
     """
-    lockFile = "{}/vendor".format(dir)
+    lockFile = "{0}/vendor".format(dir)
     if os.path.exists(lockFile):
         return True
     return False
@@ -136,7 +140,7 @@ def _run_composer(
     # Validate Composer is there
     if not _valid_composer(composer):
         raise CommandNotFoundError(
-            "'composer.{}' is not available. Couldn't find '{}'.".format(
+            "'composer.{0}' is not available. Couldn't find '{1}'.".format(
                 action, composer
             )
         )
@@ -147,7 +151,7 @@ def _run_composer(
     # Don't need a dir for the 'selfupdate' action; all other actions do need a dir
     if directory is None and action != "selfupdate":
         raise SaltInvocationError(
-            "The 'directory' argument is required for composer.{}".format(action)
+            "The 'directory' argument is required for composer.{0}".format(action)
         )
 
     # Base Settings

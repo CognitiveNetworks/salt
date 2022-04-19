@@ -1,7 +1,12 @@
+# Import python libs
+
 import logging
 
+# Import Salt Libs
 import salt.utils.minion
 from tests.support.mock import MagicMock, mock_open, patch
+
+# Import Salt Testing Libs
 from tests.support.unit import TestCase
 
 log = logging.getLogger(__name__)
@@ -39,7 +44,9 @@ class MinionUtilTestCase(TestCase):
 
         with patch("os.getpid", MagicMock(return_value=12345)):
             with patch("salt.utils.files.fopen", mock_open(read_data=b"msgpack")):
-                with patch("salt.payload.loads", MagicMock(return_value=proc_data)):
+                with patch(
+                    "salt.payload.Serial.loads", MagicMock(return_value=proc_data)
+                ):
                     with patch(
                         "salt.utils.process.os_is_running", MagicMock(return_value=True)
                     ):
@@ -73,7 +80,9 @@ class MinionUtilTestCase(TestCase):
 
         with patch("os.getpid", MagicMock(return_value=12345)):
             with patch("salt.utils.files.fopen", mock_open(read_data=b"msgpack")):
-                with patch("salt.payload.loads", MagicMock(return_value=proc_data)):
+                with patch(
+                    "salt.payload.Serial.loads", MagicMock(return_value=proc_data)
+                ):
                     with patch(
                         "salt.utils.process.os_is_running", MagicMock(return_value=True)
                     ):
@@ -107,7 +116,9 @@ class MinionUtilTestCase(TestCase):
 
         with patch("os.getpid", MagicMock(return_value=12345)):
             with patch("salt.utils.files.fopen", mock_open(read_data=b"msgpack")):
-                with patch("salt.payload.loads", MagicMock(return_value=proc_data)):
+                with patch(
+                    "salt.payload.Serial.loads", MagicMock(return_value=proc_data)
+                ):
                     with patch(
                         "salt.utils.process.os_is_running", MagicMock(return_value=True)
                     ):
@@ -145,7 +156,9 @@ class MinionUtilTestCase(TestCase):
 
         with patch("os.getpid", MagicMock(return_value=12345)):
             with patch("salt.utils.files.fopen", mock_open(read_data=b"msgpack")):
-                with patch("salt.payload.loads", MagicMock(return_value=proc_data)):
+                with patch(
+                    "salt.payload.Serial.loads", MagicMock(return_value=proc_data)
+                ):
                     with patch(
                         "salt.utils.process.os_is_running", MagicMock(return_value=True)
                     ):

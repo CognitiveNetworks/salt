@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     :synopsis: Base class for kernelpkg modules
     :platform: Linux
@@ -6,6 +7,7 @@
 """
 # pylint: disable=invalid-name,no-member
 
+from __future__ import absolute_import, print_function, unicode_literals
 
 # Salt testing libs
 try:
@@ -15,7 +17,7 @@ except ImportError:
     pass
 
 
-class KernelPkgTestCase:
+class KernelPkgTestCase(object):
     """
     Test cases shared by all kernelpkg virtual modules
     """
@@ -165,7 +167,7 @@ class KernelPkgTestCase:
                 self.assertEqual(result["latest_installed"], self.KERNEL_LIST[-1])
                 self.assertEqual(result["reboot_requested"], True)
                 self.assertEqual(result["reboot_required"], True)
-                self._kernelpkg.__salt__["system.reboot"].assert_called_once()
+                self.assert_called_once(self._kernelpkg.__salt__["system.reboot"])
 
     def test_upgrade_needed_without_reboot(self):
         """

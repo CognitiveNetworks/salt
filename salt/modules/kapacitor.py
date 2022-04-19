@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Kapacitor execution module.
 
@@ -21,6 +22,8 @@ Kapacitor execution module.
     overwrite options passed into pillar.
 
 """
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging as logger
 
@@ -29,6 +32,7 @@ import salt.utils.json
 import salt.utils.path
 
 # Import Salt lobs
+from salt.ext import six
 from salt.utils.decorators import memoize
 
 # Setup the logger
@@ -49,7 +53,9 @@ def version():
     """
     version = __salt__["pkg.version"]("kapacitor")
     if not version:
-        version = str(__salt__["config.option"]("kapacitor.version", "latest"))
+        version = six.string_types(
+            __salt__["config.option"]("kapacitor.version", "latest")
+        )
     return version
 
 
@@ -61,7 +67,7 @@ def _get_url():
     host = __salt__["config.option"]("kapacitor.host", "localhost")
     port = __salt__["config.option"]("kapacitor.port", 9092)
 
-    return "{}://{}:{}".format(protocol, host, port)
+    return "{0}://{1}:{2}".format(protocol, host, port)
 
 
 def get_task(name):
@@ -80,9 +86,9 @@ def get_task(name):
     url = _get_url()
 
     if version() < "0.13":
-        task_url = "{}/task?name={}".format(url, name)
+        task_url = "{0}/task?name={1}".format(url, name)
     else:
-        task_url = "{}/kapacitor/v1/tasks/{}?skip-format=true".format(url, name)
+        task_url = "{0}/kapacitor/v1/tasks/{1}?skip-format=true".format(url, name)
 
     response = salt.utils.http.query(task_url, status=True)
 
@@ -173,28 +179,28 @@ def define_task(
         return False
 
     if version() < "0.13":
-        cmd = "kapacitor define -name {}".format(name)
+        cmd = "kapacitor define -name {0}".format(name)
     else:
-        cmd = "kapacitor define {}".format(name)
+        cmd = "kapacitor define {0}".format(name)
 
     if tick_script.startswith("salt://"):
         tick_script = __salt__["cp.cache_file"](tick_script, __env__)
 
-    cmd += " -tick {}".format(tick_script)
+    cmd += " -tick {0}".format(tick_script)
 
     if task_type:
-        cmd += " -type {}".format(task_type)
+        cmd += " -type {0}".format(task_type)
 
     if not dbrps:
         dbrps = []
 
     if database and retention_policy:
-        dbrp = "{}.{}".format(database, retention_policy)
+        dbrp = "{0}.{1}".format(database, retention_policy)
         dbrps.append(dbrp)
 
     if dbrps:
         for dbrp in dbrps:
-            cmd += " -dbrp {}".format(dbrp)
+            cmd += " -dbrp {0}".format(dbrp)
 
     return _run_cmd(cmd)
 
@@ -212,7 +218,7 @@ def delete_task(name):
 
         salt '*' kapacitor.delete_task cpu
     """
-    return _run_cmd("kapacitor delete tasks {}".format(name))
+    return _run_cmd("kapacitor delete tasks {0}".format(name))
 
 
 def enable_task(name):
@@ -228,7 +234,7 @@ def enable_task(name):
 
         salt '*' kapacitor.enable_task cpu
     """
-    return _run_cmd("kapacitor enable {}".format(name))
+    return _run_cmd("kapacitor enable {0}".format(name))
 
 
 def disable_task(name):
@@ -244,4 +250,4 @@ def disable_task(name):
 
         salt '*' kapacitor.disable_task cpu
     """
-    return _run_cmd("kapacitor disable {}".format(name))
+    return _run_cmd("kapacitor disable {0}".format(name))

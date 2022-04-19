@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
 """
 Helpers/utils for working with tornado asynchronous stuff
 """
 
+from __future__ import absolute_import, print_function, unicode_literals
 
 import contextlib
 import logging
@@ -10,6 +12,7 @@ import threading
 
 import salt.ext.tornado.concurrent
 import salt.ext.tornado.ioloop
+from salt.ext import six
 
 log = logging.getLogger(__name__)
 
@@ -27,7 +30,7 @@ def current_ioloop(io_loop):
         orig_loop.make_current()
 
 
-class SyncWrapper:
+class SyncWrapper(object):
     """
     A wrapper to make Async classes synchronous
 
@@ -113,16 +116,14 @@ class SyncWrapper:
         def wrap(*args, **kwargs):
             results = []
             thread = threading.Thread(
-                target=self._target,
-                args=(key, args, kwargs, results, self.io_loop),
+                target=self._target, args=(key, args, kwargs, results, self.io_loop),
             )
             thread.start()
             thread.join()
             if results[0]:
                 return results[1]
             else:
-                exc_info = results[1]
-                raise exc_info[1].with_traceback(exc_info[2])
+                six.reraise(*results[1])
 
         return wrap
 

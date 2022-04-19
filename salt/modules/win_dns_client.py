@@ -1,9 +1,13 @@
+# -*- coding: utf-8 -*-
 """
 Module for configuring DNS Client on Windows systems
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import Python libs
 import logging
 
+# Import Salt libs
 import salt.utils.platform
 
 try:
@@ -117,7 +121,7 @@ def add_dns(ip, interface="Local Area Connection", index=1):
         "dns",
         interface,
         ip,
-        "index={}".format(index),
+        "index={0}".format(index),
         "validate=no",
     ]
 

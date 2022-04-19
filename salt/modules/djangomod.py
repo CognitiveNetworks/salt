@@ -1,12 +1,21 @@
+# -*- coding: utf-8 -*-
 """
 Manage Django sites
 """
 
 
+# Import python libs
+from __future__ import absolute_import, print_function, unicode_literals
+
 import os
 
 import salt.exceptions
+
+# Import Salt libs
 import salt.utils.path
+
+# Import 3rd-party libs
+from salt.ext import six
 
 # Define the module's virtual name
 __virtualname__ = "django"
@@ -56,17 +65,17 @@ def command(
         salt '*' django.command <settings_module> <command>
     """
     dja = _get_django_admin(bin_env)
-    cmd = "{} {} --settings={}".format(dja, command, settings_module)
+    cmd = "{0} {1} --settings={2}".format(dja, command, settings_module)
 
     if pythonpath:
-        cmd = "{} --pythonpath={}".format(cmd, pythonpath)
+        cmd = "{0} --pythonpath={1}".format(cmd, pythonpath)
 
     for arg in args:
-        cmd = "{} --{}".format(cmd, arg)
+        cmd = "{0} --{1}".format(cmd, arg)
 
-    for key, value in kwargs.items():
+    for key, value in six.iteritems(kwargs):
         if not key.startswith("__"):
-            cmd = "{} --{}={}".format(cmd, key, value)
+            cmd = "{0} --{1}={2}".format(cmd, key, value)
     return __salt__["cmd.run"](cmd, env=env, runas=runas, python_shell=False)
 
 
@@ -193,9 +202,9 @@ def migrate(
         args.append("noinput")
 
     if app_label and migration_name:
-        cmd = "migrate {} {}".format(app_label, migration_name)
+        cmd = "migrate {0} {1}".format(app_label, migration_name)
     elif app_label:
-        cmd = "migrate {}".format(app_label)
+        cmd = "migrate {0}".format(app_label)
     else:
         cmd = "migrate"
 
@@ -226,10 +235,7 @@ def createsuperuser(
         salt '*' django.createsuperuser <settings_module> user user@example.com
     """
     args = ["noinput"]
-    kwargs = dict(
-        email=email,
-        username=username,
-    )
+    kwargs = dict(email=email, username=username,)
     if database:
         kwargs["database"] = database
     return command(
@@ -265,7 +271,7 @@ def loaddata(
     if database:
         kwargs["database"] = database
 
-    cmd = "{} {}".format("loaddata", " ".join(fixtures.split(",")))
+    cmd = "{0} {1}".format("loaddata", " ".join(fixtures.split(",")))
 
     return command(settings_module, cmd, bin_env, pythonpath, env, *args, **kwargs)
 

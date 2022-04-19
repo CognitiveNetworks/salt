@@ -59,11 +59,9 @@ def test_computer_name():
 
             ret.update(
                 {
-                    "comment": (
-                        "The current computer name"
-                        " is 'salt', but will be changed to 'salt' on"
-                        " the next reboot"
-                    )
+                    "comment": "The current computer name"
+                    " is 'salt', but will be changed to 'salt' on"
+                    " the next reboot"
                 }
             )
             assert win_system.computer_name("salt") == ret
@@ -100,10 +98,8 @@ def test_hostname():
         with patch.dict(win_system.__salt__, {"system.set_hostname": mock}):
             ret.update(
                 {
-                    "comment": (
-                        "The current hostname is 'minion', "
-                        "but will be changed to 'salt' on the next reboot"
-                    ),
+                    "comment": "The current hostname is 'minion', "
+                    "but will be changed to 'salt' on the next reboot",
                     "changes": {"hostname": "salt"},
                 }
             )
@@ -182,10 +178,7 @@ def test_workgroup():
             with patch.dict(win_system.__opts__, {"test": False}):
                 ret.update(
                     {
-                        "comment": (
-                            "The workgroup has been changed from 'WORKGROUP' to"
-                            " 'WERKGROUP'"
-                        ),
+                        "comment": "The workgroup has been changed from 'WORKGROUP' to 'WERKGROUP'",
                         "name": "WERKGROUP",
                         "changes": {"new": "WERKGROUP", "old": "WORKGROUP"},
                         "result": True,

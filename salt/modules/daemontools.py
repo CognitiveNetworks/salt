@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 daemontools service module. This module will create daemontools type
 service watcher.
@@ -11,12 +12,15 @@ so it can be used to maintain services using the ``provider`` argument:
       service.running:
         - provider: daemontools
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import python libs
 import logging
 import os
 import os.path
 import re
 
+# Import salt libs
 import salt.utils.path
 from salt.exceptions import CommandExecutionError
 
@@ -44,7 +48,7 @@ def __virtual__():
     BINS = frozenset(("svc", "supervise", "svok"))
     if all(salt.utils.path.which(b) for b in BINS) and SERVICE_DIR:
         return __virtualname__
-    return (False, "Missing dependency: {}".format(BINS))
+    return (False, "Missing dependency: {0}".format(BINS))
 
 
 def _service_path(name):
@@ -53,7 +57,7 @@ def _service_path(name):
     """
     if not SERVICE_DIR:
         raise CommandExecutionError("Could not find service directory.")
-    return "{}/{}".format(SERVICE_DIR, name)
+    return "{0}/{1}".format(SERVICE_DIR, name)
 
 
 # -- states.service  compatible args
@@ -67,8 +71,8 @@ def start(name):
 
         salt '*' daemontools.start <service name>
     """
-    __salt__["file.remove"]("{}/down".format(_service_path(name)))
-    cmd = "svc -u {}".format(_service_path(name))
+    __salt__["file.remove"]("{0}/down".format(_service_path(name)))
+    cmd = "svc -u {0}".format(_service_path(name))
     return not __salt__["cmd.retcode"](cmd, python_shell=False)
 
 
@@ -83,8 +87,8 @@ def stop(name):
 
         salt '*' daemontools.stop <service name>
     """
-    __salt__["file.touch"]("{}/down".format(_service_path(name)))
-    cmd = "svc -d {}".format(_service_path(name))
+    __salt__["file.touch"]("{0}/down".format(_service_path(name)))
+    cmd = "svc -d {0}".format(_service_path(name))
     return not __salt__["cmd.retcode"](cmd, python_shell=False)
 
 
@@ -98,7 +102,7 @@ def term(name):
 
         salt '*' daemontools.term <service name>
     """
-    cmd = "svc -t {}".format(_service_path(name))
+    cmd = "svc -t {0}".format(_service_path(name))
     return not __salt__["cmd.retcode"](cmd, python_shell=False)
 
 
@@ -158,7 +162,7 @@ def status(name, sig=None):
 
         salt '*' daemontools.status <service name>
     """
-    cmd = "svstat {}".format(_service_path(name))
+    cmd = "svstat {0}".format(_service_path(name))
     out = __salt__["cmd.run_stdout"](cmd, python_shell=False)
     try:
         pid = re.search(r"\(pid (\d+)\)", out).group(1)

@@ -1,7 +1,11 @@
+# -*- coding: utf-8 -*-
 """
 Management of LVS (Linux Virtual Server) Service
 ================================================
 """
+
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 
 def __virtual__():
@@ -14,10 +18,7 @@ def __virtual__():
 
 
 def present(
-    name,
-    protocol=None,
-    service_address=None,
-    scheduler="wlc",
+    name, protocol=None, service_address=None, scheduler="wlc",
 ):
     """
     Ensure that the named service is present.
@@ -53,14 +54,14 @@ def present(
             protocol=protocol, service_address=service_address, scheduler=scheduler
         )
         if service_rule_check is True:
-            ret["comment"] = "LVS Service {} is present".format(name)
+            ret["comment"] = "LVS Service {0} is present".format(name)
             return ret
         else:
             if __opts__["test"]:
                 ret["result"] = None
                 ret[
                     "comment"
-                ] = "LVS Service {} is present but some options should update".format(
+                ] = "LVS Service {0} is present but some options should update".format(
                     name
                 )
                 return ret
@@ -71,18 +72,18 @@ def present(
                     scheduler=scheduler,
                 )
                 if service_edit is True:
-                    ret["comment"] = "LVS Service {} has been updated".format(name)
+                    ret["comment"] = "LVS Service {0} has been updated".format(name)
                     ret["changes"][name] = "Update"
                     return ret
                 else:
                     ret["result"] = False
-                    ret["comment"] = "LVS Service {} update failed".format(name)
+                    ret["comment"] = "LVS Service {0} update failed".format(name)
                     return ret
     else:
         if __opts__["test"]:
             ret[
                 "comment"
-            ] = "LVS Service {} is not present and needs to be created".format(name)
+            ] = "LVS Service {0} is not present and needs to be created".format(name)
             ret["result"] = None
             return ret
         else:
@@ -90,11 +91,11 @@ def present(
                 protocol=protocol, service_address=service_address, scheduler=scheduler
             )
             if service_add is True:
-                ret["comment"] = "LVS Service {} has been created".format(name)
+                ret["comment"] = "LVS Service {0} has been created".format(name)
                 ret["changes"][name] = "Present"
                 return ret
             else:
-                ret["comment"] = "LVS Service {} create failed({})".format(
+                ret["comment"] = "LVS Service {0} create failed({1})".format(
                     name, service_add
                 )
                 ret["result"] = False
@@ -123,19 +124,19 @@ def absent(name, protocol=None, service_address=None):
     if service_check is True:
         if __opts__["test"]:
             ret["result"] = None
-            ret["comment"] = "LVS Service {} is present and needs to be removed".format(
-                name
-            )
+            ret[
+                "comment"
+            ] = "LVS Service {0} is present and needs to be removed".format(name)
             return ret
         service_delete = __salt__["lvs.delete_service"](
             protocol=protocol, service_address=service_address
         )
         if service_delete is True:
-            ret["comment"] = "LVS Service {} has been removed".format(name)
+            ret["comment"] = "LVS Service {0} has been removed".format(name)
             ret["changes"][name] = "Absent"
             return ret
         else:
-            ret["comment"] = "LVS Service {} removed failed({})".format(
+            ret["comment"] = "LVS Service {0} removed failed({1})".format(
                 name, service_delete
             )
             ret["result"] = False
@@ -143,6 +144,6 @@ def absent(name, protocol=None, service_address=None):
     else:
         ret[
             "comment"
-        ] = "LVS Service {} is not present, so it cannot be removed".format(name)
+        ] = "LVS Service {0} is not present, so it cannot be removed".format(name)
 
     return ret

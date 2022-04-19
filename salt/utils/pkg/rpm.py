@@ -13,15 +13,11 @@ import salt.utils.stringutils
 log = logging.getLogger(__name__)
 
 # These arches compiled from the rpmUtils.arch python module source
-
-ARCHES_64 = ('x86_64', 'athlon', 'amd64', 'ia32e', 'ia64', 'geode')
-ARCHES_32 = ('i386', 'i486', 'i586', 'i686')
-ARCHES_PPC = ('ppc', 'ppc64', 'ppc64le', 'ppc64iseries', 'ppc64pseries')
-ARCHES_S390 = ('s390', 's390x')
-ARCHES_SPARC = (
-    'sparc', 'sparcv8', 'sparcv9', 'sparcv9v', 'sparc64', 'sparc64v'
-)
-
+ARCHES_64 = ("x86_64", "athlon", "amd64", "ia32e", "ia64", "geode")
+ARCHES_32 = ("i386", "i486", "i586", "i686")
+ARCHES_PPC = ("ppc", "ppc64", "ppc64le", "ppc64iseries", "ppc64pseries")
+ARCHES_S390 = ("s390", "s390x")
+ARCHES_SPARC = ("sparc", "sparcv8", "sparcv9", "sparcv9v", "sparc64", "sparc64v")
 ARCHES_ALPHA = (
     "alpha",
     "alphaev4",
@@ -34,7 +30,7 @@ ARCHES_ALPHA = (
     "alphaev68",
     "alphaev7",
 )
-ARCHES_ARM = ("armv5tel", "armv5tejl", "armv6l", "armv7l", "aarch64")
+ARCHES_ARM = ("armv5tel", "armv5tejl", "armv6l", "armv7l")
 ARCHES_SH = ("sh3", "sh4", "sh4a")
 
 ARCHES = (

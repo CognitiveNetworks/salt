@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
 """
 Script for copying back xml junit files from tests
 """
+from __future__ import absolute_import, print_function
 
 import argparse  # pylint: disable=minimum-python-version
 import os
@@ -10,7 +12,7 @@ import paramiko
 import salt.utils.yaml
 
 
-class DownloadArtifacts:
+class DownloadArtifacts(object):
     def __init__(self, instance, artifacts):
         self.instance = instance
         self.artifacts = artifacts
@@ -60,11 +62,11 @@ class DownloadArtifacts:
                 self._do_download(remote, os.path.join(local, os.path.basename(remote)))
 
     def _do_download(self, remote, local):
-        print("Copying from {} to {}".format(remote, local))
+        print("Copying from {0} to {1}".format(remote, local))
         try:
             self.sftpclient.get(remote, local)
-        except OSError:
-            print("Failed to copy: {}".format(remote))
+        except IOError:
+            print("Failed to copy: {0}".format(remote))
 
 
 if __name__ == "__main__":

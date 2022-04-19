@@ -1,12 +1,17 @@
+# -*- coding: utf-8 -*-
 """
 Sudo executor module
 """
-
-import shlex
+# Import python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import salt.syspaths
+
+# Import salt libs
 import salt.utils.json
 import salt.utils.path
+from salt.ext import six
+from salt.ext.six.moves import shlex_quote as _cmd_quote
 
 __virtualname__ = "sudo"
 
@@ -62,9 +67,9 @@ def execute(opts, data, func, args, kwargs):
     if data["fun"] in ("state.sls", "state.highstate", "state.apply"):
         kwargs["concurrent"] = True
     for arg in args:
-        cmd.append(shlex.quote(str(arg)))
+        cmd.append(_cmd_quote(six.text_type(arg)))
     for key in kwargs:
-        cmd.append(shlex.quote("{}={}".format(key, kwargs[key])))
+        cmd.append(_cmd_quote("{0}={1}".format(key, kwargs[key])))
 
     cmd_ret = __salt__["cmd.run_all"](cmd, use_vt=True, python_shell=False)
 

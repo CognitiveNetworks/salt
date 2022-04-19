@@ -235,10 +235,7 @@ def uptime():
             raise CommandExecutionError("Cannot find kern.boottime system parameter")
         data = bt_data.split("{")[-1].split("}")[0].strip().replace(" ", "")
         uptime = {
-            k: int(
-                v,
-            )
-            for k, v in [p.strip().split("=") for p in data.split(",")]
+            k: int(v,) for k, v in [p.strip().split("=") for p in data.split(",")]
         }
         seconds = int(curr_seconds - uptime["sec"])
     elif salt.utils.platform.is_aix():
@@ -1385,20 +1382,24 @@ def netdev():
 
             # add data
             ret[dev] = {}
-            for val in netstat_ipv4[0][:-1]:
-                if val == "Name":
+            for i in range(len(netstat_ipv4[0]) - 1):
+                if netstat_ipv4[0][i] == "Name":
                     continue
-                if val in ["Address", "Net/Dest"]:
-                    ret[dev]["IPv4 {field}".format(field=val)] = val
+                if netstat_ipv4[0][i] in ["Address", "Net/Dest"]:
+                    ret[dev][
+                        "IPv4 {field}".format(field=netstat_ipv4[0][i])
+                    ] = netstat_ipv4[1][i]
                 else:
-                    ret[dev][val] = _number(val)
-            for val in netstat_ipv6[0][:-1]:
-                if val == "Name":
+                    ret[dev][netstat_ipv4[0][i]] = _number(netstat_ipv4[1][i])
+            for i in range(len(netstat_ipv6[0]) - 1):
+                if netstat_ipv6[0][i] == "Name":
                     continue
-                if val in ["Address", "Net/Dest"]:
-                    ret[dev]["IPv6 {field}".format(field=val)] = val
+                if netstat_ipv6[0][i] in ["Address", "Net/Dest"]:
+                    ret[dev][
+                        "IPv6 {field}".format(field=netstat_ipv6[0][i])
+                    ] = netstat_ipv6[1][i]
                 else:
-                    ret[dev][val] = _number(val)
+                    ret[dev][netstat_ipv6[0][i]] = _number(netstat_ipv6[1][i])
 
         return ret
 
@@ -1796,9 +1797,9 @@ def proxy_reconnect(proxy_name, opts=None):
         # especially
         minion_id = opts.get("proxyid", "") or opts.get("id", "")
         log.info(
-            "%s (%s proxy) is rebooting or shutting down. Don't probe connection.",
-            minion_id,
-            proxy_name,
+            "{} ({} proxy) is rebooting or shutting down. Don't probe connection.".format(
+                minion_id, proxy_name
+            )
         )
         return True
 

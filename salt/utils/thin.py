@@ -15,11 +15,11 @@ import tarfile
 import tempfile
 import zipfile
 
-import distro
 import jinja2
 import msgpack
 import salt
 import salt.exceptions
+import salt.ext.six as _six
 import salt.ext.tornado as tornado
 import salt.utils.files
 import salt.utils.hashutils
@@ -81,8 +81,15 @@ except ImportError:
         from salt.ext import ssl_match_hostname
     except ImportError:
         ssl_match_hostname = None
+# pylint: enable=import-error,no-name-in-module
+if _six.PY2:
+    import concurrent
 
-concurrent = None
+    distro = None
+else:
+    import distro
+
+    concurrent = None
 
 
 log = logging.getLogger(__name__)
@@ -287,7 +294,9 @@ def get_tops_python(py_ver, exclude=None, ext_py_ver=None):
             continue
 
         if not salt.utils.path.which(py_ver):
-            log.error("%s does not exist. Could not auto detect dependencies", py_ver)
+            log.error(
+                "{} does not exist. Could not auto detect dependencies".format(py_ver)
+            )
             return {}
         py_shell_cmd = [py_ver, "-c", "import {0}; print({0}.__file__)".format(mod)]
         cmd = subprocess.Popen(py_shell_cmd, stdout=subprocess.PIPE)
@@ -296,9 +305,9 @@ def get_tops_python(py_ver, exclude=None, ext_py_ver=None):
 
         if not stdout or not os.path.exists(mod_file):
             log.error(
-                "Could not auto detect file location for module %s for python version %s",
-                mod,
-                py_ver,
+                "Could not auto detect file location for module {} for python version {}".format(
+                    mod, py_ver
+                )
             )
             continue
 
@@ -317,11 +326,11 @@ def get_ext_tops(config):
 
     :return:
     """
-    config = copy.deepcopy(config) or {}
+    config = copy.deepcopy(config)
     alternatives = {}
     required = ["jinja2", "yaml", "tornado", "msgpack"]
     tops = []
-    for ns, cfg in config.items():
+    for ns, cfg in salt.ext.six.iteritems(config or {}):
         alternatives[ns] = cfg
         locked_py_version = cfg.get("py-version")
         err_msg = None
@@ -451,16 +460,16 @@ def get_tops(extra_mods="", so_mods=""):
                 else:
                     tops.append(os.path.join(moddir, base + ".py"))
             except ImportError as err:
-                log.error(
-                    'Unable to import extra-module "%s": %s', mod, err, exc_info=True
-                )
+                log.exception(err)
+                log.error('Unable to import extra-module "%s"', mod)
 
     for mod in [m for m in so_mods.split(",") if m]:
         try:
             locals()[mod] = __import__(mod)
             tops.append(locals()[mod].__file__)
         except ImportError as err:
-            log.error('Unable to import so-module "%s"', mod, exc_info=True)
+            log.exception(err)
+            log.error('Unable to import so-module "%s"', mod)
 
     return tops
 
@@ -477,14 +486,14 @@ def _get_supported_py_config(tops, extended_cfg):
     :return:
     """
     pymap = []
-    for py_ver, tops in copy.deepcopy(tops).items():
+    for py_ver, tops in _six.iteritems(copy.deepcopy(tops)):
         py_ver = int(py_ver)
         if py_ver == 2:
             pymap.append("py2:2:7")
         elif py_ver == 3:
             pymap.append("py3:3:0")
-    cfg_copy = copy.deepcopy(extended_cfg) or {}
-    for ns, cfg in cfg_copy.items():
+
+    for ns, cfg in _six.iteritems(copy.deepcopy(extended_cfg) or {}):
         pymap.append("{}:{}:{}".format(ns, *cfg.get("py-version")))
     pymap.append("")
 
@@ -512,7 +521,7 @@ def _pack_alternative(extended_cfg, digest_collector, tfp):
     # Pack alternative data
     config = copy.deepcopy(extended_cfg)
     # Check if auto_detect is enabled and update dependencies
-    for ns, cfg in config.items():
+    for ns, cfg in _six.iteritems(config):
         if cfg.get("auto_detect"):
             py_ver = "python" + str(cfg.get("py-version", [""])[0])
             if cfg.get("py_bin"):
@@ -534,7 +543,7 @@ def _pack_alternative(extended_cfg, digest_collector, tfp):
             for dep in auto_deps:
                 config[ns]["dependencies"][dep] = auto_deps[dep]
 
-    for ns, cfg in get_ext_tops(config).items():
+    for ns, cfg in _six.iteritems(get_ext_tops(config)):
         tops = [cfg.get("path")] + cfg.get("dependencies")
         py_ver_major, py_ver_minor = cfg.get("py-version")
 
@@ -583,6 +592,8 @@ def gen_thin(
     extra_mods="",
     overwrite=False,
     so_mods="",
+    python2_bin="python2",
+    python3_bin="python3",
     absonly=True,
     compress="gzip",
     extended_cfg=None,
@@ -601,6 +612,11 @@ def gen_thin(
         salt-run thin.generate mako,wempy 1
         salt-run thin.generate overwrite=1
     """
+    if python2_bin != "python2" or python3_bin != "python3":
+        salt.utils.versions.warn_until(
+            "Silicon",
+            "python2_bin and python3_bin are no longer used, please update your call to gen_thin",
+        )
     if sys.version_info < (3,):
         raise salt.exceptions.SaltSystemExit(
             'The minimum required python version to run salt-ssh is "3".'
@@ -633,7 +649,9 @@ def gen_thin(
                     overwrite = fh_.read() != salt.version.__version__
                 if overwrite is False and os.path.isfile(pythinver):
                     with salt.utils.files.fopen(pythinver) as fh_:
-                        overwrite = fh_.read() != str(sys.version_info[0])
+                        overwrite = fh_.read() != str(
+                            sys.version_info[0]
+                        )  # future lint: disable=blacklisted-function
             else:
                 overwrite = True
 
@@ -682,7 +700,7 @@ def gen_thin(
 
     # Pack default data
     log.debug("Packing default libraries based on current Salt version")
-    for py_ver, tops in tops_py_version_mapping.items():
+    for py_ver, tops in _six.iteritems(tops_py_version_mapping):
         for top in tops:
             if absonly and not os.path.isabs(top):
                 continue
@@ -735,7 +753,9 @@ def gen_thin(
     with salt.utils.files.fopen(thinver, "w+") as fp_:
         fp_.write(salt.version.__version__)
     with salt.utils.files.fopen(pythinver, "w+") as fp_:
-        fp_.write(str(sys.version_info.major))
+        fp_.write(
+            str(sys.version_info.major)
+        )  # future lint: disable=blacklisted-function
     with salt.utils.files.fopen(code_checksum, "w+") as fp_:
         fp_.write(digest_collector.digest())
     os.chdir(os.path.dirname(thinver))
@@ -778,6 +798,8 @@ def gen_min(
     extra_mods="",
     overwrite=False,
     so_mods="",
+    python2_bin="python2",
+    python3_bin="python3",
 ):
     """
     Generate the salt-min tarball and print the location of the tarball
@@ -793,6 +815,11 @@ def gen_min(
         salt-run min.generate mako,wempy 1
         salt-run min.generate overwrite=1
     """
+    if python2_bin != "python2" or python3_bin != "python3":
+        salt.utils.versions.warn_until(
+            "Silicon",
+            "python2_bin and python3_bin are no longer used, please update your call to gen_min",
+        )
     mindir = os.path.join(cachedir, "min")
     if not os.path.isdir(mindir):
         os.makedirs(mindir)
@@ -809,7 +836,9 @@ def gen_min(
                     overwrite = fh_.read() != salt.version.__version__
                 if overwrite is False and os.path.isfile(pyminver):
                     with salt.utils.files.fopen(pyminver) as fh_:
-                        overwrite = fh_.read() != str(sys.version_info[0])
+                        overwrite = fh_.read() != str(
+                            sys.version_info[0]
+                        )  # future lint: disable=blacklisted-function
             else:
                 overwrite = True
 
@@ -954,7 +983,7 @@ def gen_min(
         "salt/output/nested.py",
     )
 
-    for py_ver, tops in tops_py_version_mapping.items():
+    for py_ver, tops in _six.iteritems(tops_py_version_mapping):
         for top in tops:
             base = os.path.basename(top)
             top_dirname = os.path.dirname(top)
@@ -993,7 +1022,7 @@ def gen_min(
     with salt.utils.files.fopen(minver, "w+") as fp_:
         fp_.write(salt.version.__version__)
     with salt.utils.files.fopen(pyminver, "w+") as fp_:
-        fp_.write(str(sys.version_info[0]))
+        fp_.write(str(sys.version_info[0]))  # future lint: disable=blacklisted-function
     os.chdir(os.path.dirname(minver))
     tfp.add("version")
     tfp.add(".min-gen-py-version")

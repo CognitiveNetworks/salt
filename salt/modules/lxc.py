@@ -76,8 +76,7 @@ def __virtual__():
     #
     return (
         False,
-        "The lxc execution module cannot be loaded: the lxc-start binary is not in the"
-        " path.",
+        "The lxc execution module cannot be loaded: the lxc-start binary is not in the path.",
     )
 
 
@@ -1576,7 +1575,7 @@ def init(
                 if (
                     retcode(
                         name,
-                        'sh -c \'touch "{0}"; test -e "{0}"\''.format(gid),
+                        ('sh -c \'touch "{0}"; test -e "{0}"\''.format(gid)),
                         path=path,
                         chroot_fallback=True,
                         ignore_retcode=True,
@@ -1615,7 +1614,7 @@ def init(
                 if (
                     retcode(
                         name,
-                        'sh -c \'touch "{0}"; test -e "{0}"\''.format(gid),
+                        ('sh -c \'touch "{0}"; test -e "{0}"\''.format(gid)),
                         chroot_fallback=True,
                         path=path,
                         ignore_retcode=True,
@@ -1631,20 +1630,17 @@ def init(
         run(name, "rm -f '{}'".format(SEED_MARKER), path=path, python_shell=False)
     gid = "/.lxc.initial_seed"
     gids = [gid, "/lxc.initial_seed"]
-    if (
-        any(
-            retcode(
-                name,
-                "test -e {}".format(x),
-                path=path,
-                chroot_fallback=True,
-                ignore_retcode=True,
-            )
-            == 0
-            for x in gids
+    if any(
+        retcode(
+            name,
+            "test -e {}".format(x),
+            path=path,
+            chroot_fallback=True,
+            ignore_retcode=True,
         )
-        or not ret.get("result", True)
-    ):
+        == 0
+        for x in gids
+    ) or not ret.get("result", True):
         pass
     elif seed or seed_cmd:
         if seed:
@@ -1669,9 +1665,9 @@ def init(
                 ret["result"] = False
             else:
                 if not result:
-                    ret[
-                        "comment"
-                    ] = "Bootstrap failed, see minion log for more information"
+                    ret["comment"] = (
+                        "Bootstrap failed, see minion log for " "more information"
+                    )
                     ret["result"] = False
                 else:
                     changes.append({"bootstrap": "Container successfully bootstrapped"})
@@ -1695,10 +1691,8 @@ def init(
                 else:
                     changes.append(
                         {
-                            "bootstrap": (
-                                "Container successfully bootstrapped "
-                                "using seed_cmd '{}'".format(seed_cmd)
-                            )
+                            "bootstrap": "Container successfully bootstrapped "
+                            "using seed_cmd '{}'".format(seed_cmd)
                         }
                     )
 
@@ -1974,7 +1968,7 @@ def create(
         raise SaltInvocationError("Only one of 'template' and 'image' is permitted")
     elif not any((template, image, profile)):
         raise SaltInvocationError(
-            "At least one of 'template', 'image', and 'profile' is required"
+            "At least one of 'template', 'image', and 'profile' is " "required"
         )
 
     options = select("options") or {}
@@ -2332,9 +2326,8 @@ def _change_state(
 
     if _cmdout["retcode"] != 0:
         raise CommandExecutionError(
-            "Error changing state for container '{}' using command '{}': {}".format(
-                name, cmd, _cmdout["stdout"]
-            )
+            "Error changing state for container '{}' using command "
+            "'{}': {}".format(name, cmd, _cmdout["stdout"])
         )
     if expected is not None:
         # some commands do not wait, so we will
@@ -3235,7 +3228,7 @@ def running_systemd(name, cache=True, path=None):
         if result["retcode"] == 0:
             result = run_all(
                 name,
-                'sh -c "chmod +x {0};{0}"'.format(script),
+                'sh -c "chmod +x {0};{0}"' "".format(script),
                 path=path,
                 python_shell=True,
             )
@@ -3245,7 +3238,7 @@ def running_systemd(name, cache=True, path=None):
             )
         run_all(
             name,
-            'sh -c \'if [ -f "{0}" ];then rm -f "{0}";fi\''.format(script),
+            'sh -c \'if [ -f "{0}" ];then rm -f "{0}";fi\'' "".format(script),
             path=path,
             ignore_retcode=True,
             python_shell=True,
@@ -3597,7 +3590,7 @@ def bootstrap(
 
                 run_all(
                     name,
-                    'sh -c \'if [ -f "{0}" ];then rm -f "{0}";fi\''.format(script),
+                    'sh -c \'if [ -f "{0}" ];then rm -f "{0}";fi\'' "".format(script),
                     path=path,
                     ignore_retcode=True,
                     python_shell=True,
@@ -4380,10 +4373,7 @@ def write_conf(conf_file, conf):
         elif isinstance(line, dict):
             for key in list(line.keys()):
                 out_line = None
-                if isinstance(
-                    line[key],
-                    (str, (str,), (int,), float),
-                ):
+                if isinstance(line[key], (str, (str,), (int,), float),):
                     out_line = " = ".join((key, "{}".format(line[key])))
                 elif isinstance(line[key], dict):
                     out_line = " = ".join((key, line[key]["value"]))

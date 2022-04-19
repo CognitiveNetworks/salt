@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Pure python state renderer
 ==========================
@@ -109,10 +110,14 @@ Full Example
         return config
 
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import python libs
 import os
 
 import salt.utils.templates
+
+# Import salt libs
 from salt.exceptions import SaltRenderError
 
 
@@ -124,7 +129,7 @@ def render(template, saltenv="base", sls="", tmplpath=None, **kws):
     """
     template = tmplpath
     if not os.path.isfile(template):
-        raise SaltRenderError("Template {} is not a file!".format(template))
+        raise SaltRenderError("Template {0} is not a file!".format(template))
 
     tmp_data = salt.utils.templates.py(
         template,

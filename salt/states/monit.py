@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Monit state
 ===========
@@ -18,6 +19,9 @@ Manage monit states
     Use of these states require that the :mod:`monit <salt.modules.monit>`
     execution module is available.
 """
+
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 
 def __virtual__():
@@ -40,20 +44,20 @@ def monitor(name):
     try:
         for key, value in result.items():
             if "Running" in value[name]:
-                ret["comment"] = "{} is being being monitored.".format(name)
+                ret["comment"] = ("{0} is being being monitored.").format(name)
                 ret["result"] = True
             else:
                 if __opts__["test"]:
-                    ret["comment"] = "Service {} is set to be monitored.".format(name)
+                    ret["comment"] = "Service {0} is set to be monitored.".format(name)
                     ret["result"] = None
                     return ret
                 __salt__["monit.monitor"](name)
-                ret["comment"] = "{} started to be monitored.".format(name)
+                ret["comment"] = ("{0} started to be monitored.").format(name)
                 ret["changes"][name] = "Running"
                 ret["result"] = True
                 break
     except KeyError:
-        ret["comment"] = "{} not found in configuration.".format(name)
+        ret["comment"] = ("{0} not found in configuration.").format(name)
         ret["result"] = False
 
     return ret
@@ -70,20 +74,22 @@ def unmonitor(name):
     try:
         for key, value in result.items():
             if "Not monitored" in value[name]:
-                ret["comment"] = "{} is not being monitored.".format(name)
+                ret["comment"] = ("{0} is not being monitored.").format(name)
                 ret["result"] = True
             else:
                 if __opts__["test"]:
-                    ret["comment"] = "Service {} is set to be unmonitored.".format(name)
+                    ret["comment"] = "Service {0} is set to be unmonitored.".format(
+                        name
+                    )
                     ret["result"] = None
                     return ret
                 __salt__["monit.unmonitor"](name)
-                ret["comment"] = "{} stopped being monitored.".format(name)
+                ret["comment"] = ("{0} stopped being monitored.").format(name)
                 ret["changes"][name] = "Not monitored"
                 ret["result"] = True
                 break
     except KeyError:
-        ret["comment"] = "{} not found in configuration.".format(name)
+        ret["comment"] = ("{0} not found in configuration.").format(name)
         ret["result"] = False
 
     return ret

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Manage CloudTrail Objects
 =========================
@@ -51,12 +52,17 @@ config:
 
 """
 
+# Import Python Libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 import os
 import os.path
 
 import salt.utils.data
+
+# Import Salt Libs
+from salt.ext import six
 
 log = logging.getLogger(__name__)
 
@@ -160,12 +166,12 @@ def present(
 
     if "error" in r:
         ret["result"] = False
-        ret["comment"] = "Failed to create trail: {}.".format(r["error"]["message"])
+        ret["comment"] = "Failed to create trail: {0}.".format(r["error"]["message"])
         return ret
 
     if not r.get("exists"):
         if __opts__["test"]:
-            ret["comment"] = "CloudTrail {} is set to be created.".format(Name)
+            ret["comment"] = "CloudTrail {0} is set to be created.".format(Name)
             ret["result"] = None
             return ret
         r = __salt__["boto_cloudtrail.create"](
@@ -186,14 +192,16 @@ def present(
         )
         if not r.get("created"):
             ret["result"] = False
-            ret["comment"] = "Failed to create trail: {}.".format(r["error"]["message"])
+            ret["comment"] = "Failed to create trail: {0}.".format(
+                r["error"]["message"]
+            )
             return ret
         _describe = __salt__["boto_cloudtrail.describe"](
             Name, region=region, key=key, keyid=keyid, profile=profile
         )
         ret["changes"]["old"] = {"trail": None}
         ret["changes"]["new"] = _describe
-        ret["comment"] = "CloudTrail {} created.".format(Name)
+        ret["comment"] = "CloudTrail {0} created.".format(Name)
 
         if LoggingEnabled:
             r = __salt__["boto_cloudtrail.start_logging"](
@@ -201,7 +209,7 @@ def present(
             )
             if "error" in r:
                 ret["result"] = False
-                ret["comment"] = "Failed to create trail: {}.".format(
+                ret["comment"] = "Failed to create trail: {0}.".format(
                     r["error"]["message"]
                 )
                 ret["changes"] = {}
@@ -216,7 +224,7 @@ def present(
             )
             if not r.get("tagged"):
                 ret["result"] = False
-                ret["comment"] = "Failed to create trail: {}.".format(
+                ret["comment"] = "Failed to create trail: {0}.".format(
                     r["error"]["message"]
                 )
                 ret["changes"] = {}
@@ -225,7 +233,7 @@ def present(
         return ret
 
     ret["comment"] = os.linesep.join(
-        [ret["comment"], "CloudTrail {} is present.".format(Name)]
+        [ret["comment"], "CloudTrail {0} is present.".format(Name)]
     )
     ret["changes"] = {}
     # trail exists, ensure config matches
@@ -234,7 +242,7 @@ def present(
     )
     if "error" in _describe:
         ret["result"] = False
-        ret["comment"] = "Failed to update trail: {}.".format(
+        ret["comment"] = "Failed to update trail: {0}.".format(
             _describe["error"]["message"]
         )
         ret["changes"] = {}
@@ -260,7 +268,7 @@ def present(
         "LoggingEnabled": "LoggingEnabled",
     }
 
-    for invar, outvar in bucket_vars.items():
+    for invar, outvar in six.iteritems(bucket_vars):
         if _describe[outvar] != locals()[invar]:
             need_update = True
             ret["changes"].setdefault("new", {})[invar] = locals()[invar]
@@ -278,7 +286,7 @@ def present(
 
     if need_update:
         if __opts__["test"]:
-            msg = "CloudTrail {} set to be modified.".format(Name)
+            msg = "CloudTrail {0} set to be modified.".format(Name)
             ret["comment"] = msg
             ret["result"] = None
             return ret
@@ -302,7 +310,9 @@ def present(
         )
         if not r.get("updated"):
             ret["result"] = False
-            ret["comment"] = "Failed to update trail: {}.".format(r["error"]["message"])
+            ret["comment"] = "Failed to update trail: {0}.".format(
+                r["error"]["message"]
+            )
             ret["changes"] = {}
             return ret
 
@@ -312,7 +322,7 @@ def present(
             )
             if not r.get("started"):
                 ret["result"] = False
-                ret["comment"] = "Failed to update trail: {}.".format(
+                ret["comment"] = "Failed to update trail: {0}.".format(
                     r["error"]["message"]
                 )
                 ret["changes"] = {}
@@ -323,7 +333,7 @@ def present(
             )
             if not r.get("stopped"):
                 ret["result"] = False
-                ret["comment"] = "Failed to update trail: {}.".format(
+                ret["comment"] = "Failed to update trail: {0}.".format(
                     r["error"]["message"]
                 )
                 ret["changes"] = {}
@@ -332,7 +342,7 @@ def present(
         if bool(tagchange):
             adds = {}
             removes = {}
-            for k, diff in tagchange.items():
+            for k, diff in six.iteritems(tagchange):
                 if diff.get("new", "") != "":
                     # there's an update for this key
                     adds[k] = Tags[k]
@@ -391,15 +401,15 @@ def absent(name, Name, region=None, key=None, keyid=None, profile=None):
     )
     if "error" in r:
         ret["result"] = False
-        ret["comment"] = "Failed to delete trail: {}.".format(r["error"]["message"])
+        ret["comment"] = "Failed to delete trail: {0}.".format(r["error"]["message"])
         return ret
 
     if r and not r["exists"]:
-        ret["comment"] = "CloudTrail {} does not exist.".format(Name)
+        ret["comment"] = "CloudTrail {0} does not exist.".format(Name)
         return ret
 
     if __opts__["test"]:
-        ret["comment"] = "CloudTrail {} is set to be removed.".format(Name)
+        ret["comment"] = "CloudTrail {0} is set to be removed.".format(Name)
         ret["result"] = None
         return ret
     r = __salt__["boto_cloudtrail.delete"](
@@ -407,9 +417,9 @@ def absent(name, Name, region=None, key=None, keyid=None, profile=None):
     )
     if not r["deleted"]:
         ret["result"] = False
-        ret["comment"] = "Failed to delete trail: {}.".format(r["error"]["message"])
+        ret["comment"] = "Failed to delete trail: {0}.".format(r["error"]["message"])
         return ret
     ret["changes"]["old"] = {"trail": Name}
     ret["changes"]["new"] = {"trail": None}
-    ret["comment"] = "CloudTrail {} deleted.".format(Name)
+    ret["comment"] = "CloudTrail {0} deleted.".format(Name)
     return ret

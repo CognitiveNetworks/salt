@@ -1,4 +1,5 @@
 #! /bin/env python
+from __future__ import print_function
 
 import argparse
 import os
@@ -8,7 +9,7 @@ from os.path import abspath, dirname, join
 from shutil import copy
 from subprocess import check_call
 
-parser = argparse.ArgumentParser(description="Build salt rpms")
+parser = argparse.ArgumentParser(description="Build salt rpms",)
 parser.add_argument(
     "buildid",
     help="The build id to use i.e. the bit after the salt version in the package name",

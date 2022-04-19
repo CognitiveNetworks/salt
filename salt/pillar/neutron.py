@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Use Openstack Neutron data as a Pillar source. Will list all networks listed
 inside of Neutron, to all minions.
@@ -42,9 +43,12 @@ name after the Keystone profile name:
       - neutron: my_openstack_config neutron_networks
 """
 
+# Import Python Libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 
+# Import Salt Libs
 try:
     import salt.utils.openstack.neutron as suoneu
 

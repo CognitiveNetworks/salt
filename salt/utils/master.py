@@ -5,6 +5,8 @@
     Utilities that can only be used on a salt master.
 
 """
+
+
 import logging
 import os
 import signal
@@ -57,11 +59,12 @@ def _read_proc_file(path, opts):
     """
     Return a dict of JID metadata, or None
     """
+    serial = salt.payload.Serial(opts)
     with salt.utils.files.fopen(path, "rb") as fp_:
         buf = fp_.read()
         fp_.close()
         if buf:
-            data = salt.payload.loads(buf)
+            data = serial.loads(buf)
         else:
             # Proc file is empty, remove
             try:
@@ -165,6 +168,7 @@ class MasterPillarUtil:
             )
         else:
             self.opts = opts
+        self.serial = salt.payload.Serial(self.opts)
         self.tgt = tgt
         self.tgt_type = tgt_type
         self.saltenv = saltenv
@@ -213,7 +217,9 @@ class MasterPillarUtil:
         grains = {minion_id: {} for minion_id in minion_ids}
         pillars = grains.copy()
         if not self.opts.get("minion_data_cache", False):
-            log.debug("Skipping cached data because minion_data_cache is not enabled.")
+            log.debug(
+                "Skipping cached data because minion_data_cache is not " "enabled."
+            )
             return grains, pillars
         if not minion_ids:
             minion_ids = self.cache.list("minions")
@@ -223,8 +229,7 @@ class MasterPillarUtil:
             mdata = self.cache.fetch("minions/{}".format(minion_id), "data")
             if not isinstance(mdata, dict):
                 log.warning(
-                    "cache.fetch should always return a dict. ReturnedType: %s,"
-                    " MinionId: %s",
+                    "cache.fetch should always return a dict. ReturnedType: %s, MinionId: %s",
                     type(mdata).__name__,
                     minion_id,
                 )
@@ -554,6 +559,7 @@ class CacheTimer(Thread):
         self.opts = opts
         self.stopped = event
         self.daemon = True
+        self.serial = salt.payload.Serial(opts.get("serial", ""))
         self.timer_sock = os.path.join(self.opts["sock_dir"], "con_timer.ipc")
 
     def run(self):
@@ -569,7 +575,7 @@ class CacheTimer(Thread):
         count = 0
         log.debug("ConCache-Timer started")
         while not self.stopped.wait(1):
-            socket.send(salt.payload.dumps(count))
+            socket.send(self.serial.dumps(count))
 
             count += 1
             if count >= 60:
@@ -589,6 +595,23 @@ class CacheWorker(Process):
         """
         super().__init__(**kwargs)
         self.opts = opts
+
+    # __setstate__ and __getstate__ are only used on Windows.
+    # We do this so that __init__ will be invoked on Windows in the child
+    # process so that a register_after_fork() equivalent will work on Windows.
+    def __setstate__(self, state):
+        self.__init__(
+            state["opts"],
+            log_queue=state["log_queue"],
+            log_queue_level=state["log_queue_level"],
+        )
+
+    def __getstate__(self):
+        return {
+            "opts": self.opts,
+            "log_queue": self.log_queue,
+            "log_queue_level": self.log_queue_level,
+        }
 
     def run(self):
         """
@@ -634,6 +657,23 @@ class ConnectedCache(Process):
         self.timer = CacheTimer(self.opts, self.timer_stop)
         self.timer.start()
         self.running = True
+
+    # __setstate__ and __getstate__ are only used on Windows.
+    # We do this so that __init__ will be invoked on Windows in the child
+    # process so that a register_after_fork() equivalent will work on Windows.
+    def __setstate__(self, state):
+        self.__init__(
+            state["opts"],
+            log_queue=state["log_queue"],
+            log_queue_level=state["log_queue_level"],
+        )
+
+    def __getstate__(self):
+        return {
+            "opts": self.opts,
+            "log_queue": self.log_queue,
+            "log_queue_level": self.log_queue_level,
+        }
 
     def signal_handler(self, sig, frame):
         """
@@ -704,6 +744,9 @@ class ConnectedCache(Process):
         poller.register(cupd_in, zmq.POLLIN)
         poller.register(timer_in, zmq.POLLIN)
 
+        # our serializer
+        serial = salt.payload.Serial(self.opts.get("serial", ""))
+
         # register a signal handler
         signal.signal(signal.SIGINT, self.signal_handler)
 
@@ -726,19 +769,19 @@ class ConnectedCache(Process):
 
             # check for next cache-request
             if socks.get(creq_in) == zmq.POLLIN:
-                msg = salt.payload.loads(creq_in.recv())
+                msg = serial.loads(creq_in.recv())
                 log.debug("ConCache Received request: %s", msg)
 
                 # requests to the minion list are send as str's
                 if isinstance(msg, str):
                     if msg == "minions":
                         # Send reply back to client
-                        reply = salt.payload.dumps(self.minions)
+                        reply = serial.dumps(self.minions)
                         creq_in.send(reply)
 
             # check for next cache-update from workers
             if socks.get(cupd_in) == zmq.POLLIN:
-                new_c_data = salt.payload.loads(cupd_in.recv())
+                new_c_data = serial.loads(cupd_in.recv())
                 # tell the worker to exit
                 # cupd_in.send(serial.dumps('ACK'))
 
@@ -781,7 +824,7 @@ class ConnectedCache(Process):
 
             # check for next timer-event to start new jobs
             if socks.get(timer_in) == zmq.POLLIN:
-                sec_event = salt.payload.loads(timer_in.recv())
+                sec_event = serial.loads(timer_in.recv())
 
                 # update the list every 30 seconds
                 if int(sec_event % 30) == 0:

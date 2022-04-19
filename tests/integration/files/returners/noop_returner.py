@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 noop_returner
 ~~~~~~~~~~~~~
@@ -5,9 +6,12 @@ noop_returner
 A returner that does nothing which is used to test the salt-master `event_return` functionality
 """
 
+# Import python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 
+# Import Salt libs
 import salt.utils.jid
 
 log = logging.getLogger(__name__)

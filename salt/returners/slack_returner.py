@@ -229,7 +229,13 @@ def returner(ret):
     else:
         returns = pprint.pformat(returns)
 
-    message = "id: {}\r\nfunction: {}\r\nfunction args: {}\r\njid: {}\r\nreturn: {}\r\n".format(
+    message = (
+        "id: {}\r\n"
+        "function: {}\r\n"
+        "function args: {}\r\n"
+        "jid: {}\r\n"
+        "return: {}\r\n"
+    ).format(
         ret.get("id"), ret.get("fun"), ret.get("fun_args"), ret.get("jid"), returns
     )
 

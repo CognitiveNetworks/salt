@@ -12,14 +12,13 @@ log = logging.getLogger(__name__)
 
 
 @pytest.fixture(scope="module")
-def minion_config_overrides(tmp_path_factory):
+def minion_opts(minion_opts, tmp_path_factory):
     temp_path = tmp_path_factory.mktemp("aliases-temp")
     aliases_file = temp_path / "aliases-file"
     try:
-        yield {
-            "aliases.file": str(aliases_file),
-            "integration.test": True,
-        }
+        minion_opts["aliases.file"] = str(aliases_file)
+        minion_opts["integration.test"] = True
+        yield minion_opts
     finally:
         shutil.rmtree(str(temp_path), ignore_errors=True)
 

@@ -299,9 +299,8 @@ class LocalFuncsTestCase(TestCase):
         mock_ret = {
             "error": {
                 "name": "TokenAuthenticationError",
-                "message": (
-                    'Authentication failure of type "token" occurred for user test.'
-                ),
+                "message": 'Authentication failure of type "token" occurred '
+                "for user test.",
             }
         }
 
@@ -345,9 +344,8 @@ class LocalFuncsTestCase(TestCase):
         mock_ret = {
             "error": {
                 "name": "EauthAuthenticationError",
-                "message": (
-                    'Authentication failure of type "eauth" occurred for user UNKNOWN.'
-                ),
+                "message": 'Authentication failure of type "eauth" occurred for '
+                "user UNKNOWN.",
             }
         }
         ret = self.local_funcs.runner({"eauth": "foo"})
@@ -363,9 +361,8 @@ class LocalFuncsTestCase(TestCase):
         mock_ret = {
             "error": {
                 "name": "EauthAuthenticationError",
-                "message": (
-                    'Authentication failure of type "eauth" occurred for user test.'
-                ),
+                "message": 'Authentication failure of type "eauth" occurred for '
+                "user test.",
             }
         }
         with patch(
@@ -430,9 +427,8 @@ class LocalFuncsTestCase(TestCase):
         mock_ret = {
             "error": {
                 "name": "TokenAuthenticationError",
-                "message": (
-                    'Authentication failure of type "token" occurred for user test.'
-                ),
+                "message": 'Authentication failure of type "token" occurred '
+                "for user test.",
             }
         }
 
@@ -476,9 +472,8 @@ class LocalFuncsTestCase(TestCase):
         mock_ret = {
             "error": {
                 "name": "EauthAuthenticationError",
-                "message": (
-                    'Authentication failure of type "eauth" occurred for user UNKNOWN.'
-                ),
+                "message": 'Authentication failure of type "eauth" occurred for '
+                "user UNKNOWN.",
             }
         }
         ret = self.local_funcs.wheel({"eauth": "foo"})
@@ -494,9 +489,8 @@ class LocalFuncsTestCase(TestCase):
         mock_ret = {
             "error": {
                 "name": "EauthAuthenticationError",
-                "message": (
-                    'Authentication failure of type "eauth" occurred for user test.'
-                ),
+                "message": 'Authentication failure of type "eauth" occurred for '
+                "user test.",
             }
         }
         with patch(
@@ -541,9 +535,8 @@ class LocalFuncsTestCase(TestCase):
         mock_ret = {
             "error": {
                 "name": "UserAuthenticationError",
-                "message": (
-                    'Authentication failure of type "user" occurred for user UNKNOWN.'
-                ),
+                "message": 'Authentication failure of type "user" occurred for '
+                "user UNKNOWN.",
             }
         }
         ret = self.local_funcs.wheel({})

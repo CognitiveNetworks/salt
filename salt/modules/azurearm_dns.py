@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Azure (ARM) DNS Execution Module
 
@@ -52,6 +53,7 @@ Optional provider parameters:
 """
 
 # Python libs
+from __future__ import absolute_import
 
 import logging
 
@@ -115,7 +117,9 @@ def record_set_create_or_update(name, zone_name, resource_group, record_type, **
             "dns", "RecordSet", **kwargs
         )
     except TypeError as exc:
-        result = {"error": "The object model could not be built. ({})".format(str(exc))}
+        result = {
+            "error": "The object model could not be built. ({0})".format(str(exc))
+        }
         return result
 
     try:
@@ -134,7 +138,7 @@ def record_set_create_or_update(name, zone_name, resource_group, record_type, **
         result = {"error": str(exc)}
     except SerializationError as exc:
         result = {
-            "error": "The object model could not be parsed. ({})".format(str(exc))
+            "error": "The object model could not be parsed. ({0})".format(str(exc))
         }
 
     return result
@@ -358,7 +362,9 @@ def zone_create_or_update(name, resource_group, **kwargs):
     try:
         zone_model = __utils__["azurearm.create_object_model"]("dns", "Zone", **kwargs)
     except TypeError as exc:
-        result = {"error": "The object model could not be built. ({})".format(str(exc))}
+        result = {
+            "error": "The object model could not be built. ({0})".format(str(exc))
+        }
         return result
 
     try:
@@ -375,7 +381,7 @@ def zone_create_or_update(name, resource_group, **kwargs):
         result = {"error": str(exc)}
     except SerializationError as exc:
         result = {
-            "error": "The object model could not be parsed. ({})".format(str(exc))
+            "error": "The object model could not be parsed. ({0})".format(str(exc))
         }
 
     return result

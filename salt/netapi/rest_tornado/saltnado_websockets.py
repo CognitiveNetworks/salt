@@ -1,3 +1,4 @@
+# encoding: utf-8
 """
 A Websockets add-on to saltnado
 ===============================
@@ -288,6 +289,7 @@ in which each job's information is keyed by salt's ``jid``.
 Setup
 =====
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 
@@ -326,7 +328,7 @@ class AllEventsHandler(
             log.debug("Refusing websocket connection, bad token!")
             self.send_error(401)
             return
-        super().get(token)
+        super(AllEventsHandler, self).get(token)
 
     def open(self, token):  # pylint: disable=W0221
         """
@@ -369,7 +371,9 @@ class AllEventsHandler(
             pass
 
     def on_close(self, *args, **kwargs):
-        """Cleanup."""
+        """Cleanup.
+
+        """
         log.debug("In the websocket close method")
         self.close()
 
@@ -383,7 +387,7 @@ class AllEventsHandler(
         if mod_opts.get("cors_origin"):
             return bool(_check_cors_origin(origin, mod_opts["cors_origin"]))
         else:
-            return super().check_origin(origin)
+            return super(AllEventsHandler, self).check_origin(origin)
 
 
 class FormattedEventsHandler(AllEventsHandler):  # pylint: disable=W0223,W0232

@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+from __future__ import absolute_import, print_function, unicode_literals
+
 import pytest
 from tests.support.case import ModuleCase
 
@@ -8,7 +12,7 @@ class GentoolkitModuleTest(ModuleCase):
         """
         Set up test environment
         """
-        super().setUp()
+        super(GentoolkitModuleTest, self).setUp()
         ret_grain = self.run_function("grains.item", ["os"])
         if ret_grain["os"] not in "Gentoo":
             self.skipTest("For Gentoo only")

@@ -1,16 +1,22 @@
+# -*- coding: utf-8 -*-
 """
 Loader mechanism for caching data, with data expiration, etc.
 
 .. versionadded:: 2016.11.0
 """
 
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 import time
 
+# Import Salt libs
 import salt.config
 import salt.loader
 import salt.syspaths
+from salt.ext import six
+from salt.payload import Serial
 from salt.utils.odict import OrderedDict
 
 log = logging.getLogger(__name__)
@@ -29,7 +35,7 @@ def factory(opts, **kwargs):
     return cls(opts, **kwargs)
 
 
-class Cache:
+class Cache(object):
     """
     Base caching object providing access to the modular cache subsystem.
 
@@ -39,12 +45,18 @@ class Cache:
         The name of the cache driver to use. This is the name of the python
         module of the `salt.cache` package. Default is `localfs`.
 
+    :param serial:
+        The module of `salt.serializers` package that should be used by the cache
+        driver to store data.
+        If a driver can't use a specific module or uses specific objects storage
+        it can ignore this parameter.
+
     Terminology.
 
     Salt cache subsystem is organized as a tree with nodes and leafs like a
     filesystem. Cache consists of banks. Each bank can contain a number of
     keys. Each key can contain a dict or any other object serializable with
-    `salt.payload`. I.e. any data object in the cache can be
+    `salt.payload.Serial`. I.e. any data object in the cache can be
     addressed by the path to the bank and the key name:
         bank: 'minions/alpha'
         key:  'data'
@@ -64,13 +76,14 @@ class Cache:
         else:
             self.cachedir = cachedir
         self.driver = opts.get("cache", salt.config.DEFAULT_MASTER_OPTS["cache"])
+        self.serial = Serial(opts)
         self._modules = None
         self._kwargs = kwargs
         self._kwargs["cachedir"] = self.cachedir
 
     def __lazy_init(self):
-        self._modules = salt.loader.cache(self.opts)
-        fun = "{}.init_kwargs".format(self.driver)
+        self._modules = salt.loader.cache(self.opts, self.serial)
+        fun = "{0}.init_kwargs".format(self.driver)
         if fun in self.modules:
             self._kwargs = self.modules[fun](self._kwargs)
         else:
@@ -135,13 +148,13 @@ class Cache:
 
         :param data:
             The data which will be stored in the cache. This data should be
-            in a format which can be serialized by msgpack.
+            in a format which can be serialized by msgpack/json/yaml/etc.
 
         :raises SaltCacheError:
             Raises an exception if cache driver detected an error accessing data
             in the cache backend (auth, permissions, etc).
         """
-        fun = "{}.store".format(self.driver)
+        fun = "{0}.store".format(self.driver)
         return self.modules[fun](bank, key, data, **self._kwargs)
 
     def fetch(self, bank, key):
@@ -165,7 +178,7 @@ class Cache:
             Raises an exception if cache driver detected an error accessing data
             in the cache backend (auth, permissions, etc).
         """
-        fun = "{}.fetch".format(self.driver)
+        fun = "{0}.fetch".format(self.driver)
         return self.modules[fun](bank, key, **self._kwargs)
 
     def updated(self, bank, key):
@@ -189,7 +202,7 @@ class Cache:
             Raises an exception if cache driver detected an error accessing data
             in the cache backend (auth, permissions, etc).
         """
-        fun = "{}.updated".format(self.driver)
+        fun = "{0}.updated".format(self.driver)
         return self.modules[fun](bank, key, **self._kwargs)
 
     def flush(self, bank, key=None):
@@ -210,7 +223,7 @@ class Cache:
             Raises an exception if cache driver detected an error accessing data
             in the cache backend (auth, permissions, etc).
         """
-        fun = "{}.flush".format(self.driver)
+        fun = "{0}.flush".format(self.driver)
         return self.modules[fun](bank, key=key, **self._kwargs)
 
     def list(self, bank):
@@ -229,7 +242,7 @@ class Cache:
             Raises an exception if cache driver detected an error accessing data
             in the cache backend (auth, permissions, etc).
         """
-        fun = "{}.list".format(self.driver)
+        fun = "{0}.list".format(self.driver)
         return self.modules[fun](bank, **self._kwargs)
 
     def contains(self, bank, key=None):
@@ -254,7 +267,7 @@ class Cache:
             Raises an exception if cache driver detected an error accessing data
             in the cache backend (auth, permissions, etc).
         """
-        fun = "{}.contains".format(self.driver)
+        fun = "{0}.contains".format(self.driver)
         return self.modules[fun](bank, key, **self._kwargs)
 
 
@@ -268,7 +281,7 @@ class MemCache(Cache):
     data = {}
 
     def __init__(self, opts, **kwargs):
-        super().__init__(opts, **kwargs)
+        super(MemCache, self).__init__(opts, **kwargs)
         self.expire = opts.get("memcache_expire_seconds", 10)
         self.max = opts.get("memcache_max_items", 1024)
         self.cleanup = opts.get("memcache_full_cleanup", False)
@@ -281,7 +294,7 @@ class MemCache(Cache):
     @classmethod
     def __cleanup(cls, expire):
         now = time.time()
-        for storage in cls.data.values():
+        for storage in six.itervalues(cls.data):
             for key, data in list(storage.items()):
                 if data[0] + expire < now:
                     del storage[key]
@@ -289,7 +302,7 @@ class MemCache(Cache):
                     break
 
     def _get_storage_id(self):
-        fun = "{}.storage_id".format(self.driver)
+        fun = "{0}.storage_id".format(self.driver)
         if fun in self.modules:
             return self.modules[fun](self.kwargs)
         else:
@@ -325,7 +338,7 @@ class MemCache(Cache):
             return record[1]
 
         # Have no value for the key or value is expired
-        data = super().fetch(bank, key)
+        data = super(MemCache, self).fetch(bank, key)
         if len(self.storage) >= self.max:
             if self.cleanup:
                 MemCache.__cleanup(self.expire)
@@ -336,7 +349,7 @@ class MemCache(Cache):
 
     def store(self, bank, key, data):
         self.storage.pop((bank, key), None)
-        super().store(bank, key, data)
+        super(MemCache, self).store(bank, key, data)
         if len(self.storage) >= self.max:
             if self.cleanup:
                 MemCache.__cleanup(self.expire)
@@ -346,4 +359,4 @@ class MemCache(Cache):
 
     def flush(self, bank, key=None):
         self.storage.pop((bank, key), None)
-        super().flush(bank, key)
+        super(MemCache, self).flush(bank, key)

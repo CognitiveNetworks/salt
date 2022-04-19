@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Infoblox A record management.
 
@@ -8,6 +9,9 @@ functions accept api_opts:
     api_username:  [default to pillar value]
     api_password:  [default to pillar value]
 """
+
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 
 def present(name=None, ipv4addr=None, data=None, ensure_data=True, **api_opts):
@@ -50,7 +54,7 @@ def present(name=None, ipv4addr=None, data=None, ensure_data=True, **api_opts):
             ret["result"] = False
             ret[
                 "comment"
-            ] = "** please update the name: {} to equal the updated data name {}".format(
+            ] = "** please update the name: {0} to equal the updated data name {1}".format(
                 name, data["name"]
             )
             return ret
@@ -67,10 +71,9 @@ def present(name=None, ipv4addr=None, data=None, ensure_data=True, **api_opts):
         diff = __salt__["infoblox.diff_objects"](data, obj)
         if not diff:
             ret["result"] = True
-            ret["comment"] = (
-                "supplied fields already updated (note: removing fields might not"
-                " update)"
-            )
+            ret[
+                "comment"
+            ] = "supplied fields already updated (note: removing fields might not update)"
             return ret
 
         if diff:
@@ -84,15 +87,14 @@ def present(name=None, ipv4addr=None, data=None, ensure_data=True, **api_opts):
                 obj["_ref"], data=data, **api_opts
             )
             ret["result"] = True
-            ret["comment"] = (
-                "infoblox record fields updated (note: removing fields might not"
-                " update)"
-            )
+            ret[
+                "comment"
+            ] = "infoblox record fields updated (note: removing fields might not update)"
             return ret
 
     if __opts__["test"]:
         ret["result"] = None
-        ret["comment"] = "would attempt to create infoblox record {}".format(
+        ret["comment"] = "would attempt to create infoblox record {0}".format(
             data["name"]
         )
         return ret

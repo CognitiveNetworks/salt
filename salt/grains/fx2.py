@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Generate baseline proxy minion grains for Dell FX2 chassis.
 The challenge is that most of Salt isn't bootstrapped yet,
@@ -5,6 +6,7 @@ so we need to repeat a bunch of things that would normally happen
 in proxy/fx2.py--just enough to get data from the chassis to include
 in grains.
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 

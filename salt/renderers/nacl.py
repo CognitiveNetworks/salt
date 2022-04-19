@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 r"""
 Renderer that will decrypt NACL ciphers
 
@@ -52,10 +53,16 @@ data like so:
 """
 
 
+from __future__ import absolute_import, print_function, unicode_literals
+
 import logging
 import re
 
+# Import 3rd-party libs
+import salt.ext.six as six
 import salt.syspaths
+
+# Import salt libs
 import salt.utils.stringio
 
 log = logging.getLogger(__name__)
@@ -64,19 +71,19 @@ NACL_REGEX = r"^NACL\[(.*)\]$"
 
 def _decrypt_object(obj, **kwargs):
     """
-    Recursively try to decrypt any object. If the object is a str, and it
-    contains a valid NACLENC pretext, decrypt it, otherwise keep going until a
-    string is found.
+    Recursively try to decrypt any object. If the object is a six.string_types
+    (string or unicode), and it contains a valid NACLENC pretext, decrypt it,
+    otherwise keep going until a string is found.
     """
     if salt.utils.stringio.is_readable(obj):
         return _decrypt_object(obj.getvalue(), **kwargs)
-    if isinstance(obj, str):
+    if isinstance(obj, six.string_types):
         if re.search(NACL_REGEX, obj) is not None:
             return __salt__["nacl.dec"](re.search(NACL_REGEX, obj).group(1), **kwargs)
         else:
             return obj
     elif isinstance(obj, dict):
-        for key, value in obj.items():
+        for key, value in six.iteritems(obj):
             obj[key] = _decrypt_object(value, **kwargs)
         return obj
     elif isinstance(obj, list):

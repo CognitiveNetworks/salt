@@ -5,8 +5,6 @@ import logging
 import os
 import time
 
-import salt.utils.beacons
-
 log = logging.getLogger(__name__)
 
 LAST_STATUS = {}
@@ -20,25 +18,30 @@ def validate(config):
     """
     # Configuration for service beacon should be a list of dicts
     if not isinstance(config, list):
-        return False, "Configuration for service beacon must be a list."
+        return False, ("Configuration for service beacon must be a list.")
     else:
-        config = salt.utils.beacons.list_to_dict(config)
+        _config = {}
+        list(map(_config.update, config))
 
-        if "services" not in config:
-            return False, "Configuration for service beacon requires services."
+        if "services" not in _config:
+            return False, ("Configuration for service beacon requires services.")
         else:
-            if not isinstance(config["services"], dict):
+            if not isinstance(_config["services"], dict):
                 return (
                     False,
-                    "Services configuration item for service beacon must "
-                    "be a dictionary.",
+                    (
+                        "Services configuration item for service beacon must "
+                        "be a dictionary."
+                    ),
                 )
-            for config_item in config["services"]:
-                if not isinstance(config["services"][config_item], dict):
+            for config_item in _config["services"]:
+                if not isinstance(_config["services"][config_item], dict):
                     return (
                         False,
-                        "Configuration for service beacon must "
-                        "be a list of dictionaries.",
+                        (
+                            "Configuration for service beacon must "
+                            "be a list of dictionaries."
+                        ),
                     )
 
     return True, "Valid beacon configuration"
@@ -106,12 +109,13 @@ def beacon(config):
                   uncleanshutdown: /run/nginx.pid
     """
     ret = []
-    config = salt.utils.beacons.list_to_dict(config)
+    _config = {}
+    list(map(_config.update, config))
 
-    for service in config.get("services", {}):
+    for service in _config.get("services", {}):
         ret_dict = {}
 
-        service_config = config["services"][service]
+        service_config = _config["services"][service]
 
         ret_dict[service] = {"running": __salt__["service.status"](service)}
         ret_dict["service_name"] = service

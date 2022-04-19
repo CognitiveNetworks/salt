@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Module to provide ceph control with salt.
 
@@ -5,6 +6,8 @@ Module to provide ceph control with salt.
 
 .. versionadded:: 2016.11.0
 """
+# Import Python Libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 
@@ -22,7 +25,7 @@ except ImportError:
 
 def __virtual__():
     if HAS_CEPH_CFG is False:
-        msg = "ceph_cfg unavailable: {} execution module cant be loaded ".format(
+        msg = "ceph_cfg unavailable: {0} execution module cant be loaded ".format(
             __virtualname__
         )
         return False, msg
@@ -115,7 +118,7 @@ def zap(target=None, **kwargs):
         The cluster UUID. Defaults to value found in ceph config file.
     """
     if target is not None:
-        log.warning("Deprecated use of function, use kwargs")
+        log.warning("Depricated use of function, use kwargs")
     target = kwargs.get("dev", target)
     kwargs["dev"] = target
     return ceph_cfg.zap(**kwargs)

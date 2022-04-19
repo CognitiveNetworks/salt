@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     :codeauthor: :email:`Alexandru Bleotu (alexandru.bleotu@morganstanley.com)`
 
@@ -8,7 +9,10 @@
     ESX Datacenter configuration schemas
 """
 
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import Salt libs
 from salt.utils.schema import ArrayItem, IntegerItem, Schema, StringItem
 
 

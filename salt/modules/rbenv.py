@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Manage ruby installations with rbenv. rbenv is supported on Linux and macOS.
 rbenv doesn't work on Windows (and isn't really necessary on Windows as there is
@@ -9,16 +10,22 @@ http://misheska.com/blog/2013/06/15/using-rbenv-to-manage-multiple-versions-of-r
 .. versionadded:: 0.16.0
 """
 
+# Import python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 import os
 import re
 
+# Import Salt libs
 import salt.utils.args
 import salt.utils.data
 import salt.utils.path
 import salt.utils.platform
 from salt.exceptions import SaltInvocationError
+
+# Import 3rd-party libs
+from salt.ext import six
 
 # Set up logger
 log = logging.getLogger(__name__)
@@ -38,8 +45,7 @@ def __virtual__():
     if salt.utils.platform.is_windows():
         return (
             False,
-            "The rbenv execution module failed to load: only available on non-Windows"
-            " systems.",
+            "The rbenv execution module failed to load: only available on non-Windows systems.",
         )
     return True
 
@@ -63,7 +69,7 @@ def _parse_env(env):
     if not isinstance(env, dict):
         env = {}
 
-    for bad_env_key in (x for x, y in env.items() if y is None):
+    for bad_env_key in (x for x, y in six.iteritems(env) if y is None):
         log.error(
             "Environment variable '%s' passed without a value. "
             "Setting value to an empty string",
@@ -76,7 +82,7 @@ def _parse_env(env):
 
 def _rbenv_bin(runas=None):
     path = _rbenv_path(runas)
-    return "{}/bin/rbenv".format(path)
+    return "{0}/bin/rbenv".format(path)
 
 
 def _rbenv_path(runas=None):
@@ -84,7 +90,7 @@ def _rbenv_path(runas=None):
     if runas in (None, "root"):
         path = __salt__["config.option"]("rbenv.root") or "/usr/local/rbenv"
     else:
-        path = __salt__["config.option"]("rbenv.root") or "~{}/.rbenv".format(runas)
+        path = __salt__["config.option"]("rbenv.root") or "~{0}/.rbenv".format(runas)
 
     return os.path.expanduser(path)
 
@@ -120,7 +126,7 @@ def _install_rbenv(path, runas=None):
 
 
 def _install_ruby_build(path, runas=None):
-    path = "{}/plugins/ruby-build".format(path)
+    path = "{0}/plugins/ruby-build".format(path)
     if os.path.isdir(path):
         return True
 
@@ -141,7 +147,7 @@ def _update_rbenv(path, runas=None):
 
 
 def _update_ruby_build(path, runas=None):
-    path = "{}/plugins/ruby-build".format(path)
+    path = "{0}/plugins/ruby-build".format(path)
     if not os.path.isdir(path):
         return False
 
@@ -381,7 +387,9 @@ def do(cmdline, runas=None, env=None):
     # NOTE: Env vars (and their values) need to be str type on both Python 2
     # and 3. The code below first normalizes all path components to unicode to
     # stitch them together, and then converts the result back to a str type.
-    env["PATH"] = salt.utils.stringutils.to_str(
+    env[
+        str("PATH")
+    ] = salt.utils.stringutils.to_str(  # future lint: disable=blacklisted-function
         os.pathsep.join(
             (
                 salt.utils.path.join(path, "shims"),
@@ -393,7 +401,7 @@ def do(cmdline, runas=None, env=None):
     try:
         cmdline = salt.utils.args.shlex_split(cmdline)
     except AttributeError:
-        cmdauth = salt.utils.args.shlex_split(str(cmdline))
+        cmdauth = salt.utils.args.shlex_split(six.text_type(cmdline))
 
     result = __salt__["cmd.run_all"](cmdline, runas=runas, env=env, python_shell=False)
 
@@ -424,7 +432,7 @@ def do_with_ruby(ruby, cmdline, runas=None):
     try:
         cmdline = salt.utils.args.shlex_split(cmdline)
     except AttributeError:
-        cmdline = salt.utils.args.shlex_split(str(cmdline))
+        cmdline = salt.utils.args.shlex_split(six.text_type(cmdline))
 
     env = {}
     if ruby:

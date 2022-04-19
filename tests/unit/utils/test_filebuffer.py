@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     :codeauthor: Pedro Algarvio (pedro@algarvio.me)
 
@@ -6,11 +7,16 @@
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import os
 
+# Import salt libs
 from salt.utils.filebuffer import BufferedReader, InvalidFileMode
 from tests.support.paths import BASE_FILES
+
+# Import Salt Testing libs
 from tests.support.unit import TestCase
 
 
@@ -42,7 +48,7 @@ class TestFileBuffer(TestCase):
                         if stripped_text in chunk:
                             return True
                 return False
-            except OSError:
+            except (IOError, OSError):
                 return False
 
         self.assertTrue(find_value("We have the Holy Hand Grenade"))

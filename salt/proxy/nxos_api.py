@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Proxy Minion to manage Cisco Nexus Switches (NX-OS) over the NX-API
 
@@ -98,7 +99,9 @@ Proxy Pillar Example
       username: example
       password: example
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import python stdlib
 import copy
 import logging
 

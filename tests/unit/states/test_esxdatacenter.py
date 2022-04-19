@@ -59,7 +59,8 @@ class DatacenterConfiguredTestCase(TestCase, LoaderModuleMockMixin):
                 "name": "fake_dc",
                 "changes": {},
                 "result": True,
-                "comment": "Datacenter 'fake_dc' already exists. Nothing to be done.",
+                "comment": "Datacenter 'fake_dc' already "
+                "exists. Nothing to be done.",
             },
         )
 
@@ -80,7 +81,8 @@ class DatacenterConfiguredTestCase(TestCase, LoaderModuleMockMixin):
                 "name": "fake_dc",
                 "changes": {},
                 "result": True,
-                "comment": "Datacenter 'proxy_dc' already exists. Nothing to be done.",
+                "comment": "Datacenter 'proxy_dc' "
+                "already exists. Nothing to be done.",
             },
         )
 
@@ -138,7 +140,7 @@ class DatacenterConfiguredTestCase(TestCase, LoaderModuleMockMixin):
                 "name": "fake_dc",
                 "changes": {"new": {"name": "fake_dc"}},
                 "result": None,
-                "comment": "State will create datacenter 'fake_dc'.",
+                "comment": "State will create " "datacenter 'fake_dc'.",
             },
         )
 
@@ -155,7 +157,8 @@ class DatacenterConfiguredTestCase(TestCase, LoaderModuleMockMixin):
                 "name": "fake_dc",
                 "changes": {},
                 "result": True,
-                "comment": "Datacenter 'fake_dc' already exists. Nothing to be done.",
+                "comment": "Datacenter 'fake_dc' already "
+                "exists. Nothing to be done.",
             },
         )
 

@@ -1,7 +1,13 @@
-import io
+# -*- coding: utf-8 -*-
+
+# Import python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import salt.utils.templates
 from salt.exceptions import SaltRenderError
+
+# Import salt libs
+from salt.ext import six
 
 
 def render(template_file, saltenv="base", sls="", argline="", context=None, **kws):
@@ -26,4 +32,4 @@ def render(template_file, saltenv="base", sls="", argline="", context=None, **kw
         raise SaltRenderError(
             tmp_data.get("data", "Unknown render error in the wempy renderer")
         )
-    return io.StringIO(tmp_data["data"])
+    return six.moves.StringIO(tmp_data["data"])

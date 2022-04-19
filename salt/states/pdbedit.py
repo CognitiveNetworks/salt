@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Manage accounts in Samba's passdb using pdbedit
 
@@ -20,9 +21,12 @@ Manage accounts in Samba's passdb using pdbedit
         - drive: 'X:'
         - homedir: '\\\\serenity\\mechanic\\profile'
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import Python libs
 import logging
 
+# Import Salt libs
 import salt.utils.data
 
 log = logging.getLogger(__name__)
@@ -40,7 +44,7 @@ def __virtual__():
     else:
         return (
             False,
-            "{} state module can only be loaded when the pdbedit module is available".format(
+            "{0} state module can only be loaded when the pdbedit module is available".format(
                 __virtualname__
             ),
         )
@@ -126,8 +130,7 @@ def managed(name, **kwargs):
         ret["changes"] = res
     elif res[name] in ["updated"]:
         ret["changes"][name] = salt.utils.data.compare_dicts(
-            saved,
-            __salt__["pdbedit.list"](hashes=True)[name],
+            saved, __salt__["pdbedit.list"](hashes=True)[name],
         )
     elif res[name] not in ["unchanged"]:
         ret["result"] = False

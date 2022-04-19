@@ -47,7 +47,7 @@ class ProxyMinionTestCase(TestCase):
         ):
             try:
                 ret = proxy_minion._post_master_init("dummy_master")
-                salt.minion._metaproxy_call.assert_called_once()
+                self.assert_called_once(salt.minion._metaproxy_call)
             finally:
                 proxy_minion.destroy()
 
@@ -75,7 +75,7 @@ class ProxyMinionTestCase(TestCase):
             try:
                 ret = proxy_minion._handle_decoded_payload(mock_data).result()
                 self.assertEqual(proxy_minion.jid_queue, mock_jid_queue)
-                salt.minion._metaproxy_call.assert_called_once()
+                self.assert_called_once(salt.minion._metaproxy_call)
             finally:
                 proxy_minion.destroy()
 
@@ -103,7 +103,7 @@ class ProxyMinionTestCase(TestCase):
             try:
                 ret = proxy_minion._handle_decoded_payload(mock_data).result()
                 self.assertEqual(proxy_minion.jid_queue, mock_jid_queue)
-                mock_metaproxy_call.assert_called_once()
+                self.assert_called_once(mock_metaproxy_call)
             finally:
                 proxy_minion.destroy()
 
@@ -156,9 +156,7 @@ class ProxyMinionTestCase(TestCase):
                 )
             )
         opts = salt.config.proxy_config(
-            str(conf_file),
-            minion_id=proxyid,
-            cache_minion_id=False,
+            str(conf_file), minion_id=proxyid, cache_minion_id=False,
         )
         self.assertIn("schedule", opts)
         self.assertIn("test_job", opts["schedule"])

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 r"""
 Display Pony output data structure
 ==================================
@@ -46,9 +47,12 @@ CLI Example:
     salt '*' foo.bar --out=pony
 """
 
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import subprocess
 
+# Import Salt libs
 import salt.utils.data
 import salt.utils.path
 

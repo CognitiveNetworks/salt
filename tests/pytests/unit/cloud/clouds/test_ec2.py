@@ -1,9 +1,7 @@
 import pytest
 from salt.cloud.clouds import ec2
 
-pytestmark = [
-    pytest.mark.windows_whitelisted,
-]
+pytestmark = [pytest.mark.windows_whitelisted]
 
 
 def test__load_params_size():

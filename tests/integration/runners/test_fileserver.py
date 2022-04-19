@@ -233,7 +233,6 @@ class FileserverTest(ShellCase):
                 fun="fileserver.update", backend="gitfs", unknown_arg="foo"
             )
         self.assertIn(
-            "Passed invalid arguments: got an unexpected keyword argument"
-            " 'unknown_arg'",
+            "Passed invalid arguments: got an unexpected keyword argument 'unknown_arg'",
             ret["return"],
         )

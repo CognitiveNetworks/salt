@@ -1,12 +1,21 @@
+# encoding: utf-8
+
+# Import python libs
+from __future__ import absolute_import, print_function, unicode_literals
+
 import logging
 
+# Import Salt libs
 import salt.netapi
 import salt.utils.json
+
+# Import 3rd-party libs
+from salt.ext import six
 
 logger = logging.getLogger(__name__)
 
 
-class SaltInfo:
+class SaltInfo(object):
     """
     Class to  handle processing and publishing of "real time" Salt upates.
     """
@@ -30,7 +39,7 @@ class SaltInfo:
         """
         minions = []
 
-        for minion, minion_info in self.minions.items():
+        for minion, minion_info in six.iteritems(self.minions):
             curr_minion = {}
             curr_minion.update(minion_info)
             curr_minion.update({"id": minion})
@@ -81,7 +90,7 @@ class SaltInfo:
         minion.update({"success": event_info["success"]})
 
         job_complete = all(
-            [minion["success"] for mid, minion in job["minions"].items()]
+            [minion["success"] for mid, minion in six.iteritems(job["minions"])]
         )
 
         if job_complete:
@@ -147,7 +156,7 @@ class SaltInfo:
         event_info = event_data["data"]
 
         minions_detected = event_info["present"]
-        curr_minions = self.minions.keys()
+        curr_minions = six.iterkeys(self.minions)
 
         changed = False
 

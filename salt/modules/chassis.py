@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Glue execution module to link to the :mod:`fx2 proxymodule <salt.proxy.fx2>`.
 
@@ -12,7 +13,9 @@ parameter in :mod:`salt.modules.dracr <salt.modules.dracr>` and calls it.
 
 .. versionadded:: 2015.8.2
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import python libs
 import logging
 
 import salt.utils.platform

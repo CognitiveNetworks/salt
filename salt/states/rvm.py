@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Managing Ruby installations and gemsets with Ruby Version Manager (RVM)
 =======================================================================
@@ -99,7 +100,9 @@ configuration could look like:
         - require:
           - rvm: ruby-1.9.2
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import python libs
 import re
 
 
@@ -188,7 +191,7 @@ def installed(name, default=False, user=None, opts=None, env=None):
     ret = {"name": name, "result": None, "comment": "", "changes": {}}
 
     if __opts__["test"]:
-        ret["comment"] = "Ruby {} is set to be installed".format(name)
+        ret["comment"] = "Ruby {0} is set to be installed".format(name)
         return ret
 
     ret = _check_rvm(ret, user)
@@ -241,7 +244,7 @@ def gemset_present(name, ruby="default", user=None):
     else:
         if __opts__["test"]:
             ret["result"] = None
-            ret["comment"] = "Set to install gemset {}".format(name)
+            ret["comment"] = "Set to install gemset {0}".format(name)
             return ret
         if __salt__["rvm.gemset_create"](ruby, name, runas=user):
             ret["result"] = True

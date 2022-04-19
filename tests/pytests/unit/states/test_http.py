@@ -19,9 +19,8 @@ def test_query():
     ret = [
         {
             "changes": {},
-            "comment": (
-                " Either match text (match) or a status code (status) is required."
-            ),
+            "comment": " Either match text (match) or a "
+            "status code (status) is required.",
             "data": {},
             "name": "salt",
             "result": False,
@@ -50,10 +49,7 @@ def test_query_pcre_statustype():
     http_result = {"text": "This page returned a 201 status code", "status": "201"}
     state_return = {
         "changes": {},
-        "comment": (
-            'Match text "This page returned" was found. Status pattern "200|201" was'
-            " found."
-        ),
+        "comment": 'Match text "This page returned" was found. Status pattern "200|201" was found.',
         "data": {"status": "201", "text": "This page returned a 201 status code"},
         "name": testurl,
         "result": True,

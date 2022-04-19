@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     salt.serializers.json
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -7,8 +8,13 @@
     It's just a wrapper around json (or simplejson if available).
 """
 
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import Salt libs
 import salt.utils.json
+
+# Import 3rd-party libs
+from salt.ext import six
 from salt.serializers import DeserializationError, SerializationError
 
 try:
@@ -31,7 +37,7 @@ def deserialize(stream_or_string, **options):
     """
 
     try:
-        if not isinstance(stream_or_string, (bytes, str)):
+        if not isinstance(stream_or_string, (bytes, six.string_types)):
             return salt.utils.json.load(stream_or_string, _json_module=_json, **options)
 
         if isinstance(stream_or_string, bytes):

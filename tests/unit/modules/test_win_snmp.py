@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     :synopsis: Unit Tests for Windows SNMP Module 'module.win_snmp'
     :platform: Windows
@@ -5,9 +6,14 @@
     .. versionadded:: 2017.7.0
 """
 
+# Import Python Libs
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import Salt Libs
 import salt.modules.win_snmp as win_snmp
 from salt.exceptions import CommandExecutionError
+
+# Import Salt Testing Libs
 from tests.support.mixins import LoaderModuleMockMixin
 from tests.support.mock import MagicMock, patch
 from tests.support.unit import TestCase

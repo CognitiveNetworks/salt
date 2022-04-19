@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Utilities for working with memcache
 
@@ -34,11 +35,17 @@ specified, rather than top-level configurations. This being the case, it is
 better to always use a named configuration profile, as shown above.
 """
 
+# Import python libs
+from __future__ import absolute_import, unicode_literals
 
 import logging
 
+# Import salt libs
 from salt.exceptions import CommandExecutionError, SaltInvocationError
+from salt.ext import six
+from salt.ext.six import integer_types
 
+# Import third party libs
 try:
     import memcache
 
@@ -88,14 +95,14 @@ def get_conn(opts, profile=None, host=None, port=None):
         host = conf.get("memcached.host", DEFAULT_HOST)
         port = conf.get("memcached.port", DEFAULT_PORT)
 
-    if not str(port).isdigit():
+    if not six.text_type(port).isdigit():
         raise SaltInvocationError("port must be an integer")
 
     if HAS_LIBS:
-        return memcache.Client(["{}:{}".format(host, port)])
+        return memcache.Client(["{0}:{1}".format(host, port)])
     else:
         raise CommandExecutionError(
-            "(unable to import memcache, module most likely not installed)"
+            "(unable to import memcache, " "module most likely not installed)"
         )
 
 
@@ -116,9 +123,9 @@ def set_(
     """
     Set a key on the memcached server, overwriting the value if it exists.
     """
-    if not isinstance(time, int):
+    if not isinstance(time, integer_types):
         raise SaltInvocationError("'time' must be an integer")
-    if not isinstance(min_compress_len, int):
+    if not isinstance(min_compress_len, integer_types):
         raise SaltInvocationError("'min_compress_len' must be an integer")
     _check_stats(conn)
     return conn.set(key, value, time, min_compress_len)

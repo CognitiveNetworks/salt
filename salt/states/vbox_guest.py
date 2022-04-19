@@ -1,7 +1,10 @@
+# -*- coding: utf-8 -*-
 """
 VirtualBox Guest Additions installer state
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import python libs
 import logging
 
 log = logging.getLogger(__name__)
@@ -28,7 +31,7 @@ def additions_installed(name, reboot=False, upgrade_os=False):
         ret["comment"] = "System already in the correct state"
         return ret
     if __opts__["test"]:
-        ret["comment"] = "The state of VirtualBox Guest Additions will be changed."
+        ret["comment"] = "The state of VirtualBox Guest Additions will be " "changed."
         ret["changes"] = {
             "old": current_state,
             "new": True,
@@ -70,7 +73,7 @@ def additions_removed(name, force=False):
         ret["comment"] = "System already in the correct state"
         return ret
     if __opts__["test"]:
-        ret["comment"] = "The state of VirtualBox Guest Additions will be changed."
+        ret["comment"] = "The state of VirtualBox Guest Additions will be " "changed."
         ret["changes"] = {
             "old": current_state,
             "new": True,
@@ -126,9 +129,9 @@ def grant_access_to_shared_folders_to(name, users=None):
         name=name, users=users
     )
 
-    ret[
-        "comment"
-    ] = "List of users who have access to auto-mounted shared folders was changed"
+    ret["comment"] = (
+        "List of users who have access to auto-mounted shared " "folders was changed"
+    )
     ret["changes"] = {
         "old": current_state,
         "new": new_state,

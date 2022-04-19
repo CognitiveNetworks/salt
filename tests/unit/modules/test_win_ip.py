@@ -23,7 +23,10 @@ ETHERNET_CONFIG = (
 )
 
 ETHERNET_ENABLE = (
-    "Ethernet\nType: Dedicated\nAdministrative state: Enabled\nConnect state: Connected"
+    "Ethernet\n"
+    "Type: Dedicated\n"
+    "Administrative state: Enabled\n"
+    "Connect state: Connected"
 )
 
 

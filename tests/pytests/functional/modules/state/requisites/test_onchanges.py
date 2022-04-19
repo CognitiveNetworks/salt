@@ -87,7 +87,9 @@ def test_requisites_onchanges_any(state, state_tree):
     }
     with pytest.helpers.temp_file("requisite.sls", sls_contents, state_tree):
         ret = state.sls("requisite")
-        result = normalize_ret(ret.raw)
+        result = normalize_ret(ret)
+        ret = pytest.helpers.state_return(ret)
+        ret.assert_return_non_empty_state_type()
         assert result == expected_result
 
 
@@ -119,11 +121,13 @@ def test_onchanges_requisite(state, state_tree):
     with pytest.helpers.temp_file("requisite.sls", sls_contents, state_tree):
         ret = state.sls("requisite")
         assert (
-            ret['cmd_|-test_changing_state_|-echo "Success!"_|-run'].comment
+            ret['cmd_|-test_changing_state_|-echo "Success!"_|-run']["comment"]
             == 'Command "echo "Success!"" run'
         )
         assert (
-            ret['cmd_|-test_non_changing_state_|-echo "Should not run"_|-run'].comment
+            ret['cmd_|-test_non_changing_state_|-echo "Should not run"_|-run'][
+                "comment"
+            ]
             == "State was not run because none of the onchanges reqs changed"
         )
 
@@ -173,19 +177,19 @@ def test_onchanges_requisite_multiple(state, state_tree):
     with pytest.helpers.temp_file("requisite.sls", sls_contents, state_tree):
         ret = state.sls("requisite")
         assert (
-            ret['cmd_|-test_two_changing_states_|-echo "Success!"_|-run'].comment
+            ret['cmd_|-test_two_changing_states_|-echo "Success!"_|-run']["comment"]
             == 'Command "echo "Success!"" run'
         )
 
         assert (
-            ret[
-                'cmd_|-test_two_non_changing_states_|-echo "Should not run"_|-run'
-            ].comment
+            ret['cmd_|-test_two_non_changing_states_|-echo "Should not run"_|-run'][
+                "comment"
+            ]
             == "State was not run because none of the onchanges reqs changed"
         )
 
         assert (
-            ret['cmd_|-test_one_changing_state_|-echo "Success!"_|-run'].comment
+            ret['cmd_|-test_one_changing_state_|-echo "Success!"_|-run']["comment"]
             == 'Command "echo "Success!"" run'
         )
 
@@ -218,12 +222,14 @@ def test_onchanges_in_requisite(state, state_tree):
     with pytest.helpers.temp_file("requisite.sls", sls_contents, state_tree):
         ret = state.sls("requisite")
         assert (
-            ret['cmd_|-test_changes_expected_|-echo "Success!"_|-run'].comment
+            ret['cmd_|-test_changes_expected_|-echo "Success!"_|-run']["comment"]
             == 'Command "echo "Success!"" run'
         )
 
         assert (
-            ret['cmd_|-test_changes_not_expected_|-echo "Should not run"_|-run'].comment
+            ret['cmd_|-test_changes_not_expected_|-echo "Should not run"_|-run'][
+                "comment"
+            ]
             == "State was not run because none of the onchanges reqs changed"
         )
 
@@ -256,7 +262,7 @@ def test_onchanges_requisite_no_state_module(state, state_tree):
     with pytest.helpers.temp_file("requisite.sls", sls_contents, state_tree):
         ret = state.sls("requisite")
         assert (
-            ret['cmd_|-test_changing_state_|-echo "Success!"_|-run'].comment
+            ret['cmd_|-test_changing_state_|-echo "Success!"_|-run']["comment"]
             == 'Command "echo "Success!"" run'
         )
 

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     :codeauthor: Pedro Algarvio (pedro@algarvio.me)
 
@@ -8,7 +9,10 @@
     Common salt configuration schemas
 """
 
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import salt libs
 from salt.utils.schema import ArrayItem, OneOfItem, Schema, StringItem
 
 
@@ -26,15 +30,17 @@ class DefaultIncludeConfig(StringItem):
     description = __doc__
 
     def __init__(self, default=None, pattern=None, **kwargs):
-        default = "{}/*.conf".format(self.__confd_directory__)
+        default = "{0}/*.conf".format(self.__confd_directory__)
         pattern = r"(?:.*)/\*\.conf"
-        super().__init__(default=default, pattern=pattern, **kwargs)
+        super(DefaultIncludeConfig, self).__init__(
+            default=default, pattern=pattern, **kwargs
+        )
 
     def __validate_attributes__(self):
         self.__doc__ = DefaultIncludeConfig.__doc__.format(
             self.__target__, self.__confd_directory__
         )
-        super().__validate_attributes__()
+        super(DefaultIncludeConfig, self).__validate_attributes__()
 
     def __get_description__(self):
         return self.__doc__.format(self.__target__, self.__confd_directory__)

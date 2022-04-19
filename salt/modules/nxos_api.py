@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Execution module to manage Cisco Nexus Switches (NX-OS) over the NX-API
 
@@ -121,11 +122,17 @@ outside a ``nxos_api`` Proxy, e.g.:
     Minion. If you want to use the :mod:`nxos_api Proxy<salt.proxy.nxos_api>`,
     please follow the documentation notes for a proper setup.
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
 import difflib
+
+# Import python stdlib
 import logging
 
 from salt.exceptions import CommandExecutionError, SaltException
+
+# Import Salt libs
+from salt.ext import six
 
 # -----------------------------------------------------------------------------
 # execution module properties
@@ -402,7 +409,7 @@ def config(
         if file_str is False:
             raise CommandExecutionError("Source file {} not found".format(config_file))
     elif commands:
-        if isinstance(commands, str):
+        if isinstance(commands, (six.string_types, six.text_type)):
             commands = [commands]
         file_str = "\n".join(commands)
         # unify all the commands in a single file, to render them in a go

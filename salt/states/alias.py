@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Configuration of email aliases
 
@@ -25,6 +26,7 @@ file from the default location, set the following in your minion config:
     aliases.file: /my/alias/file
 
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
 
 def present(name, target):
@@ -43,20 +45,20 @@ def present(name, target):
     ret = {"name": name, "changes": {}, "result": False, "comment": ""}
     if __salt__["aliases.has_target"](name, target):
         ret["result"] = True
-        ret["comment"] = "Alias {} already present".format(name)
+        ret["comment"] = "Alias {0} already present".format(name)
         return ret
     if __opts__["test"]:
         ret["result"] = None
-        ret["comment"] = "Alias {} -> {} is set to be added".format(name, target)
+        ret["comment"] = "Alias {0} -> {1} is set to be added".format(name, target)
         return ret
     if __salt__["aliases.set_target"](name, target):
         ret["changes"] = {"alias": name}
         ret["result"] = True
-        ret["comment"] = "Set email alias {} -> {}".format(name, target)
+        ret["comment"] = "Set email alias {0} -> {1}".format(name, target)
         return ret
     else:
         ret["result"] = False
-        ret["comment"] = "Failed to set alias {} -> {}".format(name, target)
+        ret["comment"] = "Failed to set alias {0} -> {1}".format(name, target)
         return ret
 
 
@@ -70,18 +72,18 @@ def absent(name):
     ret = {"name": name, "changes": {}, "result": False, "comment": ""}
     if not __salt__["aliases.get_target"](name):
         ret["result"] = True
-        ret["comment"] = "Alias {} already absent".format(name)
+        ret["comment"] = "Alias {0} already absent".format(name)
         return ret
     if __opts__["test"]:
         ret["result"] = None
-        ret["comment"] = "Alias {} is set to be removed".format(name)
+        ret["comment"] = "Alias {0} is set to be removed".format(name)
         return ret
     if __salt__["aliases.rm_alias"](name):
         ret["changes"] = {"alias": name}
         ret["result"] = True
-        ret["comment"] = "Removed alias {}".format(name)
+        ret["comment"] = "Removed alias {0}".format(name)
         return ret
     else:
         ret["result"] = False
-        ret["comment"] = "Failed to remove alias {}".format(name)
+        ret["comment"] = "Failed to remove alias {0}".format(name)
         return ret

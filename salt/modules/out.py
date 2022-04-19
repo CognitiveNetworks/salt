@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Output Module
 =============
@@ -16,7 +17,9 @@ For example, inside a Jinja template:
 
     {{ salt.out.string_format(complex_object, out='highstate') }}
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import python libs
 import logging
 
 # Import salt modules

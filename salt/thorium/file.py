@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Writes matches to disk to verify activity, helpful when testing
 
@@ -37,9 +38,12 @@ Be warned that if you do this, then the file will be saved, but not in a format
 that can be re-imported into Python.
 """
 
+# import python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import os
 
+# Import salt libs
 import salt.utils.data
 import salt.utils.files
 import salt.utils.json

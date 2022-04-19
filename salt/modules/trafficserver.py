@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Apache Traffic Server execution module.
 
@@ -6,10 +7,13 @@ Apache Traffic Server execution module.
 ``traffic_ctl`` is used to execute individual Traffic Server commands and to
 script multiple commands in a shell.
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import python libs
 import logging
 import subprocess
 
+# Import salt libs
 import salt.utils.path
 import salt.utils.stringutils
 

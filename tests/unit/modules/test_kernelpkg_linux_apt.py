@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     :synopsis: Unit Tests for 'module.aptkernelpkg'
     :platform: Linux
@@ -6,6 +7,8 @@
 """
 # pylint: disable=invalid-name,no-member
 
+# Import Python Libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import re
 
@@ -38,10 +41,10 @@ class AptKernelPkgTestCase(KernelPkgTestCase, TestCase, LoaderModuleMockMixin):
     @classmethod
     def setUpClass(cls):
         version = re.match(r"^(\d+\.\d+\.\d+)-(\d+)", cls.KERNEL_LIST[-1])
-        cls.LATEST = "{}.{}".format(version.group(1), version.group(2))
+        cls.LATEST = "{0}.{1}".format(version.group(1), version.group(2))
 
         for kernel in cls.KERNEL_LIST:
-            pkg = "{}-{}".format(
+            pkg = "{0}-{1}".format(
                 kernelpkg._package_prefix(), kernel
             )  # pylint: disable=protected-access
             cls.PACKAGE_DICT[pkg] = pkg
@@ -65,7 +68,7 @@ class AptKernelPkgTestCase(KernelPkgTestCase, TestCase, LoaderModuleMockMixin):
         Test - Return return the latest installed kernel version
         """
         PACKAGE_LIST = [
-            "{}-{}".format(kernelpkg._package_prefix(), kernel)
+            "{0}-{1}".format(kernelpkg._package_prefix(), kernel)
             for kernel in self.KERNEL_LIST
         ]  # pylint: disable=protected-access
 
@@ -91,7 +94,7 @@ class AptKernelPkgTestCase(KernelPkgTestCase, TestCase, LoaderModuleMockMixin):
             ):
                 result = self._kernelpkg.remove(release=self.KERNEL_LIST[0])
                 self.assertIn("removed", result)
-                target = "{}-{}".format(
+                target = "{0}-{1}".format(
                     self._kernelpkg._package_prefix(), self.KERNEL_LIST[0]
                 )  # pylint: disable=protected-access
                 self.assertListEqual(result["removed"], [target])

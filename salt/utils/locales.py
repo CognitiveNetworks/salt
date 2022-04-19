@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
 """
 the locale utils used by salt
 """
 
+from __future__ import absolute_import, unicode_literals
 
 import sys
 

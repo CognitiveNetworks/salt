@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 s6 service module
 
@@ -15,10 +16,13 @@ Note that the ``enabled`` argument is not available with this provider.
 
 :codeauthor: Marek Skrobacki <skrobul@skrobul.com>
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import python libs
 import os
 import re
 
+# Import salt libs
 from salt.exceptions import CommandExecutionError
 
 __func_alias__ = {"reload_": "reload"}
@@ -40,7 +44,7 @@ def _service_path(name):
     """
     if not SERVICE_DIR:
         raise CommandExecutionError("Could not find service directory.")
-    return "{}/{}".format(SERVICE_DIR, name)
+    return "{0}/{1}".format(SERVICE_DIR, name)
 
 
 def start(name):
@@ -53,7 +57,7 @@ def start(name):
 
         salt '*' s6.start <service name>
     """
-    cmd = "s6-svc -u {}".format(_service_path(name))
+    cmd = "s6-svc -u {0}".format(_service_path(name))
     return not __salt__["cmd.retcode"](cmd)
 
 
@@ -67,7 +71,7 @@ def stop(name):
 
         salt '*' s6.stop <service name>
     """
-    cmd = "s6-svc -d {}".format(_service_path(name))
+    cmd = "s6-svc -d {0}".format(_service_path(name))
     return not __salt__["cmd.retcode"](cmd)
 
 
@@ -81,7 +85,7 @@ def term(name):
 
         salt '*' s6.term <service name>
     """
-    cmd = "s6-svc -t {}".format(_service_path(name))
+    cmd = "s6-svc -t {0}".format(_service_path(name))
     return not __salt__["cmd.retcode"](cmd)
 
 
@@ -95,7 +99,7 @@ def reload_(name):
 
         salt '*' s6.reload <service name>
     """
-    cmd = "s6-svc -h {}".format(_service_path(name))
+    cmd = "s6-svc -h {0}".format(_service_path(name))
     return not __salt__["cmd.retcode"](cmd)
 
 
@@ -109,7 +113,7 @@ def restart(name):
 
         salt '*' s6.restart <service name>
     """
-    cmd = "s6-svc -t {}".format(_service_path(name))
+    cmd = "s6-svc -t {0}".format(_service_path(name))
     return not __salt__["cmd.retcode"](cmd)
 
 
@@ -136,7 +140,7 @@ def status(name, sig=None):
 
         salt '*' s6.status <service name>
     """
-    cmd = "s6-svstat {}".format(_service_path(name))
+    cmd = "s6-svstat {0}".format(_service_path(name))
     out = __salt__["cmd.run_stdout"](cmd)
     try:
         pid = re.search(r"up \(pid (\d+)\)", out).group(1)

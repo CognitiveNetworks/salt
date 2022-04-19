@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Arista pyeapi
 =============
@@ -64,12 +65,15 @@ Proxy Pillar Example
       username: example
       password: example
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import python stdlib
 import logging
 
 # Import salt modules
 from salt.utils.args import clean_kwargs
 
+# Import third party libs
 try:
     import pyeapi
 

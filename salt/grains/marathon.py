@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
 """
 Generate marathon proxy minion grains.
 
 .. versionadded:: 2015.8.2
 
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
 import salt.utils.http
 import salt.utils.platform
@@ -40,7 +42,9 @@ def os_data():
 
 def marathon():
     response = salt.utils.http.query(
-        "{}/v2/info".format(__opts__["proxy"].get("base_url", "http://locahost:8080")),
+        "{0}/v2/info".format(
+            __opts__["proxy"].get("base_url", "http://locahost:8080",)
+        ),
         decode_type="json",
         decode=True,
     )

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Use the cloud cache on the master to derive IPv4 addresses based on minion ID.
 
@@ -17,14 +18,19 @@ usually located at /etc/salt/cloud. For example, add the following:
     sudo: True
 """
 
+# Import python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import copy
 import os
 
 import salt.config
+
+# Import Salt libs
 import salt.loader
 import salt.utils.cloud
 import salt.utils.validate.net
+from salt.ext.six import string_types
 
 
 def targets(tgt, tgt_type="glob", **kwargs):  # pylint: disable=W0613
@@ -54,7 +60,7 @@ def targets(tgt, tgt_type="glob", **kwargs):  # pylint: disable=W0613
         for item in (public_ips, private_ips):
             if isinstance(item, list):
                 ip_list = ip_list + item
-            elif isinstance(item, str):
+            elif isinstance(item, string_types):
                 ip_list.append(item)
 
         roster_order = __opts__.get("roster_order", ("public", "private", "local"))
@@ -64,7 +70,7 @@ def targets(tgt, tgt_type="glob", **kwargs):  # pylint: disable=W0613
         ret[minion_id].update({"host": preferred_ip})
 
         ssh_username = salt.utils.cloud.ssh_usernames(vm_, cloud_opts)
-        if isinstance(ssh_username, str):
+        if isinstance(ssh_username, string_types):
             ret[minion_id]["user"] = ssh_username
         elif isinstance(ssh_username, list):
             if ssh_username[0] != "root":

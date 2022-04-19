@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Management of Gentoo configuration using eselect
 ================================================
@@ -6,6 +7,8 @@ A state module to manage Gentoo configuration via eselect
 
 """
 
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 # Define a function alias in order not to shadow built-in's
 __func_alias__ = {"set_": "set"}
@@ -49,18 +52,20 @@ def set_(name, target, module_parameter=None, action_parameter=None):
     )
 
     if target == old_target:
-        ret["comment"] = "Target '{}' is already set on '{}' module.".format(
+        ret["comment"] = "Target '{0}' is already set on '{1}' module.".format(
             target, name
         )
     elif target not in __salt__["eselect.get_target_list"](
         name, action_parameter=action_parameter
     ):
-        ret["comment"] = "Target '{}' is not available for '{}' module.".format(
+        ret["comment"] = "Target '{0}' is not available for '{1}' module.".format(
             target, name
         )
         ret["result"] = False
     elif __opts__["test"]:
-        ret["comment"] = "Target '{}' will be set on '{}' module.".format(target, name)
+        ret["comment"] = "Target '{0}' will be set on '{1}' module.".format(
+            target, name
+        )
         ret["result"] = None
     else:
         result = __salt__["eselect.set_target"](
@@ -71,9 +76,9 @@ def set_(name, target, module_parameter=None, action_parameter=None):
         )
         if result:
             ret["changes"][name] = {"old": old_target, "new": target}
-            ret["comment"] = "Target '{}' set on '{}' module.".format(target, name)
+            ret["comment"] = "Target '{0}' set on '{1}' module.".format(target, name)
         else:
-            ret["comment"] = "Target '{}' failed to be set on '{}' module.".format(
+            ret["comment"] = "Target '{0}' failed to be set on '{1}' module.".format(
                 target, name
             )
             ret["result"] = False

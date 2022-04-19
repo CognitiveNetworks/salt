@@ -62,7 +62,7 @@
 
         <documentation>
           <doc_link name="SaltStack Documentation"
-                    uri="https://docs.saltproject.io"/>
+                    uri="http://docs.saltstack.com"/>
         </documentation>
       </template>
     </service>

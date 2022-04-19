@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Pass Renderer for Salt
 ======================
@@ -47,14 +48,20 @@ Install pass binary
           pkg.installed
 """
 
+# Import python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 import os
 from os.path import expanduser
 from subprocess import PIPE, Popen
 
+# Import salt libs
 import salt.utils.path
 from salt.exceptions import SaltRenderError
+
+# Import 3rd-party libs
+from salt.ext import six
 
 log = logging.getLogger(__name__)
 
@@ -75,7 +82,7 @@ def _fetch_secret(pass_path):
     Fetch secret from pass based on pass_path. If there is
     any error, return back the original pass_path value
     """
-    cmd = "pass show {}".format(pass_path.strip())
+    cmd = "pass show {0}".format(pass_path.strip())
     log.debug("Fetching secret: %s", cmd)
 
     proc = Popen(cmd.split(" "), stdout=PIPE, stderr=PIPE)
@@ -93,10 +100,10 @@ def _decrypt_object(obj):
     """
     Recursively try to find a pass path (string) that can be handed off to pass
     """
-    if isinstance(obj, str):
+    if isinstance(obj, six.string_types):
         return _fetch_secret(obj)
     elif isinstance(obj, dict):
-        for pass_key, pass_path in obj.items():
+        for pass_key, pass_path in six.iteritems(obj):
             obj[pass_key] = _decrypt_object(pass_path)
     elif isinstance(obj, list):
         for pass_key, pass_path in enumerate(obj):

@@ -36,23 +36,12 @@ class VMWareTest(CloudTest):
             "datastore"
         ]
 
-
-        for key, value in six.iteritems(profile_config.get('vmware-test', {})):
-            assert value, "Instance config incomplete; missing '{}'".format(key)
-
-        for key, value in six.iteritems(profile_config.get('vmware-test', {})):
-            assert value, "Instance config incomplete; missing '{}'".format(key)
-
-        for key, value in six.iteritems(profile_config.get('vmware-test', {})):
-            assert value, "Instance config incomplete; missing '{}'".format(key)
-
-        for key, value in six.iteritems(profile_config.get('vmware-test', {})):
-            assert value, "Instance config incomplete; missing '{}'".format(key)
-
-        instance = self.run_cloud('-p vmware-test {0}'.format(INSTANCE_NAME), timeout=TIMEOUT)
-        assert instance, "Instance not found, are the '{}' provider credentials active?".format(PROVIDER_NAME)
-        ret_str = '{0}:'.format(INSTANCE_NAME)
-        disk_datastore_str = '                [{0}] {1}/Hard disk 2-flat.vmdk'.format(disk_datastore, INSTANCE_NAME)
+        ret_val = self.run_cloud(
+            "-p vmware-test {}".format(self.instance_name), timeout=TIMEOUT
+        )
+        disk_datastore_str = "                [{}] {}/Hard disk 2-flat.vmdk".format(
+            disk_datastore, self.instance_name
+        )
 
         # check if instance returned with salt installed
         self.assertInstanceExists(ret_val)
@@ -69,11 +58,9 @@ class VMWareTest(CloudTest):
         Tests creating snapshot and creating vm with --no-deploy
         """
         # create the instance
-
-        instance = self.run_cloud('-p vmware-test {0} --no-deploy'.format(INSTANCE_NAME),
-                                  timeout=TIMEOUT)
-        assert instance, "Instance not found, are the '{}' provider credentials active?".format(PROVIDER_NAME)
-        ret_str = '{0}:'.format(INSTANCE_NAME)
+        ret_val = self.run_cloud(
+            "-p vmware-test {} --no-deploy".format(self.instance_name), timeout=TIMEOUT
+        )
 
         # check if instance returned with salt installed
         self.assertInstanceExists(ret_val)

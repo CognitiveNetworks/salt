@@ -7,31 +7,35 @@ pytestmark = [
 
 def test_unless_req(state):
     ret = state.single(fun="test.succeed_with_changes", name="unless test", unless=[{}])
-    assert ret.result is True
-    assert ret.comment == "Success!"
+    state_id = "test_|-unless test_|-unless test_|-succeed_with_changes"
+    assert ret[state_id]["result"] is True
+    assert ret[state_id]["comment"] == "Success!"
 
     ret = state.single(
         fun="test.fail_with_changes", name="unless test", unless=[{"fun": "test.true"}]
     )
-    assert ret.result is True
-    assert not ret.changes
-    assert ret.comment == "unless condition is true"
+    state_id = "test_|-unless test_|-unless test_|-fail_with_changes"
+    assert ret[state_id]["result"] is True
+    assert not ret[state_id]["changes"]
+    assert ret[state_id]["comment"] == "unless condition is true"
 
     ret = state.single(
         fun="test.fail_with_changes", name="unless test", unless=[{"fun": "test.false"}]
     )
-    assert ret.result is False
-    assert ret.changes
-    assert ret.comment == "Failure!"
+    state_id = "test_|-unless test_|-unless test_|-fail_with_changes"
+    assert ret[state_id]["result"] is False
+    assert ret[state_id]["changes"]
+    assert ret[state_id]["comment"] == "Failure!"
 
     ret = state.single(
         fun="test.succeed_without_changes",
         name="unless test",
         unless=[{"fun": "test.false"}],
     )
-    assert ret.result is True
-    assert not ret.changes
-    assert ret.comment == "Success!"
+    state_id = "test_|-unless test_|-unless test_|-succeed_without_changes"
+    assert ret[state_id]["result"] is True
+    assert not ret[state_id]["changes"]
+    assert ret[state_id]["comment"] == "Success!"
 
 
 def test_unless_req_retcode(state):
@@ -40,15 +44,17 @@ def test_unless_req_retcode(state):
         name="unless test",
         unless=[{"fun": "test.retcode"}],
     )
-    assert ret.result is True
-    assert ret.changes
-    assert ret.comment == "Success!"
+    state_id = "test_|-unless test_|-unless test_|-succeed_with_changes"
+    assert ret[state_id]["result"] is True
+    assert ret[state_id]["changes"]
+    assert ret[state_id]["comment"] == "Success!"
 
     ret = state.single(
         fun="test.succeed_with_changes",
         name="unless test",
         unless=[{"fun": "test.retcode", "code": 0}],
     )
-    assert ret.result is True
-    assert not ret.changes
-    assert ret.comment == "unless condition is true"
+    state_id = "test_|-unless test_|-unless test_|-succeed_with_changes"
+    assert ret[state_id]["result"] is True
+    assert not ret[state_id]["changes"]
+    assert ret[state_id]["comment"] == "unless condition is true"

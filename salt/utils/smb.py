@@ -1,14 +1,17 @@
+# -*- coding: utf-8 -*-
 """
 Utility functions for SMB connections
 
 :depends: impacket
 """
 
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 import socket
 import uuid
 
+# Import python libs
 import salt.utils.files
 import salt.utils.stringutils
 import salt.utils.versions
@@ -52,7 +55,7 @@ except ImportError:
     HAS_SMBPROTOCOL = False
 
 
-class SMBProto:
+class SMBProto(object):
     def __init__(self, server, username, password, port=445):
         connection_id = uuid.uuid4()
         addr = socket.getaddrinfo(server, None, 0, 0, socket.IPPROTO_TCP)[0][4][0]

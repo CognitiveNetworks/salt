@@ -1,11 +1,18 @@
+# -*- coding: utf-8 -*-
 """
     :codeauthor: Jayesh Kariya <jayeshk@saltstack.com>
 """
 
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import Salt Libs
 import salt.modules.augeas_cfg as augeas_cfg
 from salt.exceptions import SaltInvocationError
+from salt.ext import six
 from tests.support.mock import MagicMock, patch
+
+# Import Salt Testing Libs
 from tests.support.unit import TestCase, skipIf
 
 # Make sure augeas python interface is installed
@@ -21,7 +28,7 @@ class AugeasCfgTestCase(TestCase):
 
     # 'execute' function tests: 3
     @skipIf(
-        True,
+        six.PY3,
         "Disabled pending https://github.com/hercules-team/python-augeas/issues/30",
     )
     def test_execute(self):

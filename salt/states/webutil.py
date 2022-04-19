@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Support for htpasswd module. Requires the apache2-utils package for Debian-based distros.
 
@@ -14,7 +15,10 @@ Support for htpasswd module. Requires the apache2-utils package for Debian-based
 
 """
 
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import Salt libs
 import salt.utils.path
 
 __virtualname__ = "webutil"
@@ -66,7 +70,7 @@ def user_exists(
     """
     ret = {"name": name, "changes": {}, "comment": "", "result": None}
 
-    exists = __salt__["file.grep"](htpasswd_file, "^{}:".format(name))["retcode"] == 0
+    exists = __salt__["file.grep"](htpasswd_file, "^{0}:".format(name))["retcode"] == 0
 
     # If user exists, but we're supposed to update the password, find out if
     # it's changed, but not if we're forced to update the file regardless.
@@ -79,7 +83,7 @@ def user_exists(
     if not exists or password_changed or force:
         if __opts__["test"]:
             ret["result"] = None
-            ret["comment"] = "User '{}' is set to be added to htpasswd file".format(
+            ret["comment"] = "User '{0}' is set to be added to htpasswd file".format(
                 name
             )
             ret["changes"] = {name: True}
@@ -122,7 +126,7 @@ def user_absent(name, htpasswd_file=None, runas=None):
     """
     ret = {"name": name, "changes": {}, "comment": "", "result": None}
 
-    exists = __salt__["file.grep"](htpasswd_file, "^{}:".format(name))["retcode"] == 0
+    exists = __salt__["file.grep"](htpasswd_file, "^{0}:".format(name))["retcode"] == 0
 
     if not exists:
         if __opts__["test"]:
@@ -133,9 +137,9 @@ def user_absent(name, htpasswd_file=None, runas=None):
     else:
         if __opts__["test"]:
             ret["result"] = None
-            ret["comment"] = "User '{}' is set to be removed from htpasswd file".format(
-                name
-            )
+            ret[
+                "comment"
+            ] = "User '{0}' is set to be removed from htpasswd file".format(name)
             ret["changes"] = {name: True}
         else:
             userdel_ret = __salt__["webutil.userdel"](

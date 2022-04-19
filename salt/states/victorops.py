@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Create an Event in VictorOps
 ============================
@@ -15,6 +16,9 @@ VictorOps service during state runs.
         - entity_id: 'webserver/diskspace'
         - state_message: 'Webserver diskspace is low.'
 """
+
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 
 def __virtual__():
@@ -93,7 +97,7 @@ def create_event(name, message_type, routing_key="everyone", **kwargs):
     ret = {"name": name, "changes": {}, "result": None, "comment": ""}
 
     if __opts__["test"]:
-        ret["comment"] = "Need to create event: {}".format(name)
+        ret["comment"] = "Need to create event: {0}".format(name)
         return ret
 
     res = __salt__["victorops.create_event"](
@@ -101,10 +105,10 @@ def create_event(name, message_type, routing_key="everyone", **kwargs):
     )
     if res["result"] == "success":
         ret["result"] = True
-        ret["comment"] = "Created event: {} for entity {}".format(
+        ret["comment"] = "Created event: {0} for entity {1}".format(
             name, res["entity_id"]
         )
     else:
         ret["result"] = False
-        ret["comment"] = "Failed to create event: {}".format(res["message"])
+        ret["comment"] = "Failed to create event: {0}".format(res["message"])
     return ret

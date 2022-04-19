@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Run-time utilities
 """
@@ -5,12 +6,19 @@ Run-time utilities
 # Copyright (C) 2014 SUSE LLC
 
 
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
+
 import logging
 import os
 import re
 
+# Import Salt libs
 import salt.utils.files
 from salt.exceptions import CommandExecutionError
+
+# Import 3rd-party libs
+from salt.ext import six
 
 log = logging.getLogger(__name__)
 
@@ -71,7 +79,7 @@ def _blkid_output(out, fs_type=None):
 
     if fs_type:
         mounts = _get_mounts(fs_type)
-        for device in mounts:
+        for device in six.iterkeys(mounts):
             if data.get(device):
                 data[device]["mounts"] = mounts[device]
 
@@ -101,7 +109,7 @@ def _blkid(fs_type=None):
 
     if fs_type:
         mounts = _get_mounts(fs_type)
-        for device in mounts:
+        for device in six.iterkeys(mounts):
             if data.get(device):
                 data[device]["mounts"] = mounts[device]
 
@@ -112,7 +120,7 @@ def _is_device(path):
     """
     Return True if path is a physical device.
     """
-    out = __salt__["cmd.run_all"]("file -i {}".format(path))
+    out = __salt__["cmd.run_all"]("file -i {0}".format(path))
     _verify_run(out)
 
     # Always [device, mime, charset]. See (file --help)

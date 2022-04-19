@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# encoding: utf-8
 """
 Deployment
 ==========
@@ -43,6 +44,7 @@ An example Apache virtual host configuration::
     </VirtualHost>
 
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
 import os
 

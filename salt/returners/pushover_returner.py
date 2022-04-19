@@ -81,11 +81,16 @@ To override individual configuration items, append --return_kwargs '{"key:": "va
 
 import logging
 import pprint
-import urllib.parse
 
 import salt.returners
 import salt.utils.pushover
 from salt.exceptions import SaltInvocationError
+
+# pylint: disable=import-error,no-name-in-module,redefined-builtin
+from salt.ext.six.moves.urllib.parse import urlencode as _urlencode
+
+# pylint: enable=import-error,no-name-in-module,redefined-builtin
+
 
 log = logging.getLogger(__name__)
 
@@ -195,7 +200,7 @@ def _post_message(
         function="message",
         method="POST",
         header_dict={"Content-Type": "application/x-www-form-urlencoded"},
-        data=urllib.parse.urlencode(parameters),
+        data=_urlencode(parameters),
         opts=__opts__,
     )
 
@@ -230,7 +235,13 @@ def returner(ret):
                 "Priority 2 requires pushover.expire and pushover.retry options."
             )
 
-    message = "id: {}\r\nfunction: {}\r\nfunction args: {}\r\njid: {}\r\nreturn: {}\r\n".format(
+    message = (
+        "id: {}\r\n"
+        "function: {}\r\n"
+        "function args: {}\r\n"
+        "jid: {}\r\n"
+        "return: {}\r\n"
+    ).format(
         ret.get("id"),
         ret.get("fun"),
         ret.get("fun_args"),

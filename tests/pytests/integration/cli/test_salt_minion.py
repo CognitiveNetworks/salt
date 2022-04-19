@@ -1,5 +1,10 @@
+"""
+tests.pytests.integration.cli.test_salt_minion
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
 import logging
 import os
+import time
 
 import pytest
 import salt.defaults.exitcodes
@@ -16,7 +21,7 @@ log = logging.getLogger(__name__)
 
 
 @pytest.fixture
-def minion_id(salt_master):
+def minion_id(salt_factories, salt_master):
     _minion_id = random_string("minion-")
 
     try:
@@ -37,8 +42,8 @@ def test_exit_status_unknown_user(salt_master, minion_id):
     Ensure correct exit status when the minion is configured to run as an unknown user.
     """
     with pytest.raises(FactoryNotStarted) as exc:
-        factory = salt_master.salt_minion_daemon(
-            minion_id, overrides={"user": "unknown-user"}
+        factory = salt_master.get_salt_minion_daemon(
+            minion_id, config_overrides={"user": "unknown-user"}
         )
         factory.start(start_timeout=10, max_start_attempts=1)
 
@@ -51,7 +56,7 @@ def test_exit_status_unknown_argument(salt_master, minion_id):
     Ensure correct exit status when an unknown argument is passed to salt-minion.
     """
     with pytest.raises(FactoryNotStarted) as exc:
-        factory = salt_master.salt_minion_daemon(minion_id)
+        factory = salt_master.get_salt_minion_daemon(minion_id)
         factory.start("--unknown-argument", start_timeout=10, max_start_attempts=1)
 
     assert exc.value.exitcode == salt.defaults.exitcodes.EX_USAGE, exc.value
@@ -60,18 +65,14 @@ def test_exit_status_unknown_argument(salt_master, minion_id):
 
 
 @pytest.mark.skip_on_windows(reason=PRE_PYTEST_SKIP_REASON)
-def test_exit_status_correct_usage(salt_master, minion_id, salt_cli):
-    factory = salt_master.salt_minion_daemon(
+def test_exit_status_correct_usage(salt_master, minion_id):
+    factory = salt_master.get_salt_minion_daemon(
         minion_id,
         extra_cli_arguments_after_first_start_failure=["--log-level=debug"],
-        defaults={"transport": salt_master.config["transport"]},
+        config_defaults={"transport": salt_master.config["transport"]},
     )
     factory.start()
     assert factory.is_running()
-    # Let's issue a ping before terminating
-    ret = salt_cli.run("test.ping", minion_tgt=minion_id)
-    assert ret.exitcode == 0
-    assert ret.json is True
-    # Terminate
+    time.sleep(0.5)
     ret = factory.terminate()
     assert ret.exitcode == salt.defaults.exitcodes.EX_OK, ret

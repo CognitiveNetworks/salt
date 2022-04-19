@@ -1,9 +1,15 @@
+# -*- coding: utf-8 -*-
 """
     :codeauthor: Jayesh Kariya <jayeshk@saltstack.com>
 """
 
+# Import Python Libs
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import Salt Libs
 import salt.modules.introspect as introspect
+
+# Import Salt Testing Libs
 from tests.support.mixins import LoaderModuleMockMixin
 from tests.support.mock import MagicMock, patch
 from tests.support.unit import TestCase
@@ -33,8 +39,8 @@ class IntrospectTestCase(TestCase, LoaderModuleMockMixin):
         )
         ret = {
             "Error": {
-                "Unsupported File Module": "{}".format(err2),
-                "Unsupported Package Manager": "{}".format(err1),
+                "Unsupported File Module": "{0}".format(err2),
+                "Unsupported Package Manager": "{0}".format(err1),
             }
         }
         self.assertDictEqual(introspect.running_service_owners(), ret)
@@ -63,8 +69,8 @@ class IntrospectTestCase(TestCase, LoaderModuleMockMixin):
         )
         ret = {
             "Error": {
-                "Unsupported Service Manager": "{}".format(err2),
-                "Unsupported Package Manager": "{}".format(err1),
+                "Unsupported Service Manager": "{0}".format(err2),
+                "Unsupported Package Manager": "{0}".format(err1),
             }
         }
         self.assertDictEqual(introspect.enabled_service_owners(), ret)

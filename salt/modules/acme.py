@@ -256,15 +256,17 @@ def cert(
             if res["retcode"] != 0:
                 return {
                     "result": False,
-                    "comment": "Certificate {} renewal failed with:\n{}".format(
-                        name, res["stderr"]
+                    "comment": (
+                        "Certificate {} renewal failed with:\n{}"
+                        "".format(name, res["stderr"])
                     ),
                 }
         else:
             return {
                 "result": False,
-                "comment": "Certificate {} renewal failed with:\n{}".format(
-                    name, res["stderr"]
+                "comment": (
+                    "Certificate {} renewal failed with:\n{}"
+                    "".format(name, res["stderr"])
                 ),
             }
 

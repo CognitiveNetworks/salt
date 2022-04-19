@@ -293,9 +293,8 @@ class WinLGPOGetPolicyADMXTestCase(TestCase, LoaderModuleMockMixin):
             hierarchical_return=False,
         )
         expected = {
-            "Windows Components\\Data Collection and Preview Builds\\Allow Telemetry": (
-                "Not Configured"
-            )
+            "Windows Components\\Data Collection and Preview Builds\\"
+            "Allow Telemetry": "Not Configured"
         }
         self.assertDictEqual(result, expected)
 
@@ -308,9 +307,8 @@ class WinLGPOGetPolicyADMXTestCase(TestCase, LoaderModuleMockMixin):
             hierarchical_return=False,
         )
         expected = {
-            "Windows Components\\Data Collection and Preview Builds\\Allow Telemetry": (
-                "Not Configured"
-            )
+            "Windows Components\\Data Collection and Preview Builds\\"
+            "Allow Telemetry": "Not Configured"
         }
         self.assertDictEqual(result, expected)
 
@@ -464,9 +462,7 @@ class WinLGPOGetPolicyFromPolicyInfoTestCase(TestCase, LoaderModuleMockMixin):
             hierarchical_return=False,
         )
         expected = {
-            "Network firewall: Public: Settings: Display a notification": (
-                "Not configured"
-            )
+            "Network firewall: Public: Settings: Display a notification": "Not configured"
         }
         self.assertDictEqual(result, expected)
 
@@ -479,9 +475,7 @@ class WinLGPOGetPolicyFromPolicyInfoTestCase(TestCase, LoaderModuleMockMixin):
             hierarchical_return=False,
         )
         expected = {
-            "Network firewall: Public: Settings: Display a notification": (
-                "Not configured"
-            )
+            "Network firewall: Public: Settings: Display a notification": "Not configured"
         }
         self.assertDictEqual(result, expected)
 
@@ -494,9 +488,7 @@ class WinLGPOGetPolicyFromPolicyInfoTestCase(TestCase, LoaderModuleMockMixin):
             hierarchical_return=False,
         )
         expected = {
-            "Network firewall: Public: Settings: Display a notification": (
-                "Not configured"
-            )
+            "Network firewall: Public: Settings: Display a notification": "Not configured"
         }
         self.assertDictEqual(result, expected)
 
@@ -524,7 +516,8 @@ class WinLGPOGetPolicyFromPolicyInfoTestCase(TestCase, LoaderModuleMockMixin):
                 "Windows Settings": {
                     "Security Settings": {
                         "Windows Firewall with Advanced Security": {
-                            "Windows Firewall with Advanced Security - Local Group Policy Object": {
+                            "Windows Firewall with Advanced Security - Local "
+                            "Group Policy Object": {
                                 "WfwPublicSettingsNotification": "Not configured"
                             }
                         }
@@ -547,10 +540,10 @@ class WinLGPOGetPolicyFromPolicyInfoTestCase(TestCase, LoaderModuleMockMixin):
                 "Windows Settings": {
                     "Security Settings": {
                         "Windows Firewall with Advanced Security": {
-                            "Windows Firewall with Advanced Security - Local Group Policy Object": {
-                                "Network firewall: Public: Settings: Display a notification": (
-                                    "Not configured"
-                                )
+                            "Windows Firewall with Advanced Security - Local "
+                            "Group Policy Object": {
+                                "Network firewall: Public: Settings: Display a "
+                                "notification": "Not configured"
                             }
                         }
                     }
@@ -839,16 +832,12 @@ class WinLGPOGetPointAndPrintENTestCase(TestCase, LoaderModuleMockMixin):
             computer_policy = {
                 "Point and Print Restrictions": {
                     "Users can only point and print to these servers": True,
-                    "Enter fully qualified server names separated by semicolons": (
-                        "fakeserver1;fakeserver2"
-                    ),
-                    "Users can only point and print to machines in their forest": True,
-                    "When installing drivers for a new connection": (
-                        "Show warning and elevation prompt"
-                    ),
-                    "When updating drivers for an existing connection": (
-                        "Show warning only"
-                    ),
+                    "Enter fully qualified server names separated by "
+                    "semicolons": "fakeserver1;fakeserver2",
+                    "Users can only point and print to machines in their "
+                    "forest": True,
+                    "When installing drivers for a new connection": "Show warning and elevation prompt",
+                    "When updating drivers for an existing connection": "Show warning only",
                 },
             }
             win_lgpo.set_(computer_policy=computer_policy)
@@ -885,9 +874,7 @@ class WinLGPOGetPointAndPrintENTestCase(TestCase, LoaderModuleMockMixin):
         )
         expected = {
             "PointAndPrint_Restrictions_Win7": {
-                "PointAndPrint_NoWarningNoElevationOnInstall_Enum": (
-                    "Show warning and elevation prompt"
-                ),
+                "PointAndPrint_NoWarningNoElevationOnInstall_Enum": "Show warning and elevation prompt",
                 "PointAndPrint_NoWarningNoElevationOnUpdate_Enum": "Show warning only",
                 "PointAndPrint_TrustedForest_Chk": True,
                 "PointAndPrint_TrustedServers_Chk": True,
@@ -908,17 +895,11 @@ class WinLGPOGetPointAndPrintENTestCase(TestCase, LoaderModuleMockMixin):
                 "Administrative Templates": {
                     "Printers": {
                         "PointAndPrint_Restrictions_Win7": {
-                            "PointAndPrint_NoWarningNoElevationOnInstall_Enum": (
-                                "Show warning and elevation prompt"
-                            ),
-                            "PointAndPrint_NoWarningNoElevationOnUpdate_Enum": (
-                                "Show warning only"
-                            ),
+                            "PointAndPrint_NoWarningNoElevationOnInstall_Enum": "Show warning and elevation prompt",
+                            "PointAndPrint_NoWarningNoElevationOnUpdate_Enum": "Show warning only",
                             "PointAndPrint_TrustedForest_Chk": True,
                             "PointAndPrint_TrustedServers_Chk": True,
-                            "PointAndPrint_TrustedServers_Edit": (
-                                "fakeserver1;fakeserver2"
-                            ),
+                            "PointAndPrint_TrustedServers_Edit": "fakeserver1;fakeserver2",
                         }
                     }
                 }
@@ -935,12 +916,8 @@ class WinLGPOGetPointAndPrintENTestCase(TestCase, LoaderModuleMockMixin):
         )
         expected = {
             "Printers\\Point and Print Restrictions": {
-                "Enter fully qualified server names separated by semicolons": (
-                    "fakeserver1;fakeserver2"
-                ),
-                "When installing drivers for a new connection": (
-                    "Show warning and elevation prompt"
-                ),
+                "Enter fully qualified server names separated by semicolons": "fakeserver1;fakeserver2",
+                "When installing drivers for a new connection": "Show warning and elevation prompt",
                 "Users can only point and print to machines in their forest": True,
                 "Users can only point and print to these servers": True,
                 "When updating drivers for an existing connection": "Show warning only",
@@ -961,17 +938,13 @@ class WinLGPOGetPointAndPrintENTestCase(TestCase, LoaderModuleMockMixin):
                 "Administrative Templates": {
                     "Printers": {
                         "Point and Print Restrictions": {
-                            "Enter fully qualified server names separated by semicolons": (
-                                "fakeserver1;fakeserver2"
-                            ),
-                            "When installing drivers for a new connection": (
-                                "Show warning and elevation prompt"
-                            ),
-                            "Users can only point and print to machines in their forest": True,
+                            "Enter fully qualified server names separated by "
+                            "semicolons": "fakeserver1;fakeserver2",
+                            "When installing drivers for a new connection": "Show warning and elevation prompt",
+                            "Users can only point and print to machines in "
+                            "their forest": True,
                             "Users can only point and print to these servers": True,
-                            "When updating drivers for an existing connection": (
-                                "Show warning only"
-                            ),
+                            "When updating drivers for an existing connection": "Show warning only",
                         }
                     }
                 }

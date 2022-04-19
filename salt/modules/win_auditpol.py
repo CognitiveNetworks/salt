@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 A salt module for modifying the audit policies on the machine
 
@@ -53,7 +54,9 @@ CLI Example:
     # Set the state of the "Credential Validation" setting to No Auditing
     salt * auditpol.set_setting name="Credential Validation" value="No Auditing"
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import Salt libs
 import salt.utils.platform
 
 # Define the module's virtual name

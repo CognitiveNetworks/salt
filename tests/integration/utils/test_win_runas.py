@@ -592,10 +592,7 @@ class RunAsTest(ModuleCase):
         groups=["Administrators"],
     )
     def test_runas_powershell_remoting_admin(self, username):
-        psrp_wrap = (
-            "powershell Invoke-Command -ComputerName {} -ScriptBlock {{ {} }}; exit"
-            " $LASTEXITCODE"
-        )
+        psrp_wrap = "powershell Invoke-Command -ComputerName {} -ScriptBlock {{ {} }}; exit $LASTEXITCODE"
         runaspy = textwrap.dedent(
             """
         import sys
@@ -622,10 +619,7 @@ class RunAsTest(ModuleCase):
         groups=["Administrators"],
     )
     def test_runas_powershell_remoting_admin_no_pass(self, username):
-        psrp_wrap = (
-            "powershell Invoke-Command -ComputerName {} -ScriptBlock {{ {} }}; exit"
-            " $LASTEXITCODE"
-        )
+        psrp_wrap = "powershell Invoke-Command -ComputerName {} -ScriptBlock {{ {} }}; exit $LASTEXITCODE"
         runaspy = textwrap.dedent(
             """
         import sys

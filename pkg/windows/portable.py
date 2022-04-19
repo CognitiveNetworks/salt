@@ -1,4 +1,5 @@
 #!/usr/bin/python
+from __future__ import print_function
 
 import getopt
 import os
@@ -48,8 +49,9 @@ def main(argv):
     if target == "":
         display_help()
 
-    search = search.encode("utf-8")
-    replace = replace.encode("utf-8")
+    if sys.version_info >= (3, 0):
+        search = search.encode("utf-8")
+        replace = replace.encode("utf-8")
     f = open(target, "rb").read()
     f = f.replace(search, replace)
     f = f.replace(search.lower(), replace)

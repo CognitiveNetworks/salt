@@ -20,21 +20,12 @@ class StdTest(ModuleCase):
         """
         Test cli function
         """
-        cmd_iter = self.client.cmd_cli(
-            "minion",
-            "test.ping",
-            timeout=20,
-        )
+        cmd_iter = self.client.cmd_cli("minion", "test.ping", timeout=20,)
         for ret in cmd_iter:
             self.assertTrue(ret["minion"])
 
         # make sure that the iter waits for long running jobs too
-        cmd_iter = self.client.cmd_cli(
-            "minion",
-            "test.sleep",
-            [6],
-            timeout=20,
-        )
+        cmd_iter = self.client.cmd_cli("minion", "test.sleep", [6], timeout=20,)
         num_ret = 0
         for ret in cmd_iter:
             num_ret += 1
@@ -49,11 +40,7 @@ class StdTest(ModuleCase):
             pass
         # ping that minion and ensure it times out
         try:
-            cmd_iter = self.client.cmd_cli(
-                "footest",
-                "test.ping",
-                timeout=20,
-            )
+            cmd_iter = self.client.cmd_cli("footest", "test.ping", timeout=20,)
             num_ret = 0
             for ret in cmd_iter:
                 num_ret += 1
@@ -67,10 +54,7 @@ class StdTest(ModuleCase):
         """
         test cmd_iter
         """
-        cmd_iter = self.client.cmd_iter(
-            "minion",
-            "test.ping",
-        )
+        cmd_iter = self.client.cmd_iter("minion", "test.ping",)
         for ret in cmd_iter:
             self.assertTrue(ret["minion"])
 
@@ -79,10 +63,7 @@ class StdTest(ModuleCase):
         """
         test cmd_iter_no_block
         """
-        cmd_iter = self.client.cmd_iter_no_block(
-            "minion",
-            "test.ping",
-        )
+        cmd_iter = self.client.cmd_iter_no_block("minion", "test.ping",)
         for ret in cmd_iter:
             if ret is None:
                 continue
@@ -93,10 +74,7 @@ class StdTest(ModuleCase):
         """
         test cmd_batch
         """
-        cmd_batch = self.client.cmd_batch(
-            "minion",
-            "test.ping",
-        )
+        cmd_batch = self.client.cmd_batch("minion", "test.ping",)
         for ret in cmd_batch:
             self.assertTrue(ret["minion"])
 
@@ -105,11 +83,7 @@ class StdTest(ModuleCase):
         """
         test cmd_batch with raw option
         """
-        cmd_batch = self.client.cmd_batch(
-            "minion",
-            "test.ping",
-            raw=True,
-        )
+        cmd_batch = self.client.cmd_batch("minion", "test.ping", raw=True,)
         for ret in cmd_batch:
             self.assertTrue(ret["data"]["success"])
 
@@ -118,11 +92,7 @@ class StdTest(ModuleCase):
         """
         test cmd_iter
         """
-        ret = self.client.cmd_full_return(
-            "minion",
-            "test.ping",
-            timeout=20,
-        )
+        ret = self.client.cmd_full_return("minion", "test.ping", timeout=20,)
         self.assertIn("minion", ret)
         self.assertEqual({"ret": True, "success": True}, ret["minion"])
 

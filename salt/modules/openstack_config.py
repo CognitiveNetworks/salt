@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Modify, retrieve, or delete values from OpenStack configuration files.
 
@@ -7,11 +8,16 @@ Modify, retrieve, or delete values from OpenStack configuration files.
 :platform: linux
 
 """
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import shlex
 
 import salt.exceptions
 import salt.utils.decorators.path
+
+# Import Salt libs
+from salt.ext import six
 
 try:
     import pipes
@@ -39,10 +45,7 @@ def __virtual__():
 
 
 def _fallback(*args, **kw):
-    return (
-        'The "openstack-config" command needs to be installed for this function to'
-        ' work.  Typically this is included in the "openstack-utils" package.'
-    )
+    return 'The "openstack-config" command needs to be installed for this function to work.  Typically this is included in the "openstack-utils" package.'
 
 
 @salt.utils.decorators.path.which("openstack-config")
@@ -72,10 +75,10 @@ def set_(filename, section, parameter, value):
     filename = _quote(filename)
     section = _quote(section)
     parameter = _quote(parameter)
-    value = _quote(str(value))
+    value = _quote(six.text_type(value))
 
     result = __salt__["cmd.run_all"](
-        "openstack-config --set {} {} {} {}".format(
+        "openstack-config --set {0} {1} {2} {3}".format(
             filename, section, parameter, value
         ),
         python_shell=False,
@@ -114,7 +117,7 @@ def get(filename, section, parameter):
     parameter = _quote(parameter)
 
     result = __salt__["cmd.run_all"](
-        "openstack-config --get {} {} {}".format(filename, section, parameter),
+        "openstack-config --get {0} {1} {2}".format(filename, section, parameter),
         python_shell=False,
     )
 
@@ -150,7 +153,7 @@ def delete(filename, section, parameter):
     parameter = _quote(parameter)
 
     result = __salt__["cmd.run_all"](
-        "openstack-config --del {} {} {}".format(filename, section, parameter),
+        "openstack-config --del {0} {1} {2}".format(filename, section, parameter),
         python_shell=False,
     )
 

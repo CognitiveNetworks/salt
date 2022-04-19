@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, unicode_literals
+
 import salt.utils.kickstart as kickstart
 from tests.support.unit import TestCase
 

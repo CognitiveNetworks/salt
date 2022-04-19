@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Manage groups on Solaris
 
@@ -7,9 +8,12 @@ Manage groups on Solaris
     *'group.info' is not available*), see :ref:`here
     <module-provider-override>`.
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import python libs
 import logging
 
+# Import salt libs
 import salt.utils.data
 
 log = logging.getLogger(__name__)
@@ -48,13 +52,13 @@ def add(name, gid=None, **kwargs):
         salt '*' group.add foo 3456
     """
     if salt.utils.data.is_true(kwargs.pop("system", False)):
-        log.warning("solaris_group module does not support the 'system' argument")
+        log.warning("solaris_group module does not support the 'system' " "argument")
     if kwargs:
         log.warning("Invalid kwargs passed to group.add")
 
     cmd = "groupadd "
     if gid:
-        cmd += "-g {} ".format(gid)
+        cmd += "-g {0} ".format(gid)
     cmd += name
 
     ret = __salt__["cmd.run_all"](cmd, python_shell=False)
@@ -72,7 +76,7 @@ def delete(name):
 
         salt '*' group.delete foo
     """
-    ret = __salt__["cmd.run_all"]("groupdel {}".format(name), python_shell=False)
+    ret = __salt__["cmd.run_all"]("groupdel {0}".format(name), python_shell=False)
 
     return not ret["retcode"]
 
@@ -134,7 +138,7 @@ def chgid(name, gid):
     pre_gid = __salt__["file.group_to_gid"](name)
     if gid == pre_gid:
         return True
-    cmd = "groupmod -g {} {}".format(gid, name)
+    cmd = "groupmod -g {0} {1}".format(gid, name)
     __salt__["cmd.run"](cmd, python_shell=False)
     post_gid = __salt__["file.group_to_gid"](name)
     if post_gid != pre_gid:

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Environment sdb Module
 
@@ -56,7 +57,9 @@ in the environment:
     ..snip
 
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import Python libs
 import os
 
 __func_alias__ = {"set_": "set"}

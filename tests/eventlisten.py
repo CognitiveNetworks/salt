@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """
 Use this script to dump the event data out to the terminal. It needs to know
 what the sock_dir is.
@@ -5,13 +7,19 @@ what the sock_dir is.
 This script is a generic tool to test event output
 """
 
+# Import Python libs
+from __future__ import absolute_import, print_function
 
 import optparse
 import os
 import pprint
 import time
 
+# Import Salt libs
 import salt.utils.event
+
+# Import 3rd-party libs
+from salt.ext import six
 
 
 def parse():
@@ -53,20 +61,20 @@ def parse():
         "-i",
         "--id",
         default="",
-        help="If connecting to a live master or minion, pass in the id",
+        help=("If connecting to a live master or minion, pass in the id"),
     )
     parser.add_option(
         "-t",
         "--transport",
         default="zeromq",
-        help="Transport to use. (Default: 'zeromq'",
+        help=("Transport to use. (Default: 'zeromq'"),
     )
 
     options, args = parser.parse_args()
 
     opts = {}
 
-    for k, v in options.__dict__.items():
+    for k, v in six.iteritems(options.__dict__):
         if v is not None:
             opts[k] = v
 
@@ -97,9 +105,8 @@ def check_access_and_print_warning(sock_dir):
         return
     else:
         print(
-            "WARNING: Events will not be reported (not able to access {})".format(
-                sock_dir
-            )
+            "WARNING: Events will not be reported"
+            " (not able to access {0})".format(sock_dir)
         )
 
 
@@ -125,20 +132,23 @@ def listen(opts):
         if opts["func_count"]:
             data = ret.get("data", False)
             if data:
-                if "id" in data.keys() and data.get("id", False) not in found_minions:
+                if (
+                    "id" in six.iterkeys(data)
+                    and data.get("id", False) not in found_minions
+                ):
                     if data["fun"] == opts["func_count"]:
                         jid_counter += 1
                         found_minions.append(data["id"])
                         print(
-                            "Reply received from [{}]. Total replies now: [{}].".format(
+                            "Reply received from [{0}]. Total replies now: [{1}].".format(
                                 ret["data"]["id"], jid_counter
                             )
                         )
                     continue
         else:
-            print("Event fired at {}".format(time.asctime()))
+            print("Event fired at {0}".format(time.asctime()))
             print("*" * 25)
-            print("Tag: {}".format(ret["tag"]))
+            print("Tag: {0}".format(ret["tag"]))
             print("Data:")
             pprint.pprint(ret["data"])
 

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Loop state
 
@@ -57,6 +58,8 @@ The function :py:func:`data.subdict_match <salt.utils.data.subdict_match>` check
             instances: "{{ instance }}"
 """
 
+# Import python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 import operator
@@ -96,7 +99,7 @@ def until(name, m_args=None, m_kwargs=None, condition=None, period=1, timeout=60
         m_kwargs = {}
 
     if name not in __salt__:
-        ret["comment"] = "Cannot find module {}".format(name)
+        ret["comment"] = "Cannot find module {0}".format(name)
     elif condition is None:
         ret["comment"] = "An exit condition must be specified"
     elif not isinstance(period, (int, float)):
@@ -104,7 +107,7 @@ def until(name, m_args=None, m_kwargs=None, condition=None, period=1, timeout=60
     elif not isinstance(timeout, (int, float)):
         ret["comment"] = "Timeout must be specified as a float in seconds"
     elif __opts__["test"]:
-        ret["comment"] = "The execution module {} will be run".format(name)
+        ret["comment"] = "The execution module {0} will be run".format(name)
         ret["result"] = None
     else:
         if m_args is None:
@@ -117,11 +120,11 @@ def until(name, m_args=None, m_kwargs=None, condition=None, period=1, timeout=60
             m_ret = __salt__[name](*m_args, **m_kwargs)
             if eval(condition):  # pylint: disable=W0123
                 ret["result"] = True
-                ret["comment"] = "Condition {} was met".format(condition)
+                ret["comment"] = "Condition {0} was met".format(condition)
                 break
             time.sleep(period)
         else:
-            ret["comment"] = "Timed out while waiting for condition {}".format(
+            ret["comment"] = "Timed out while waiting for condition {0}".format(
                 condition
             )
     return ret
@@ -177,7 +180,7 @@ def until_no_eval(
         comparator = getattr(operator, compare_operator)
     if __opts__["test"]:
         ret["result"] = None
-        ret["comment"] = 'Would have waited for "{}" to produce "{}".'.format(
+        ret["comment"] = 'Would have waited for "{}" to produce "{}".' "".format(
             name, expected
         )
     if ret["comment"]:
@@ -216,19 +219,19 @@ def until_no_eval(
         )
         if cmp_res:
             ret["result"] = True
-            ret["comment"] = "Call provided the expected results in {} attempts".format(
-                current_attempt
+            ret["comment"] = (
+                "Call provided the expected results in {} attempts"
+                "".format(current_attempt)
             )
             break
         time.sleep(period)
     else:
-        ret[
-            "comment"
-        ] = "Call did not produce the expected result after {} attempts".format(
-            current_attempt
+        ret["comment"] = (
+            "Call did not produce the expected result after {} attempts"
+            "".format(current_attempt)
         )
         log.debug(
-            "%s:until_no_eval:\n\t\tResults of all attempts: %s",
+            "%s:until_no_eval:\n" "\t\tResults of all attempts: %s",
             __name__,
             res_archive,
         )

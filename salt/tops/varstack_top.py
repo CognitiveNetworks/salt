@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Use `Varstack <https://github.com/conversis/varstack>`_ to provide tops data
 
@@ -42,6 +43,7 @@ managed by salt as if given from a top.sls file.
 
 """
 
+from __future__ import absolute_import, print_function, unicode_literals
 
 try:
     import varstack

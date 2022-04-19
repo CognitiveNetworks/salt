@@ -286,7 +286,7 @@ def list_hosted_services(conn=None, call=None):
     """
     if call == "action":
         raise SaltCloudSystemExit(
-            "The list_hosted_services function must be called with -f or --function"
+            "The list_hosted_services function must be called with " "-f or --function"
         )
 
     if not conn:
@@ -394,9 +394,7 @@ def list_nodes_select(conn=None, call=None):
         conn = get_conn()
 
     return salt.utils.cloud.list_nodes_select(
-        list_nodes_full(conn, "function"),
-        __opts__["query.selection"],
-        call,
+        list_nodes_full(conn, "function"), __opts__["query.selection"], call,
     )
 
 
@@ -421,8 +419,7 @@ def show_instance(name, call=None):
         )
     except TypeError:
         log.warning(
-            "Unable to show cache node data; this may be because the node has been"
-            " deleted"
+            "Unable to show cache node data; this may be because the node has been deleted"
         )
     return nodes[name]
 
@@ -490,10 +487,7 @@ def create(vm_):
     )
 
     ssh_endpoint = azure.servicemanagement.ConfigurationSetInputEndpoint(
-        name="SSH",
-        protocol="TCP",
-        port=ssh_port,
-        local_port=22,
+        name="SSH", protocol="TCP", port=ssh_port, local_port=22,
     )
 
     network_config = azure.servicemanagement.ConfigurationSet()
@@ -512,10 +506,7 @@ def create(vm_):
             smb_port = vm_["smb_port"]
 
         smb_endpoint = azure.servicemanagement.ConfigurationSetInputEndpoint(
-            name="SMB",
-            protocol="TCP",
-            port=smb_port,
-            local_port=smb_port,
+            name="SMB", protocol="TCP", port=smb_port, local_port=smb_port,
         )
 
         network_config.input_endpoints.input_endpoints.append(smb_endpoint)
@@ -615,7 +606,7 @@ def create(vm_):
         del vm_kwargs["deployment_slot"]
         del vm_kwargs["label"]
         del vm_kwargs["virtual_network_name"]
-        result = conn.add_role(**vm_kwargs)  # pylint: disable=unexpected-keyword-arg
+        result = conn.add_role(**vm_kwargs)
         _wait_for_async(conn, result.request_id)
     except Exception as exc:  # pylint: disable=broad-except
         error = "The hosted service name is invalid."
@@ -731,7 +722,7 @@ def create_attach_volumes(name, kwargs, call=None, wait_to_finish=True):
     """
     if call != "action":
         raise SaltCloudSystemExit(
-            "The create_attach_volumes action must be called with -a or --action."
+            "The create_attach_volumes action must be called with " "-a or --action."
         )
 
     if kwargs is None:
@@ -814,9 +805,7 @@ def create_attach_volumes(name, kwargs, call=None, wait_to_finish=True):
         # If attach is None then everything is fine
         if attach:
             msg = "{} attached to {} (aka {})".format(
-                volume_dict["volume_name"],
-                kwargs["role_name"],
-                name,
+                volume_dict["volume_name"], kwargs["role_name"], name,
             )
             log.info(msg)
             ret.append(msg)
@@ -831,7 +820,7 @@ def create_attach_volumes(name, kwargs, call=None, wait_to_finish=True):
     """
     if call != "action":
         raise SaltCloudSystemExit(
-            "The create_attach_volumes action must be called with -a or --action."
+            "The create_attach_volumes action must be called with " "-a or --action."
         )
 
     if kwargs is None:
@@ -957,7 +946,7 @@ def destroy(name, conn=None, call=None, kwargs=None):
     """
     if call == "function":
         raise SaltCloudSystemExit(
-            "The destroy action must be called with -d, --destroy, -a or --action."
+            "The destroy action must be called with -d, --destroy, " "-a or --action."
         )
 
     if not conn:
@@ -1085,7 +1074,8 @@ def list_storage_services(conn=None, call=None):
     """
     if call != "function":
         raise SaltCloudSystemExit(
-            "The list_storage_services function must be called with -f or --function."
+            "The list_storage_services function must be called "
+            "with -f or --function."
         )
 
     if not conn:
@@ -1200,9 +1190,7 @@ def show_storage(kwargs=None, conn=None, call=None):
     if "name" not in kwargs:
         raise SaltCloudSystemExit('A name must be specified as "name"')
 
-    data = conn.get_storage_account_properties(
-        kwargs["name"],
-    )
+    data = conn.get_storage_account_properties(kwargs["name"],)
     return object_to_dict(data)
 
 
@@ -1237,9 +1225,7 @@ def show_storage_keys(kwargs=None, conn=None, call=None):
         raise SaltCloudSystemExit('A name must be specified as "name"')
 
     try:
-        data = conn.get_storage_account_keys(
-            kwargs["name"],
-        )
+        data = conn.get_storage_account_keys(kwargs["name"],)
     except AzureMissingResourceHttpError as exc:
         storage_data = show_storage(kwargs={"name": kwargs["name"]}, call="function")
         if storage_data["storage_service_properties"]["status"] == "Creating":
@@ -1289,7 +1275,7 @@ def create_storage(kwargs=None, conn=None, call=None):
 
     if "location" not in kwargs and "affinity_group" not in kwargs:
         raise SaltCloudSystemExit(
-            "Either a location or an affinity_group must be specified (but not both)"
+            "Either a location or an affinity_group " "must be specified (but not both)"
         )
 
     try:
@@ -1306,8 +1292,7 @@ def create_storage(kwargs=None, conn=None, call=None):
         return {"Success": "The storage account was successfully created"}
     except AzureConflictHttpError:
         raise SaltCloudSystemExit(
-            "There was a conflict. This usually means that the storage account already"
-            " exists."
+            "There was a conflict. This usually means that the storage account already exists."
         )
 
 
@@ -1382,14 +1367,12 @@ def regenerate_storage_keys(kwargs=None, conn=None, call=None):
 
     try:
         data = conn.regenerate_storage_account_keys(
-            service_name=kwargs["name"],
-            key_type=kwargs["key_type"],
+            service_name=kwargs["name"], key_type=kwargs["key_type"],
         )
         return show_storage_keys(kwargs={"name": kwargs["name"]}, call="function")
     except AzureConflictHttpError:
         raise SaltCloudSystemExit(
-            "There was a conflict. This usually means that the storage account already"
-            " exists."
+            "There was a conflict. This usually means that the storage account already exists."
         )
 
 
@@ -1518,7 +1501,7 @@ def create_service(kwargs=None, conn=None, call=None):
 
     if "location" not in kwargs and "affinity_group" not in kwargs:
         raise SaltCloudSystemExit(
-            "Either a location or an affinity_group must be specified (but not both)"
+            "Either a location or an affinity_group " "must be specified (but not both)"
         )
 
     try:
@@ -1759,8 +1742,7 @@ def list_service_certificates(kwargs=None, conn=None, call=None):
     """
     if call != "function":
         raise SaltCloudSystemExit(
-            "The list_service_certificates function must be called with -f or"
-            " --function."
+            "The list_service_certificates function must be called with -f or --function."
         )
 
     if kwargs is None:
@@ -1815,9 +1797,7 @@ def show_service_certificate(kwargs=None, conn=None, call=None):
         raise SaltCloudSystemExit('A thumbprint must be specified as "thumbprint"')
 
     data = conn.get_service_certificate(
-        kwargs["name"],
-        kwargs["thumbalgorithm"],
-        kwargs["thumbprint"],
+        kwargs["name"], kwargs["thumbalgorithm"], kwargs["thumbprint"],
     )
     return object_to_dict(data)
 
@@ -1894,8 +1874,7 @@ def delete_service_certificate(kwargs=None, conn=None, call=None):
     """
     if call != "function":
         raise SaltCloudSystemExit(
-            "The delete_service_certificate function must be called with -f or"
-            " --function."
+            "The delete_service_certificate function must be called with -f or --function."
         )
 
     if kwargs is None:
@@ -1917,9 +1896,7 @@ def delete_service_certificate(kwargs=None, conn=None, call=None):
 
     try:
         data = conn.delete_service_certificate(
-            kwargs["name"],
-            kwargs["thumbalgorithm"],
-            kwargs["thumbprint"],
+            kwargs["name"], kwargs["thumbalgorithm"], kwargs["thumbprint"],
         )
         return {"Success": "The service certificate was successfully deleted"}
     except AzureMissingResourceHttpError as exc:
@@ -1940,8 +1917,7 @@ def list_management_certificates(kwargs=None, conn=None, call=None):
     """
     if call != "function":
         raise SaltCloudSystemExit(
-            "The list_management_certificates function must be called with -f or"
-            " --function."
+            "The list_management_certificates function must be called with -f or --function."
         )
 
     if not conn:
@@ -1969,8 +1945,7 @@ def show_management_certificate(kwargs=None, conn=None, call=None):
     """
     if call != "function":
         raise SaltCloudSystemExit(
-            "The get_management_certificate function must be called with -f or"
-            " --function."
+            "The get_management_certificate function must be called with -f or --function."
         )
 
     if not conn:
@@ -2005,8 +1980,7 @@ def add_management_certificate(kwargs=None, conn=None, call=None):
     """
     if call != "function":
         raise SaltCloudSystemExit(
-            "The add_management_certificate function must be called with -f or"
-            " --function."
+            "The add_management_certificate function must be called with -f or --function."
         )
 
     if not conn:
@@ -2026,9 +2000,7 @@ def add_management_certificate(kwargs=None, conn=None, call=None):
 
     try:
         conn.add_management_certificate(
-            kwargs["name"],
-            kwargs["thumbprint"],
-            kwargs["data"],
+            kwargs["name"], kwargs["thumbprint"], kwargs["data"],
         )
         return {"Success": "The management certificate was successfully added"}
     except AzureConflictHttpError:
@@ -2053,8 +2025,7 @@ def delete_management_certificate(kwargs=None, conn=None, call=None):
     """
     if call != "function":
         raise SaltCloudSystemExit(
-            "The delete_management_certificate function must be called with -f or"
-            " --function."
+            "The delete_management_certificate function must be called with -f or --function."
         )
 
     if kwargs is None:
@@ -2122,15 +2093,15 @@ def list_input_endpoints(kwargs=None, conn=None, call=None):
         raise SaltCloudSystemExit('A deployment name must be specified as "deployment"')
 
     path = "services/hostedservices/{}/deployments/{}".format(
-        kwargs["service"],
-        kwargs["deployment"],
+        kwargs["service"], kwargs["deployment"],
     )
 
     data = query(path)
     if data is None:
         raise SaltCloudSystemExit(
-            "There was an error listing endpoints with the {} service on the {}"
-            " deployment.".format(kwargs["service"], kwargs["deployment"])
+            "There was an error listing endpoints with the {} service on the {} deployment.".format(
+                kwargs["service"], kwargs["deployment"]
+            )
         )
 
     ret = {}
@@ -2296,9 +2267,7 @@ xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
     )
 
     path = "services/hostedservices/{}/deployments/{}/roles/{}".format(
-        kwargs["service"],
-        kwargs["deployment"],
-        kwargs["role"],
+        kwargs["service"], kwargs["deployment"], kwargs["role"],
     )
     query(
         path=path,
@@ -2327,10 +2296,7 @@ def add_input_endpoint(kwargs=None, conn=None, call=None):
             timeout_for_tcp_idle_connection=4
     """
     return update_input_endpoint(
-        kwargs=kwargs,
-        conn=conn,
-        call="function",
-        activity="add",
+        kwargs=kwargs, conn=conn, call="function", activity="add",
     )
 
 
@@ -2349,10 +2315,7 @@ def delete_input_endpoint(kwargs=None, conn=None, call=None):
             deployment=mydeployment role=myrole name=HTTP
     """
     return update_input_endpoint(
-        kwargs=kwargs,
-        conn=conn,
-        call="function",
-        activity="delete",
+        kwargs=kwargs, conn=conn, call="function", activity="delete",
     )
 
 
@@ -2388,8 +2351,7 @@ def show_deployment(kwargs=None, conn=None, call=None):
         )
 
     data = conn.get_deployment_by_name(
-        service_name=kwargs["service_name"],
-        deployment_name=kwargs["deployment_name"],
+        service_name=kwargs["service_name"], deployment_name=kwargs["deployment_name"],
     )
     return object_to_dict(data)
 
@@ -2502,8 +2464,7 @@ def create_affinity_group(kwargs=None, conn=None, call=None):
         return {"Success": "The affinity group was successfully created"}
     except AzureConflictHttpError:
         raise SaltCloudSystemExit(
-            "There was a conflict. This usually means that the affinity group already"
-            " exists."
+            "There was a conflict. This usually means that the affinity group already exists."
         )
 
 
@@ -2712,8 +2673,7 @@ def create_storage_container(kwargs=None, storage_conn=None, call=None):
     """
     if call != "function":
         raise SaltCloudSystemExit(
-            "The create_storage_container function must be called with -f or"
-            " --function."
+            "The create_storage_container function must be called with -f or --function."
         )
 
     if not storage_conn:
@@ -2729,8 +2689,7 @@ def create_storage_container(kwargs=None, storage_conn=None, call=None):
         return {"Success": "The storage container was successfully created"}
     except AzureConflictHttpError:
         raise SaltCloudSystemExit(
-            "There was a conflict. This usually means that the storage container"
-            " already exists."
+            "There was a conflict. This usually means that the storage container already exists."
         )
 
 
@@ -2766,8 +2725,7 @@ def show_storage_container(kwargs=None, storage_conn=None, call=None):
         storage_conn = get_storage_conn(conn_kwargs=kwargs)
 
     data = storage_conn.get_container_properties(
-        container_name=kwargs["name"],
-        x_ms_lease_id=kwargs.get("lease_id", None),
+        container_name=kwargs["name"], x_ms_lease_id=kwargs.get("lease_id", None),
     )
     return data
 
@@ -2811,8 +2769,7 @@ def show_storage_container_metadata(kwargs=None, storage_conn=None, call=None):
         storage_conn = get_storage_conn(conn_kwargs=kwargs)
 
     data = storage_conn.get_container_metadata(
-        container_name=kwargs["name"],
-        x_ms_lease_id=kwargs.get("lease_id", None),
+        container_name=kwargs["name"], x_ms_lease_id=kwargs.get("lease_id", None),
     )
     return data
 
@@ -2845,8 +2802,7 @@ def set_storage_container_metadata(kwargs=None, storage_conn=None, call=None):
     """
     if call != "function":
         raise SaltCloudSystemExit(
-            "The create_storage_container function must be called with -f or"
-            " --function."
+            "The create_storage_container function must be called with -f or --function."
         )
 
     if kwargs is None:
@@ -2910,8 +2866,7 @@ def show_storage_container_acl(kwargs=None, storage_conn=None, call=None):
         storage_conn = get_storage_conn(conn_kwargs=kwargs)
 
     data = storage_conn.get_container_acl(
-        container_name=kwargs["name"],
-        x_ms_lease_id=kwargs.get("lease_id", None),
+        container_name=kwargs["name"], x_ms_lease_id=kwargs.get("lease_id", None),
     )
     return data
 
@@ -2944,8 +2899,7 @@ def set_storage_container_acl(kwargs=None, storage_conn=None, call=None):
     """
     if call != "function":
         raise SaltCloudSystemExit(
-            "The create_storage_container function must be called with -f or"
-            " --function."
+            "The create_storage_container function must be called with -f or --function."
         )
 
     if not storage_conn:
@@ -2985,8 +2939,7 @@ def delete_storage_container(kwargs=None, storage_conn=None, call=None):
     """
     if call != "function":
         raise SaltCloudSystemExit(
-            "The delete_storage_container function must be called with -f or"
-            " --function."
+            "The delete_storage_container function must be called with -f or --function."
         )
 
     if kwargs is None:
@@ -3176,8 +3129,7 @@ def show_blob_service_properties(kwargs=None, storage_conn=None, call=None):
     """
     if call != "function":
         raise SaltCloudSystemExit(
-            "The show_blob_service_properties function must be called with -f or"
-            " --function."
+            "The show_blob_service_properties function must be called with -f or --function."
         )
 
     if not storage_conn:
@@ -3215,8 +3167,7 @@ def set_blob_service_properties(kwargs=None, storage_conn=None, call=None):
     """
     if call != "function":
         raise SaltCloudSystemExit(
-            "The set_blob_service_properties function must be called with -f or"
-            " --function."
+            "The set_blob_service_properties function must be called with -f or --function."
         )
 
     if kwargs is None:
@@ -3533,9 +3484,7 @@ def query(path, method="GET", data=None, params=None, header_dict=None, decode=T
         "backend", get_configured_provider(), __opts__, search_global=False
     )
     url = "https://{management_host}/{subscription_id}/{path}".format(
-        management_host=management_host,
-        subscription_id=subscription_id,
-        path=path,
+        management_host=management_host, subscription_id=subscription_id, path=path,
     )
 
     if header_dict is None:

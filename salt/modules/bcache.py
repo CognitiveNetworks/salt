@@ -985,8 +985,7 @@ def _wipe(dev):
         wiper = "dd"
     elif not HAS_BLKDISCARD:
         log.warning(
-            "blkdiscard binary not available, properly wipe the dev manually for"
-            " optimal results"
+            "blkdiscard binary not available, properly wipe the dev manually for optimal results"
         )
         wiper = "dd"
     else:

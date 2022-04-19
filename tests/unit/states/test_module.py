@@ -65,13 +65,7 @@ STATE_APPLY_RET = {
 }
 
 
-def _mocked_func_named(
-    name,
-    names=(
-        "Fred",
-        "Swen",
-    ),
-):
+def _mocked_func_named(name, names=("Fred", "Swen",)):
     """
     Mocked function with named defaults.
 
@@ -257,8 +251,9 @@ class ModuleStateTest(TestCase, LoaderModuleMockMixin):
             module_function = module.__salt__[CMD].__name__
         self.assertEqual(
             ret["comment"],
-            "'{}' failed: {}() got an unexpected keyword argument 'foo'".format(
-                CMD, module_function
+            (
+                "'{}' failed: {}() got an unexpected keyword argument "
+                "'foo'".format(CMD, module_function)
             ),
         )
         self.assertFalse(ret["result"])
@@ -332,10 +327,7 @@ class ModuleStateTest(TestCase, LoaderModuleMockMixin):
             0,
             "a",
             "",
-            (
-                1,
-                2,
-            ),
+            (1, 2,),
             (),
             [1, 2],
             [],

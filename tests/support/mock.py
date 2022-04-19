@@ -14,6 +14,7 @@
 # pylint: disable=unused-import,function-redefined,blacklisted-module,blacklisted-external-module
 
 
+import collections
 import copy
 import errno
 import fnmatch
@@ -42,8 +43,7 @@ from mock import (
 
 # pylint: disable=no-name-in-module,no-member
 
-NO_MOCK = False
-NO_MOCK_REASON = ''
+
 __mock_version = tuple(
     [int(part) for part in mock.__version__.split(".") if part.isdigit()]
 )  # pylint: disable=no-member
@@ -227,6 +227,7 @@ class MockCall:
         self.kwargs = kwargs
 
     def __repr__(self):
+        # future lint: disable=blacklisted-function
         ret = "MockCall("
         for arg in self.args:
             ret += repr(arg) + ", "
@@ -239,6 +240,7 @@ class MockCall:
                 ret += "{}={}".format(salt.utils.stringutils.to_str(key), repr(val))
         ret += ")"
         return ret
+        # future lint: enable=blacklisted-function
 
     def __str__(self):
         return self.__repr__()

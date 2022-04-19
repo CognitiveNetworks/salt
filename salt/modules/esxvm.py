@@ -1,10 +1,14 @@
+# -*- coding: utf-8 -*-
 """
 Module used to access the esx proxy connection methods
 """
 
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 
+# Import Salt libs
 import salt.utils.platform
 
 log = logging.getLogger(__name__)

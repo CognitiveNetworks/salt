@@ -1,11 +1,15 @@
+# -*- coding: utf-8 -*-
 """
 Module for managing keyboards on supported POSIX-like systems using
 systemd, or such as Redhat, Debian and Gentoo.
 """
 
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 
+# Import salt libs
 import salt.utils.path
 
 log = logging.getLogger(__name__)
@@ -24,8 +28,7 @@ def __virtual__():
     return (
         False,
         "The keyboard exeuction module cannot be loaded: "
-        "only works on Redhat, Debian or Gentoo systems or if localectl binary in"
-        " path.",
+        "only works on Redhat, Debian or Gentoo systems or if localectl binary in path.",
     )
 
 
@@ -64,18 +67,18 @@ def set_sys(layout):
         salt '*' keyboard.set_sys dvorak
     """
     if salt.utils.path.which("localectl"):
-        __salt__["cmd.run"]("localectl set-keymap {}".format(layout))
+        __salt__["cmd.run"]("localectl set-keymap {0}".format(layout))
     elif "RedHat" in __grains__["os_family"]:
         __salt__["file.sed"](
-            "/etc/sysconfig/keyboard", "^LAYOUT=.*", "LAYOUT={}".format(layout)
+            "/etc/sysconfig/keyboard", "^LAYOUT=.*", "LAYOUT={0}".format(layout)
         )
     elif "Debian" in __grains__["os_family"]:
         __salt__["file.sed"](
-            "/etc/default/keyboard", "^XKBLAYOUT=.*", "XKBLAYOUT={}".format(layout)
+            "/etc/default/keyboard", "^XKBLAYOUT=.*", "XKBLAYOUT={0}".format(layout)
         )
     elif "Gentoo" in __grains__["os_family"]:
         __salt__["file.sed"](
-            "/etc/conf.d/keymaps", "^keymap=.*", "keymap={}".format(layout)
+            "/etc/conf.d/keymaps", "^keymap=.*", "keymap={0}".format(layout)
         )
     return layout
 
@@ -105,6 +108,6 @@ def set_x(layout):
 
         salt '*' keyboard.set_x dvorak
     """
-    cmd = "setxkbmap {}".format(layout)
+    cmd = "setxkbmap {0}".format(layout)
     __salt__["cmd.run"](cmd)
     return layout

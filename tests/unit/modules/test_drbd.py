@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
 """
     :codeauthor: Jayesh Kariya <jayeshk@saltstack.com>
 """
 
+from __future__ import absolute_import, print_function, unicode_literals
 
 import salt.modules.drbd as drbd
 from tests.support.mixins import LoaderModuleMockMixin
@@ -39,9 +41,8 @@ class DrbdTestCase(TestCase, LoaderModuleMockMixin):
             "used": "50",
         }
         mock = MagicMock(
-            return_value=(
-                "Salt:Stack True master/minion UpToDate/UpToDate True None 50 50 666 888"
-            )
+            return_value="Salt:Stack True master/minion \
+        UpToDate/UpToDate True None 50 50 666 888"
         )
         with patch.dict(drbd.__salt__, {"cmd.run": mock}):
             self.assertDictEqual(drbd.overview(), ret)
@@ -58,9 +59,8 @@ class DrbdTestCase(TestCase, LoaderModuleMockMixin):
             "synchronisation: ": "syncbar",
         }
         mock = MagicMock(
-            return_value=(
-                "Salt:Stack True master/minion UpToDate/partner syncbar None 50 50"
-            )
+            return_value="Salt:Stack True master/minion \
+        UpToDate/partner syncbar None 50 50"
         )
         with patch.dict(drbd.__salt__, {"cmd.run": mock}):
             self.assertDictEqual(drbd.overview(), ret)

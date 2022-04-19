@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
 """
 Functions various time manipulations.
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
 # Import Python
 import logging
@@ -8,6 +10,7 @@ import time
 from datetime import datetime, timedelta
 
 # Import Salt modules
+from salt.ext import six
 
 log = logging.getLogger(__name__)
 
@@ -38,7 +41,7 @@ def get_timestamp_at(time_in=None, time_at=None):
         return time.mktime(time_at.timetuple())
     elif time_at:
         log.debug("Predicted at specified as %s", time_at)
-        if isinstance(time_at, (int, float)):
+        if isinstance(time_at, (six.integer_types, float)):
             # then it's a timestamp
             return time_at
         else:

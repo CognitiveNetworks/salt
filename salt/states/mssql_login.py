@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Management of Microsoft SQLServer Logins
 ========================================
@@ -11,6 +12,7 @@ and manage SQL Server Logins
       mssql_login.present
         - domain: mydomain
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
 import collections
 
@@ -26,7 +28,7 @@ def __virtual__():
 
 def _normalize_options(options):
     if type(options) in [dict, collections.OrderedDict]:
-        return ["{}={}".format(k, v) for k, v in options.items()]
+        return ["{0}={1}".format(k, v) for k, v in options.items()]
     if type(options) is list and (not options or type(options[0]) is str):
         return options
     # Invalid options
@@ -69,13 +71,13 @@ def present(
     if __salt__["mssql.login_exists"](name, domain=domain, **kwargs):
         ret[
             "comment"
-        ] = "Login {} is already present (Not going to try to set its password)".format(
+        ] = "Login {0} is already present (Not going to try to set its password)".format(
             name
         )
         return ret
     if __opts__["test"]:
         ret["result"] = None
-        ret["comment"] = "Login {} is set to be added".format(name)
+        ret["comment"] = "Login {0} is set to be added".format(name)
         return ret
 
     login_created = __salt__["mssql.login_create"](
@@ -89,9 +91,9 @@ def present(
     # Non-empty strings are also evaluated to True, so we cannot use if not login_created:
     if login_created is not True:
         ret["result"] = False
-        ret["comment"] = "Login {} failed to be added: {}".format(name, login_created)
+        ret["comment"] = "Login {0} failed to be added: {1}".format(name, login_created)
         return ret
-    ret["comment"] = "Login {} has been added. ".format(name)
+    ret["comment"] = "Login {0} has been added. ".format(name)
     ret["changes"][name] = "Present"
     return ret
 
@@ -106,17 +108,17 @@ def absent(name, **kwargs):
     ret = {"name": name, "changes": {}, "result": True, "comment": ""}
 
     if not __salt__["mssql.login_exists"](name):
-        ret["comment"] = "Login {} is not present".format(name)
+        ret["comment"] = "Login {0} is not present".format(name)
         return ret
     if __opts__["test"]:
         ret["result"] = None
-        ret["comment"] = "Login {} is set to be removed".format(name)
+        ret["comment"] = "Login {0} is set to be removed".format(name)
         return ret
     if __salt__["mssql.login_remove"](name, **kwargs):
-        ret["comment"] = "Login {} has been removed".format(name)
+        ret["comment"] = "Login {0} has been removed".format(name)
         ret["changes"][name] = "Absent"
         return ret
     # else:
     ret["result"] = False
-    ret["comment"] = "Login {} failed to be removed".format(name)
+    ret["comment"] = "Login {0} failed to be removed".format(name)
     return ret

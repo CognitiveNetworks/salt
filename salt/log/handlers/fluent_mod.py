@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     Fluent Logging Handler
     ======================
@@ -72,6 +73,8 @@
 
 """
 
+# Import python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import datetime
 import logging
@@ -83,7 +86,12 @@ import types
 
 import salt.utils.msgpack
 import salt.utils.network
+
+# Import Third party libs
+from salt.ext import six
 from salt.log.mixins import NewStyleClassMixIn
+
+# Import salt libs
 from salt.log.setup import LOG_LEVELS
 
 log = logging.getLogger(__name__)
@@ -184,9 +192,9 @@ class MessageFormatter(logging.Formatter, NewStyleClassMixIn):
         self.tags = tags
         self.msg_path = msg_path if msg_path else payload_type
         self.msg_type = msg_type if msg_type else payload_type
-        format_func = "format_{}_v{}".format(payload_type, version).replace(".", "_")
+        format_func = "format_{0}_v{1}".format(payload_type, version).replace(".", "_")
         self.format = getattr(self, format_func)
-        super().__init__(fmt=None, datefmt=None)
+        super(MessageFormatter, self).__init__(fmt=None, datefmt=None)
 
     def formatTime(self, record, datefmt=None):
         if self.payload_type == "gelf":  # GELF uses epoch times
@@ -212,7 +220,7 @@ class MessageFormatter(logging.Formatter, NewStyleClassMixIn):
             message_dict.update({"full_message": exc_info})
 
         # Add any extra attributes to the message field
-        for key, value in record.__dict__.items():
+        for key, value in six.iteritems(record.__dict__):
             if key in (
                 "args",
                 "asctime",
@@ -236,12 +244,14 @@ class MessageFormatter(logging.Formatter, NewStyleClassMixIn):
                 continue
 
             # pylint: disable=incompatible-py3-code
-            if isinstance(value, (str, bool, dict, float, int, list, types.NoneType)):
+            if isinstance(
+                value, (six.string_types, bool, dict, float, int, list, types.NoneType)
+            ):
                 val = value
             # pylint: enable=incompatible-py3-code
             else:
                 val = repr(value)
-            message_dict.update({"{}".format(key): val})
+            message_dict.update({"{0}".format(key): val})
         return message_dict
 
     def format_gelf_v1_1(self, record):
@@ -263,7 +273,7 @@ class MessageFormatter(logging.Formatter, NewStyleClassMixIn):
             message_dict.update({"full_message": exc_info})
 
         # Add any extra attributes to the message field
-        for key, value in record.__dict__.items():
+        for key, value in six.iteritems(record.__dict__):
             if key in (
                 "args",
                 "asctime",
@@ -287,13 +297,15 @@ class MessageFormatter(logging.Formatter, NewStyleClassMixIn):
                 continue
 
             # pylint: disable=incompatible-py3-code
-            if isinstance(value, (str, bool, dict, float, int, list, types.NoneType)):
+            if isinstance(
+                value, (six.string_types, bool, dict, float, int, list, types.NoneType)
+            ):
                 val = value
             # pylint: enable=incompatible-py3-code
             else:
                 val = repr(value)
             # GELF spec require "non-standard" fields to be prefixed with '_' (underscore).
-            message_dict.update({"_{}".format(key): val})
+            message_dict.update({"_{0}".format(key): val})
 
         return message_dict
 
@@ -315,7 +327,7 @@ class MessageFormatter(logging.Formatter, NewStyleClassMixIn):
                 "processName": record.processName,
             },
             "@message": record.getMessage(),
-            "@source": "{}://{}/{}".format(self.msg_type, host, self.msg_path),
+            "@source": "{0}://{1}/{2}".format(self.msg_type, host, self.msg_path),
             "@source_host": host,
             "@source_path": self.msg_path,
             "@tags": self.tags,
@@ -326,7 +338,7 @@ class MessageFormatter(logging.Formatter, NewStyleClassMixIn):
             message_dict["@fields"]["exc_info"] = self.formatException(record.exc_info)
 
         # Add any extra attributes to the message field
-        for key, value in record.__dict__.items():
+        for key, value in six.iteritems(record.__dict__):
             if key in (
                 "args",
                 "asctime",
@@ -359,7 +371,7 @@ class MessageFormatter(logging.Formatter, NewStyleClassMixIn):
                 message_dict["@fields"][key] = value
                 continue
 
-            if isinstance(value, (str, bool, dict, float, int, list)):
+            if isinstance(value, (six.string_types, bool, dict, float, int, list)):
                 message_dict["@fields"][key] = value
                 continue
 
@@ -391,7 +403,7 @@ class MessageFormatter(logging.Formatter, NewStyleClassMixIn):
             message_dict["exc_info"] = self.formatException(record.exc_info)
 
         # Add any extra attributes to the message field
-        for key, value in record.__dict__.items():
+        for key, value in six.iteritems(record.__dict__):
             if key in (
                 "args",
                 "asctime",
@@ -424,7 +436,7 @@ class MessageFormatter(logging.Formatter, NewStyleClassMixIn):
                 message_dict[key] = value
                 continue
 
-            if isinstance(value, (str, bool, dict, float, int, list)):
+            if isinstance(value, (six.string_types, bool, dict, float, int, list)):
                 message_dict[key] = value
                 continue
 
@@ -458,7 +470,7 @@ class FluentHandler(logging.Handler):
             self.release()
 
 
-class FluentSender:
+class FluentSender(object):
     def __init__(
         self,
         tag,

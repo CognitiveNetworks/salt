@@ -234,10 +234,8 @@ def test_present_update(input_params, existing_obj_diff, diff_params):
             ret["comment"] = 'Zabbix Action "{}" updated.'.format(name)
             ret["changes"] = {
                 name: {
-                    "old": (
-                        'Zabbix Action "{}" differed '
-                        "in following parameters: {}".format(name, diff_params)
-                    ),
+                    "old": 'Zabbix Action "{}" differed '
+                    "in following parameters: {}".format(name, diff_params),
                     "new": 'Zabbix Action "{}" fixed.'.format(name),
                 }
             }

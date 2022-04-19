@@ -558,7 +558,7 @@ def _is_text_file(filename):
     type_of_file = subprocess.run(
         ["file", "-bi", filename],
         check=False,
-        stdout=subprocess.PIPE,
+        stdout=subprocess.STDOUT,
         universal_newlines=True,
     ).stdout
     return type_of_file.startswith("text")

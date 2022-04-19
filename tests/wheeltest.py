@@ -1,14 +1,20 @@
+# -*- coding: utf-8 -*-
+
 #!/usr/bin/env python
 """
 Test interacting with the wheel system. This script is useful when testing
 wheel modules
 """
 
+# Import Python libs
+from __future__ import absolute_import
 
 import optparse
 import pprint
 
 import salt.auth
+
+# Import Salt Libs
 import salt.config
 import salt.wheel
 
@@ -39,7 +45,7 @@ def parse():
     return cli
 
 
-class Wheeler:
+class Wheeler(object):
     """
     Set up communication with the wheel interface
     """

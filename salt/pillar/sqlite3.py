@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Retrieve Pillar data by doing a SQLite3 query
 
@@ -45,11 +46,15 @@ Complete Example
             as_list: True
             with_lists: [1,3]
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 import sqlite3
+
+# Import python libs
 from contextlib import contextmanager
 
+# Import Salt libs
 from salt.pillar.sql_base import SqlBaseExtPillar
 
 # Set up logging

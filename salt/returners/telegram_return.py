@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Return salt data via Telegram.
 
@@ -21,9 +22,12 @@ To use the Telegram return, append '--return telegram' to the salt command.
     salt '*' test.ping --return telegram
 
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import Python libs
 import logging
 
+# Import Salt Libs
 import salt.returners
 
 log = logging.getLogger(__name__)
@@ -76,7 +80,13 @@ def returner(ret):
 
     returns = ret.get("return")
 
-    message = "id: {}\r\nfunction: {}\r\nfunction args: {}\r\njid: {}\r\nreturn: {}\r\n".format(
+    message = (
+        "id: {0}\r\n"
+        "function: {1}\r\n"
+        "function args: {2}\r\n"
+        "jid: {3}\r\n"
+        "return: {4}\r\n"
+    ).format(
         ret.get("id"), ret.get("fun"), ret.get("fun_args"), ret.get("jid"), returns
     )
 

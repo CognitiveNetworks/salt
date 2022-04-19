@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Simple module for creating temporary directories and files
 
@@ -6,6 +7,7 @@ This is a thin wrapper around Pythons tempfile module
 .. versionadded:: 2015.8.0
 
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 import os

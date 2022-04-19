@@ -23,8 +23,7 @@ class JSONTestCase(TestCase):
     }
 
     serialized = salt.utils.stringutils.to_str(
-        '{"None": null, "True": false, "dict": {"subdict": {"спам": "яйца"}}, "float":'
-        ' 1.5, "list": [1, 2, "three"], "спам": "яйца"}'
+        '{"None": null, "True": false, "dict": {"subdict": {"спам": "яйца"}}, "float": 1.5, "list": [1, 2, "three"], "спам": "яйца"}'
     )
 
     serialized_indent4 = salt.utils.stringutils.to_str(
@@ -81,10 +80,7 @@ class JSONTestCase(TestCase):
                         "GlossEntry": {
                             "GlossDef": {
                                 "GlossSeeAlso": ["GML", "XML"],
-                                "para": (
-                                    "A meta-markup language, used to create markup"
-                                    " languages such as DocBook."
-                                ),
+                                "para": "A meta-markup language, used to create markup languages such as DocBook.",
                             },
                             "GlossSee": "markup",
                             "Acronym": "SGML",
@@ -129,7 +125,9 @@ class JSONTestCase(TestCase):
         # results in trailing whitespace on lines ending in a comma. So, for a
         # proper comparison, we will have to run rstrip on each line of the
         # return and then stitch it back together.
-        ret = "\n".join([x.rstrip() for x in ret.splitlines()])
+        ret = "\n".join(
+            [x.rstrip() for x in ret.splitlines()]
+        )  # future lint: disable=blacklisted-function
         self.assertEqual(ret, self.serialized_indent4)
         # Loading it should be equal to the original data
         self.assertEqual(salt.utils.json.loads(ret), self.data)

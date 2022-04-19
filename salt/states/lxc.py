@@ -1,9 +1,12 @@
+# -*- coding: utf-8 -*-
 """
 Manage Linux Containers
 =======================
 """
 
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import salt libs
 from salt.exceptions import CommandExecutionError, SaltInvocationError
 
 __docformat__ = "restructuredtext en"
@@ -151,7 +154,7 @@ def present(
     ret = {
         "name": name,
         "result": True,
-        "comment": "Container '{}' already exists".format(name),
+        "comment": "Container '{0}' already exists".format(name),
         "changes": {},
     }
 
@@ -179,17 +182,17 @@ def present(
     # Sanity check(s)
     if clone_from and not __salt__["lxc.exists"](clone_from, path=path):
         ret["result"] = False
-        ret["comment"] = "Clone source '{}' does not exist".format(clone_from)
+        ret["comment"] = "Clone source '{0}' does not exist".format(clone_from)
     if not ret["result"]:
         return ret
 
-    action = "cloned from {}".format(clone_from) if clone_from else "created"
+    action = "cloned from {0}".format(clone_from) if clone_from else "created"
 
     state = {"old": __salt__["lxc.state"](name, path=path)}
     if __opts__["test"]:
         if state["old"] is None:
-            ret["comment"] = "Container '{}' will be {}".format(
-                name, "cloned from {}".format(clone_from) if clone_from else "created"
+            ret["comment"] = "Container '{0}' will be {1}".format(
+                name, "cloned from {0}".format(clone_from) if clone_from else "created"
             )
             ret["result"] = None
             return ret
@@ -200,7 +203,7 @@ def present(
                 return ret
             elif running:
                 if state["old"] in ("frozen", "stopped"):
-                    ret["comment"] = "Container '{}' would be {}".format(
+                    ret["comment"] = "Container '{0}' would be {1}".format(
                         name, "unfrozen" if state["old"] == "frozen" else "started"
                     )
                     ret["result"] = None
@@ -210,7 +213,7 @@ def present(
                     return ret
             else:
                 if state["old"] in ("frozen", "running"):
-                    ret["comment"] = "Container '{}' would be stopped".format(name)
+                    ret["comment"] = "Container '{0}' would be stopped".format(name)
                     ret["result"] = None
                     return ret
                 else:
@@ -253,11 +256,11 @@ def present(
             ret["comment"] = exc.strerror
         else:
             if clone_from:
-                ret["comment"] = "Cloned container '{}' as '{}'".format(
+                ret["comment"] = "Cloned container '{0}' as '{1}'".format(
                     clone_from, name
                 )
             else:
-                ret["comment"] = "Created container '{}'".format(name)
+                ret["comment"] = "Created container '{0}'".format(name)
             state["new"] = result["state"]["new"]
 
     if ret["result"] is True:
@@ -279,12 +282,12 @@ def present(
                         ret["comment"] += error
                 except (SaltInvocationError, CommandExecutionError) as exc:
                     ret["result"] = False
-                    ret["comment"] += "{}: {}".format(error, exc)
+                    ret["comment"] += "{0}: {1}".format(error, exc)
                 else:
                     if state["old"] is None:
                         ret["comment"] += ", and the container was started"
                     else:
-                        ret["comment"] = "Container '{}' was {}".format(
+                        ret["comment"] = "Container '{0}' was {1}".format(
                             name, "unfrozen" if state["old"] == "frozen" else "started"
                         )
 
@@ -302,12 +305,12 @@ def present(
                         ret["comment"] += error
                 except (SaltInvocationError, CommandExecutionError) as exc:
                     ret["result"] = False
-                    ret["comment"] += "{}: {}".format(error, exc)
+                    ret["comment"] += "{0}: {1}".format(error, exc)
                 else:
                     if state["old"] is None:
                         ret["comment"] += ", and the container was stopped"
                     else:
-                        ret["comment"] = "Container '{}' was stopped".format(name)
+                        ret["comment"] = "Container '{0}' was stopped".format(name)
 
     if "new" not in state:
         # Make sure we know the final state of the container before we return
@@ -346,7 +349,7 @@ def absent(name, stop=False, path=None):
         "name": name,
         "changes": {},
         "result": True,
-        "comment": "Container '{}' does not exist".format(name),
+        "comment": "Container '{0}' does not exist".format(name),
     }
 
     if not __salt__["lxc.exists"](name, path=path):
@@ -354,17 +357,17 @@ def absent(name, stop=False, path=None):
 
     if __opts__["test"]:
         ret["result"] = None
-        ret["comment"] = "Container '{}' would be destroyed".format(name)
+        ret["comment"] = "Container '{0}' would be destroyed".format(name)
         return ret
 
     try:
         result = __salt__["lxc.destroy"](name, stop=stop, path=path)
     except (SaltInvocationError, CommandExecutionError) as exc:
         ret["result"] = False
-        ret["comment"] = "Failed to destroy container: {}".format(exc)
+        ret["comment"] = "Failed to destroy container: {0}".format(exc)
     else:
         ret["changes"]["state"] = result["state"]
-        ret["comment"] = "Container '{}' was destroyed".format(name)
+        ret["comment"] = "Container '{0}' was destroyed".format(name)
     return ret
 
 
@@ -408,14 +411,14 @@ def running(name, restart=False, path=None):
     ret = {
         "name": name,
         "result": True,
-        "comment": "Container '{}' is already running".format(name),
+        "comment": "Container '{0}' is already running".format(name),
         "changes": {},
     }
 
     state = {"old": __salt__["lxc.state"](name, path=path)}
     if state["old"] is None:
         ret["result"] = False
-        ret["comment"] = "Container '{}' does not exist".format(name)
+        ret["comment"] = "Container '{0}' does not exist".format(name)
         return ret
     elif state["old"] == "running" and not restart:
         return ret
@@ -436,7 +439,7 @@ def running(name, restart=False, path=None):
 
     if __opts__["test"]:
         ret["result"] = None
-        ret["comment"] = "Container '{}' would be {}".format(name, action[1])
+        ret["comment"] = "Container '{0}' would be {1}".format(name, action[1])
         return ret
 
     try:
@@ -455,9 +458,9 @@ def running(name, restart=False, path=None):
         state["new"] = result["state"]["new"]
         if state["new"] != "running":
             ret["result"] = False
-            ret["comment"] = "Unable to {} container '{}'".format(action[0], name)
+            ret["comment"] = "Unable to {0} container '{1}'".format(action[0], name)
         else:
-            ret["comment"] = "Container '{}' was successfully {}".format(
+            ret["comment"] = "Container '{0}' was successfully {1}".format(
                 name, action[1]
             )
         try:
@@ -508,17 +511,17 @@ def frozen(name, start=True, path=None):
     ret = {
         "name": name,
         "result": True,
-        "comment": "Container '{}' is already frozen".format(name),
+        "comment": "Container '{0}' is already frozen".format(name),
         "changes": {},
     }
 
     state = {"old": __salt__["lxc.state"](name, path=path)}
     if state["old"] is None:
         ret["result"] = False
-        ret["comment"] = "Container '{}' does not exist".format(name)
+        ret["comment"] = "Container '{0}' does not exist".format(name)
     elif state["old"] == "stopped" and not start:
         ret["result"] = False
-        ret["comment"] = "Container '{}' is stopped".format(name)
+        ret["comment"] = "Container '{0}' is stopped".format(name)
 
     if ret["result"] is False or state["old"] == "frozen":
         return ret
@@ -530,7 +533,7 @@ def frozen(name, start=True, path=None):
 
     if __opts__["test"]:
         ret["result"] = None
-        ret["comment"] = "Container '{}' would be {}".format(name, action[1])
+        ret["comment"] = "Container '{0}' would be {1}".format(name, action[1])
         return ret
 
     try:
@@ -543,9 +546,9 @@ def frozen(name, start=True, path=None):
         state["new"] = result["state"]["new"]
         if state["new"] != "frozen":
             ret["result"] = False
-            ret["comment"] = "Unable to {} container '{}'".format(action[0], name)
+            ret["comment"] = "Unable to {0} container '{1}'".format(action[0], name)
         else:
-            ret["comment"] = "Container '{}' was successfully {}".format(
+            ret["comment"] = "Container '{0}' was successfully {1}".format(
                 name, action[1]
             )
         try:
@@ -595,14 +598,14 @@ def stopped(name, kill=False, path=None):
     ret = {
         "name": name,
         "result": True,
-        "comment": "Container '{}' is already stopped".format(name),
+        "comment": "Container '{0}' is already stopped".format(name),
         "changes": {},
     }
 
     state = {"old": __salt__["lxc.state"](name, path=path)}
     if state["old"] is None:
         ret["result"] = False
-        ret["comment"] = "Container '{}' does not exist".format(name)
+        ret["comment"] = "Container '{0}' does not exist".format(name)
         return ret
     elif state["old"] == "stopped":
         return ret
@@ -614,7 +617,7 @@ def stopped(name, kill=False, path=None):
 
     if __opts__["test"]:
         ret["result"] = None
-        ret["comment"] = "Container '{}' would be {}".format(name, action[1])
+        ret["comment"] = "Container '{0}' would be {1}".format(name, action[1])
         return ret
 
     try:
@@ -627,9 +630,9 @@ def stopped(name, kill=False, path=None):
         state["new"] = result["state"]["new"]
         if state["new"] != "stopped":
             ret["result"] = False
-            ret["comment"] = "Unable to {} container '{}'".format(action[0], name)
+            ret["comment"] = "Unable to {0} container '{1}'".format(action[0], name)
         else:
-            ret["comment"] = "Container '{}' was successfully {}".format(
+            ret["comment"] = "Container '{0}' was successfully {1}".format(
                 name, action[1]
             )
 
@@ -659,11 +662,9 @@ def set_pass(name, **kwargs):  # pylint: disable=W0613
     """
     return {
         "name": name,
-        "comment": (
-            "The lxc.set_pass state is no longer supported. Please "
-            "see the LXC states documentation for further "
-            "information."
-        ),
+        "comment": "The lxc.set_pass state is no longer supported. Please "
+        "see the LXC states documentation for further "
+        "information.",
         "result": False,
         "changes": {},
     }
@@ -708,7 +709,7 @@ def edited_conf(name, lxc_conf=None, lxc_conf_unset=None):
     if __opts__["test"]:
         return {
             "name": name,
-            "comment": "{} lxc.conf will be edited".format(name),
+            "comment": "{0} lxc.conf will be edited".format(name),
             "result": True,
             "changes": {},
         }

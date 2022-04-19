@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Manage users with the useradd command
 
@@ -10,13 +11,17 @@ Manage users with the useradd command
 
 """
 
+# Import python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import copy
 import logging
 
+# Import salt libs
 import salt.utils.data
 import salt.utils.user
 from salt.exceptions import CommandExecutionError
+from salt.ext import six
 
 try:
     import pwd
@@ -57,10 +62,10 @@ def _get_gecos(name):
         while len(gecos_field) < 4:
             gecos_field.append("")
         return {
-            "fullname": str(gecos_field[0]),
-            "roomnumber": str(gecos_field[1]),
-            "workphone": str(gecos_field[2]),
-            "homephone": str(gecos_field[3]),
+            "fullname": six.text_type(gecos_field[0]),
+            "roomnumber": six.text_type(gecos_field[1]),
+            "workphone": six.text_type(gecos_field[2]),
+            "homephone": six.text_type(gecos_field[3]),
         }
 
 
@@ -69,7 +74,7 @@ def _build_gecos(gecos_dict):
     Accepts a dictionary entry containing GECOS field names and their values,
     and returns a full GECOS comment string, to be used with usermod.
     """
-    return "{},{},{},{}".format(
+    return "{0},{1},{2},{3}".format(
         gecos_dict.get("fullname", ""),
         gecos_dict.get("roomnumber", ""),
         gecos_dict.get("workphone", ""),
@@ -81,8 +86,8 @@ def _update_gecos(name, key, value):
     """
     Common code to change a user's GECOS information
     """
-    if not isinstance(value, str):
-        value = str(value)
+    if not isinstance(value, six.string_types):
+        value = six.text_type(value)
     pre_info = _get_gecos(name)
     if not pre_info:
         return False
@@ -121,11 +126,11 @@ def add(
         salt '*' user.add name <uid> <gid> <groups> <home> <shell>
     """
     if salt.utils.data.is_true(kwargs.pop("system", False)):
-        log.warning("solaris_user module does not support the 'system' argument")
+        log.warning("solaris_user module does not support the 'system' " "argument")
     if kwargs:
         log.warning("Invalid kwargs passed to user.add")
 
-    if isinstance(groups, str):
+    if isinstance(groups, six.string_types):
         groups = groups.split(",")
     cmd = ["useradd"]
     if shell:
@@ -178,7 +183,7 @@ def delete(name, remove=False, force=False):
     """
     if salt.utils.data.is_true(force):
         log.warning(
-            "userdel does not support force-deleting user while user is logged in"
+            "userdel does not support force-deleting user while user is " "logged in"
         )
     cmd = ["userdel"]
     if remove:
@@ -219,7 +224,7 @@ def chuid(name, uid):
     """
     pre_info = info(name)
     if not pre_info:
-        raise CommandExecutionError("User '{}' does not exist".format(name))
+        raise CommandExecutionError("User '{0}' does not exist".format(name))
     if uid == pre_info["uid"]:
         return True
     cmd = ["usermod", "-u", uid, name]
@@ -239,7 +244,7 @@ def chgid(name, gid):
     """
     pre_info = info(name)
     if not pre_info:
-        raise CommandExecutionError("User '{}' does not exist".format(name))
+        raise CommandExecutionError("User '{0}' does not exist".format(name))
     if gid == pre_info["gid"]:
         return True
     cmd = ["usermod", "-g", gid, name]
@@ -259,7 +264,7 @@ def chshell(name, shell):
     """
     pre_info = info(name)
     if not pre_info:
-        raise CommandExecutionError("User '{}' does not exist".format(name))
+        raise CommandExecutionError("User '{0}' does not exist".format(name))
     if shell == pre_info["shell"]:
         return True
     cmd = ["usermod", "-s", shell, name]
@@ -290,7 +295,7 @@ def chhome(name, home, persist=False):
     """
     pre_info = info(name)
     if not pre_info:
-        raise CommandExecutionError("User '{}' does not exist".format(name))
+        raise CommandExecutionError("User '{0}' does not exist".format(name))
     if home == pre_info["home"]:
         return True
     cmd = ["usermod", "-d", home]
@@ -323,7 +328,7 @@ def chgroups(name, groups, append=False):
 
         salt '*' user.chgroups foo wheel,root True
     """
-    if isinstance(groups, str):
+    if isinstance(groups, six.string_types):
         groups = groups.split(",")
     ugrps = set(list_groups(name))
     if ugrps == set(groups):
@@ -458,10 +463,10 @@ def rename(name, new_name):
     """
     current_info = info(name)
     if not current_info:
-        raise CommandExecutionError("User '{}' does not exist".format(name))
+        raise CommandExecutionError("User '{0}' does not exist".format(name))
     new_info = info(new_name)
     if new_info:
-        raise CommandExecutionError("User '{}' already exists".format(new_name))
+        raise CommandExecutionError("User '{0}' already exists".format(new_name))
     cmd = ["usermod", "-l", new_name, name]
     __salt__["cmd.run"](cmd, python_shell=False)
     return info(new_name).get("name") == new_name

@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
 """
 Functions for working with Mako templates
 """
+from __future__ import absolute_import, unicode_literals
 
 try:
     from mako.lookup import (
@@ -13,9 +15,16 @@ except ImportError:
     HAS_MAKO = False
 
 if HAS_MAKO:
+    # Import Python libs
     import os
 
-    import urllib.parse
+    # Import third-party libs
+    # pylint: disable=import-error,no-name-in-module
+    from salt.ext.six.moves.urllib.parse import urlparse
+
+    # pylint: enable=import-error,no-name-in-module
+
+    # Import salt libs
     import salt.fileclient
     import salt.utils.url
 
@@ -66,11 +75,13 @@ if HAS_MAKO:
             return self._file_client
 
         def adjust_uri(self, uri, filename):
-            scheme = urllib.parse.urlparse(uri).scheme
+            scheme = urlparse(uri).scheme
             if scheme in ("salt", "file"):
                 return uri
             elif scheme:
-                raise ValueError("Unsupported URL scheme({}) in {}".format(scheme, uri))
+                raise ValueError(
+                    "Unsupported URL scheme({0}) in {1}".format(scheme, uri)
+                )
             return self.lookup.adjust_uri(uri, filename)
 
         def get_template(self, uri, relativeto=None):

@@ -20,10 +20,8 @@ def test_managed_missing_parameters():
         "name": "salt",
         "changes": {},
         "result": False,
-        "comment": (
-            "dns_proto must be one of the following: static, dhcp\n"
-            "ip_proto must be one of the following: static, dhcp"
-        ),
+        "comment": "dns_proto must be one of the following: static, dhcp\n"
+        "ip_proto must be one of the following: static, dhcp",
     }
     assert win_network.managed("salt") == ret
 
@@ -64,12 +62,10 @@ def test_managed_validate_errors():
         "name": "salt",
         "changes": {},
         "result": False,
-        "comment": (
-            "The following SLS configuration errors were "
-            "detected:\n"
-            "- First Error\n"
-            "- Second Error"
-        ),
+        "comment": "The following SLS configuration errors were "
+        "detected:\n"
+        "- First Error\n"
+        "- Second Error",
     }
     mock_true = MagicMock(return_value=True)
     mock_validate = MagicMock(return_value=["First Error", "Second Error"])
@@ -126,11 +122,9 @@ def test_managed_test_true_changes():
         "name": "salt",
         "changes": {},
         "result": None,
-        "comment": (
-            "The following changes will be made to interface "
-            "'salt':\n"
-            "- DNS protocol will be changed to: dhcp"
-        ),
+        "comment": "The following changes will be made to interface "
+        "'salt':\n"
+        "- DNS protocol will be changed to: dhcp",
     }
     mock_true = MagicMock(return_value=True)
     mock_validate = MagicMock(return_value=[])
@@ -155,7 +149,8 @@ def test_managed_failed():
         "name": "salt",
         "changes": {},
         "result": False,
-        "comment": "Failed to set desired configuration settings for interface 'salt'",
+        "comment": "Failed to set desired configuration settings for "
+        "interface 'salt'",
     }
     mock_true = MagicMock(return_value=True)
     mock_validate = MagicMock(return_value=[])
@@ -285,10 +280,7 @@ def test_managed_static_dns():
         win_network, "_validate", mock_validate
     ):
         ret = win_network.managed(
-            "salt",
-            dns_proto="static",
-            dns_servers=["192.168.0.10"],
-            ip_proto="dhcp",
+            "salt", dns_proto="static", dns_servers=["192.168.0.10"], ip_proto="dhcp",
         )
         assert ret == expected
 

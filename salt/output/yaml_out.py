@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Display return data in YAML format
 ==================================
@@ -26,9 +27,12 @@ CLI Example:
           - Hello
           - World
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import third party libs
 import logging
 
+# Import salt libs
 import salt.utils.yaml
 
 # Define the module's virtual name

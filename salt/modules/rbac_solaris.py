@@ -1,9 +1,13 @@
+# -*- coding: utf-8 -*-
 """
 Module for Solaris' Role-Based Access Control
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import Python libs
 import logging
 
+# Import Salt libs
 import salt.utils.files
 import salt.utils.path
 
@@ -21,7 +25,9 @@ def __virtual__():
         return __virtualname__
     return (
         False,
-        "{} module can only be loaded on a solaris like system".format(__virtualname__),
+        "{0} module can only be loaded on a solaris like system".format(
+            __virtualname__
+        ),
     )
 
 
@@ -155,8 +161,7 @@ def profile_add(user, profile):
     if len(valid_profiles) > 0:
         res = __salt__["cmd.run_all"](
             'usermod -P "{profiles}" {login}'.format(
-                login=user,
-                profiles=",".join(set(profile_get(user) + valid_profiles)),
+                login=user, profiles=",".join(set(profile_get(user) + valid_profiles)),
             )
         )
         if res["retcode"] > 0:
@@ -354,8 +359,7 @@ def role_add(user, role):
     if len(valid_roles) > 0:
         res = __salt__["cmd.run_all"](
             'usermod -R "{roles}" {login}'.format(
-                login=user,
-                roles=",".join(set(role_get(user) + valid_roles)),
+                login=user, roles=",".join(set(role_get(user) + valid_roles)),
             )
         )
         if res["retcode"] > 0:
@@ -459,7 +463,7 @@ def auth_list():
 
             # add auth info to dict
             if auth[0][-1:] == ".":
-                auth[0] = "{}*".format(auth[0])
+                auth[0] = "{0}*".format(auth[0])
             auths[auth[0]] = auth[3]
 
     return auths
@@ -509,7 +513,7 @@ def auth_get(user, computed=True):
 
     ## also parse auths command
     if computed:
-        res = __salt__["cmd.run_all"]("auths {}".format(user))
+        res = __salt__["cmd.run_all"]("auths {0}".format(user))
         if res["retcode"] == 0:
             for auth in res["stdout"].splitlines():
                 if "," in auth:
@@ -553,8 +557,7 @@ def auth_add(user, auth):
     if len(valid_auths) > 0:
         res = __salt__["cmd.run_all"](
             'usermod -A "{auths}" {login}'.format(
-                login=user,
-                auths=",".join(set(auth_get(user, False) + valid_auths)),
+                login=user, auths=",".join(set(auth_get(user, False) + valid_auths)),
             )
         )
         if res["retcode"] > 0:

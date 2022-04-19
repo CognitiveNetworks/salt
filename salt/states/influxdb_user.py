@@ -1,9 +1,13 @@
+# -*- coding: utf-8 -*-
 """
 Management of InfluxDB users
 ============================
 
 (compatible with InfluxDB version 0.9+)
 """
+
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 
 def __virtual__():
@@ -55,20 +59,20 @@ def present(name, passwd, admin=False, grants=None, **client_args):
         "name": name,
         "changes": {},
         "result": True,
-        "comment": "User {} is present and up to date".format(name),
+        "comment": "User {0} is present and up to date".format(name),
     }
 
     if not __salt__["influxdb.user_exists"](name, **client_args):
         create = True
         if __opts__["test"]:
-            ret["comment"] = "User {} will be created".format(name)
+            ret["comment"] = "User {0} will be created".format(name)
             ret["result"] = None
             return ret
         else:
             if not __salt__["influxdb.create_user"](
                 name, passwd, admin=admin, **client_args
             ):
-                ret["comment"] = "Failed to create user {}".format(name)
+                ret["comment"] = "Failed to create user {0}".format(name)
                 ret["result"] = False
                 return ret
     else:
@@ -85,9 +89,9 @@ def present(name, passwd, admin=False, grants=None, **client_args):
                     admin
                     != __salt__["influxdb.user_info"](name, **client_args)["admin"]
                 ):
-                    ret["comment"] = "Failed to set admin privilege to user {}".format(
-                        name
-                    )
+                    ret[
+                        "comment"
+                    ] = "Failed to set admin privilege to " "user {0}".format(name)
                     ret["result"] = False
                     return ret
             ret["changes"]["Admin privileges"] = admin
@@ -104,7 +108,7 @@ def present(name, passwd, admin=False, grants=None, **client_args):
                 del db_privileges[database]
             if database not in db_privileges:
                 ret["changes"][
-                    "Grant on database {} to user {}".format(database, name)
+                    "Grant on database {0} to user {1}".format(database, name)
                 ] = privilege
                 if not __opts__["test"]:
                     __salt__["influxdb.grant_privilege"](
@@ -113,19 +117,20 @@ def present(name, passwd, admin=False, grants=None, **client_args):
 
     if ret["changes"]:
         if create:
-            ret["comment"] = "Created user {}".format(name)
+            ret["comment"] = "Created user {0}".format(name)
             ret["changes"][name] = "User created"
         else:
             if __opts__["test"]:
                 ret["result"] = None
-                ret[
-                    "comment"
-                ] = "User {} will be updated with the following changes:".format(name)
+                ret["comment"] = (
+                    "User {0} will be updated with the "
+                    "following changes:".format(name)
+                )
                 for k, v in ret["changes"].items():
-                    ret["comment"] += "\n{} => {}".format(k, v)
+                    ret["comment"] += "\n{0} => {1}".format(k, v)
                 ret["changes"] = {}
             else:
-                ret["comment"] = "Updated user {}".format(name)
+                ret["comment"] = "Updated user {0}".format(name)
 
     return ret
 
@@ -141,21 +146,21 @@ def absent(name, **client_args):
         "name": name,
         "changes": {},
         "result": True,
-        "comment": "User {} is not present".format(name),
+        "comment": "User {0} is not present".format(name),
     }
 
     if __salt__["influxdb.user_exists"](name, **client_args):
         if __opts__["test"]:
             ret["result"] = None
-            ret["comment"] = "User {} will be removed".format(name)
+            ret["comment"] = "User {0} will be removed".format(name)
             return ret
         else:
             if __salt__["influxdb.remove_user"](name, **client_args):
-                ret["comment"] = "Removed user {}".format(name)
+                ret["comment"] = "Removed user {0}".format(name)
                 ret["changes"][name] = "removed"
                 return ret
             else:
-                ret["comment"] = "Failed to remove user {}".format(name)
+                ret["comment"] = "Failed to remove user {0}".format(name)
                 ret["result"] = False
                 return ret
     return ret

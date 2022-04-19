@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
 """
 Management of MongoDB Users
 ===========================
 
 :depends:   - pymongo Python module
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
 # Define the module's virtual name
 __virtualname__ = "mongodb_user"
@@ -81,7 +83,7 @@ def present(
         "name": name,
         "changes": {},
         "result": True,
-        "comment": "User {} is already present".format(name),
+        "comment": "User {0} is already present".format(name),
     }
 
     # setup default empty roles if not provided to preserve previous API interface
@@ -93,7 +95,7 @@ def present(
         port = int(port)
     except TypeError:
         ret["result"] = False
-        ret["comment"] = "Port ({}) is not an integer.".format(port)
+        ret["comment"] = "Port ({0}) is not an integer.".format(port)
         return ret
 
     # check if user exists
@@ -106,7 +108,7 @@ def present(
         #    users= (False, 'not authorized on admin to execute command { usersInfo: "root" }')
         if not users[0]:
             ret["result"] = False
-            ret["comment"] = "Mongo Err: {}".format(users[1])
+            ret["comment"] = "Mongo Err: {0}".format(users[1])
             return ret
 
         # check each user occurrence
@@ -152,7 +154,9 @@ def present(
 
     if __opts__["test"]:
         ret["result"] = None
-        ret["comment"] = "User {} is not present and needs to be created".format(name)
+        ret["comment"] = ("User {0} is not present and needs to be created").format(
+            name
+        )
         return ret
     # The user is not present, make it!
     if __salt__["mongodb.user_create"](
@@ -166,10 +170,10 @@ def present(
         authdb=authdb,
         roles=roles,
     ):
-        ret["comment"] = "User {} has been created".format(name)
+        ret["comment"] = "User {0} has been created".format(name)
         ret["changes"][name] = "Present"
     else:
-        ret["comment"] = "Failed to create database {}".format(name)
+        ret["comment"] = "Failed to create database {0}".format(name)
         ret["result"] = False
 
     return ret
@@ -212,12 +216,14 @@ def absent(
     if user_exists is True:
         if __opts__["test"]:
             ret["result"] = None
-            ret["comment"] = "User {} is present and needs to be removed".format(name)
+            ret["comment"] = ("User {0} is present and needs to be removed").format(
+                name
+            )
             return ret
         if __salt__["mongodb.user_remove"](
             name, user, password, host, port, database=database, authdb=authdb
         ):
-            ret["comment"] = "User {} has been removed".format(name)
+            ret["comment"] = "User {0} has been removed".format(name)
             ret["changes"][name] = "Absent"
             return ret
 
@@ -229,5 +235,5 @@ def absent(
         return ret
 
     # fallback
-    ret["comment"] = "User {} is not present".format(name)
+    ret["comment"] = "User {0} is not present".format(name)
     return ret

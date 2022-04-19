@@ -301,12 +301,7 @@ def proxy_minion_process(queue):
         proxyminion = salt.cli.daemons.ProxyMinion()
         proxyminion.start()
         # pylint: disable=broad-except
-    except (
-        Exception,
-        SaltClientError,
-        SaltReqTimeoutError,
-        SaltSystemExit,
-    ) as exc:
+    except (Exception, SaltClientError, SaltReqTimeoutError, SaltSystemExit,) as exc:
         # pylint: enable=broad-except
         log.error("Proxy Minion failed to start: ", exc_info=True)
         restart = True
@@ -441,11 +436,20 @@ def salt_call():
     """
     import salt.cli.call
 
-    if "" in sys.path:
-        sys.path.remove("")
-    client = salt.cli.call.SaltCall()
-    _install_signal_handlers(client)
-    client.run()
+    try:
+        from salt.transport import zeromq
+    except ImportError:
+        zeromq = None
+
+    try:
+        if "" in sys.path:
+            sys.path.remove("")
+        client = salt.cli.call.SaltCall()
+        _install_signal_handlers(client)
+        client.run()
+    finally:
+        if zeromq is not None:
+            zeromq.AsyncZeroMQReqChannel.force_close_all_instances()
 
 
 def salt_run():

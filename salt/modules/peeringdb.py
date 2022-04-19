@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 PeeringDB Module
 ================
@@ -24,7 +25,9 @@ Configuration (in the opts or Pillar):
       username: salt
       password: 5@1t
 """
+from __future__ import absolute_import
 
+# Import python libs
 import logging
 
 # Import salt modules

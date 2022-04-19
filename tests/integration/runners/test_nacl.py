@@ -32,9 +32,7 @@ class NaclTest(ShellCase):
         Test keygen
         """
         # Store the data
-        ret = self.run_run_plus(
-            "nacl.keygen",
-        )
+        ret = self.run_run_plus("nacl.keygen",)
         self.assertIn("pk", ret["return"])
         self.assertIn("sk", ret["return"])
 
@@ -44,9 +42,7 @@ class NaclTest(ShellCase):
         Test keygen
         """
         # Store the data
-        ret = self.run_run_plus(
-            "nacl.keygen",
-        )
+        ret = self.run_run_plus("nacl.keygen",)
         self.assertIn("pk", ret["return"])
         self.assertIn("sk", ret["return"])
         pk = ret["return"]["pk"]
@@ -55,11 +51,7 @@ class NaclTest(ShellCase):
         unencrypted_data = "hello"
 
         # Encrypt with pk
-        ret = self.run_run_plus(
-            "nacl.enc",
-            data=unencrypted_data,
-            pk=pk,
-        )
+        ret = self.run_run_plus("nacl.enc", data=unencrypted_data, pk=pk,)
         self.assertIn("return", ret)
 
     @pytest.mark.slow_test
@@ -68,9 +60,7 @@ class NaclTest(ShellCase):
         Store, list, fetch, then flush data
         """
         # Store the data
-        ret = self.run_run_plus(
-            "nacl.keygen",
-        )
+        ret = self.run_run_plus("nacl.keygen",)
         self.assertIn("pk", ret["return"])
         self.assertIn("sk", ret["return"])
         pk = ret["return"]["pk"]
@@ -79,20 +69,12 @@ class NaclTest(ShellCase):
         unencrypted_data = b"hello"
 
         # Encrypt with pk
-        ret = self.run_run_plus(
-            "nacl.enc",
-            data=unencrypted_data,
-            pk=pk,
-        )
+        ret = self.run_run_plus("nacl.enc", data=unencrypted_data, pk=pk,)
         self.assertIn("return", ret)
         encrypted_data = ret["return"]
 
         # Decrypt with sk
-        ret = self.run_run_plus(
-            "nacl.dec",
-            data=encrypted_data,
-            sk=sk,
-        )
+        ret = self.run_run_plus("nacl.dec", data=encrypted_data, sk=sk,)
         self.assertIn("return", ret)
         self.assertEqual(unencrypted_data, ret["return"])
 
@@ -102,9 +84,7 @@ class NaclTest(ShellCase):
         Generate keys, encrypt, then decrypt.
         """
         # Store the data
-        ret = self.run_run_plus(
-            "nacl.keygen",
-        )
+        ret = self.run_run_plus("nacl.keygen",)
         self.assertIn("pk", ret["return"])
         self.assertIn("sk", ret["return"])
         pk = ret["return"]["pk"]
@@ -113,19 +93,11 @@ class NaclTest(ShellCase):
         unencrypted_data = b"hello"
 
         # Encrypt with pk
-        ret = self.run_run_plus(
-            "nacl.sealedbox_encrypt",
-            data=unencrypted_data,
-            pk=pk,
-        )
+        ret = self.run_run_plus("nacl.sealedbox_encrypt", data=unencrypted_data, pk=pk,)
         encrypted_data = ret["return"]
 
         # Decrypt with sk
-        ret = self.run_run_plus(
-            "nacl.sealedbox_decrypt",
-            data=encrypted_data,
-            sk=sk,
-        )
+        ret = self.run_run_plus("nacl.sealedbox_decrypt", data=encrypted_data, sk=sk,)
         self.assertEqual(unencrypted_data, ret["return"])
 
     @pytest.mark.slow_test
@@ -134,9 +106,7 @@ class NaclTest(ShellCase):
         Generate keys, encrypt, then decrypt.
         """
         # Store the data
-        ret = self.run_run_plus(
-            "nacl.keygen",
-        )
+        ret = self.run_run_plus("nacl.keygen",)
         self.assertIn("pk", ret["return"])
         self.assertIn("sk", ret["return"])
         pk = ret["return"]["pk"]
@@ -145,19 +115,11 @@ class NaclTest(ShellCase):
         unencrypted_data = b"hello"
 
         # Encrypt with pk
-        ret = self.run_run_plus(
-            "nacl.secretbox_encrypt",
-            data=unencrypted_data,
-            sk=sk,
-        )
+        ret = self.run_run_plus("nacl.secretbox_encrypt", data=unencrypted_data, sk=sk,)
         encrypted_data = ret["return"]
 
         # Decrypt with sk
-        ret = self.run_run_plus(
-            "nacl.secretbox_decrypt",
-            data=encrypted_data,
-            sk=sk,
-        )
+        ret = self.run_run_plus("nacl.secretbox_decrypt", data=encrypted_data, sk=sk,)
         self.assertEqual(unencrypted_data, ret["return"])
 
     @pytest.mark.slow_test
@@ -166,9 +128,7 @@ class NaclTest(ShellCase):
         Store, list, fetch, then flush data
         """
         # Store the data
-        ret = self.run_run_plus(
-            "nacl.keygen",
-        )
+        ret = self.run_run_plus("nacl.keygen",)
         self.assertIn("pk", ret["return"])
         self.assertIn("sk", ret["return"])
         pk = ret["return"]["pk"]
@@ -177,20 +137,12 @@ class NaclTest(ShellCase):
         unencrypted_data = b"hello"
 
         # Encrypt with pk
-        ret = self.run_run_plus(
-            "nacl.enc",
-            data=unencrypted_data,
-            pk=None,
-        )
+        ret = self.run_run_plus("nacl.enc", data=unencrypted_data, pk=None,)
         self.assertIn("Exception: no pubkey or pk_file found", ret["return"])
 
         self.assertIn("return", ret)
         encrypted_data = ret["return"]
 
         # Decrypt with sk
-        ret = self.run_run_plus(
-            "nacl.dec",
-            data=encrypted_data,
-            sk=None,
-        )
+        ret = self.run_run_plus("nacl.dec", data=encrypted_data, sk=None,)
         self.assertIn("Exception: no key or sk_file found", ret["return"])

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 SaltStack Extend
 ~~~~~~~~~~~~~~~~
@@ -12,6 +13,8 @@ This tool is accessed using `salt-extend`
     :codeauthor: Anthony Shaw <anthonyshaw@apache.org>
 """
 
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 import os
@@ -23,6 +26,9 @@ from datetime import date
 import salt.utils.files
 import salt.version
 from jinja2 import Template
+from salt.ext.six.moves import zip
+
+# Import Salt libs
 from salt.serializers.yaml import deserialize
 from salt.utils.odict import OrderedDict
 
@@ -174,7 +180,7 @@ def _prompt_choice(var_name, options):
     :returns: The selected user
     """
     choice_map = OrderedDict(
-        ("{}".format(i), value)
+        ("{0}".format(i), value)
         for i, value in enumerate(options, 1)
         if value[0] != "test"
     )
@@ -182,13 +188,13 @@ def _prompt_choice(var_name, options):
     default = "1"
 
     choice_lines = [
-        "{} - {} - {}".format(c[0], c[1][0], c[1][1]) for c in choice_map.items()
+        "{0} - {1} - {2}".format(c[0], c[1][0], c[1][1]) for c in choice_map.items()
     ]
     prompt = "\n".join(
         (
-            "Select {}:".format(var_name),
+            "Select {0}:".format(var_name),
             "\n".join(choice_lines),
-            "Choose from {}".format(", ".join(choices)),
+            "Choose from {0}".format(", ".join(choices)),
         )
     )
 
@@ -272,7 +278,7 @@ def run(
     if description is None:
         description = _prompt_user_variable("Short description of the module", "")
 
-    template_dir = "templates/{}".format(extension_type)
+    template_dir = "templates/{0}".format(extension_type)
     module_name = name
 
     param_dict = {

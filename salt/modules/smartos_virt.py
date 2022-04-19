@@ -1,9 +1,13 @@
+# -*- coding: utf-8 -*-
 """
 virst compatibility module for managing VMs on SmartOS
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import Python libs
 import logging
 
+# Import Salt libs
 import salt.utils.path
 import salt.utils.platform
 from salt.exceptions import CommandExecutionError
@@ -22,7 +26,9 @@ def __virtual__():
         return __virtualname__
     return (
         False,
-        "{} module can only be loaded on SmartOS compute nodes".format(__virtualname__),
+        "{0} module can only be loaded on SmartOS compute nodes".format(
+            __virtualname__
+        ),
     )
 
 

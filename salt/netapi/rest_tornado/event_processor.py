@@ -1,13 +1,17 @@
+# encoding: utf-8
+from __future__ import absolute_import, print_function, unicode_literals
+
 import logging
 import threading
 
 import salt.netapi
 import salt.utils.json
+from salt.ext import six
 
 log = logging.getLogger(__name__)
 
 
-class SaltInfo:
+class SaltInfo(object):
     """
     Class to  handle processing and publishing of "real time" Salt upates.
     """
@@ -34,7 +38,7 @@ class SaltInfo:
         minions = {}
 
         log.debug("starting loop")
-        for minion, minion_info in self.minions.items():
+        for minion, minion_info in six.iteritems(self.minions):
             log.debug(minion)
             # log.debug(minion_info)
             curr_minion = {}
@@ -43,14 +47,18 @@ class SaltInfo:
             minions[minion] = curr_minion
         log.debug("ended loop")
         ret = {"minions": minions}
-        self.handler.write_message(salt.utils.json.dumps(ret) + "\n\n")
+        self.handler.write_message(
+            salt.utils.json.dumps(ret) + str("\n\n")
+        )  # future lint: disable=blacklisted-function
 
     def publish(self, key, data):
         """
         Publishes the data to the event stream.
         """
         publish_data = {key: data}
-        pub = salt.utils.json.dumps(publish_data) + "\n\n"
+        pub = salt.utils.json.dumps(publish_data) + str(
+            "\n\n"
+        )  # future lint: disable=blacklisted-function
         self.handler.write_message(pub)
 
     def process_minion_update(self, event_data):
@@ -88,7 +96,7 @@ class SaltInfo:
         minion.update({"success": event_info["success"]})
 
         job_complete = all(
-            [minion["success"] for mid, minion in job["minions"].items()]
+            [minion["success"] for mid, minion in six.iteritems(job["minions"])]
         )
 
         if job_complete:

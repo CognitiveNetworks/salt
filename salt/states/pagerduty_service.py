@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Manage PagerDuty services
 
@@ -14,6 +15,9 @@ For example:
             - type: nagios
 
 """
+
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 
 def __virtual__():
@@ -110,7 +114,7 @@ def _diff(state_data, resource_object):
         else:
             resource_value = resource_object[k]
         if v != resource_value:
-            objects_differ = "{} {} {}".format(k, v, resource_value)
+            objects_differ = "{0} {1} {2}".format(k, v, resource_value)
             break
 
     if objects_differ:

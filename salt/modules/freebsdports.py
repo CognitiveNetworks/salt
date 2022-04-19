@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Install software from the FreeBSD ``ports(7)`` system
 
@@ -13,16 +14,21 @@ this module exclusively from the command line.
     salt minion-id ports.config security/nmap IPV6=off
     salt minion-id ports.install security/nmap
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import python libs
 import fnmatch
 import logging
 import os
 import re
 
+# Import salt libs
 import salt.utils.data
 import salt.utils.files
 import salt.utils.path
 from salt.exceptions import CommandExecutionError, SaltInvocationError
+from salt.ext import six
+from salt.ext.six import string_types
 
 log = logging.getLogger(__name__)
 
@@ -58,14 +64,14 @@ def _check_portname(name):
     Check if portname is valid and whether or not the directory exists in the
     ports tree.
     """
-    if not isinstance(name, str) or "/" not in name:
+    if not isinstance(name, string_types) or "/" not in name:
         raise SaltInvocationError(
-            "Invalid port name '{}' (category required)".format(name)
+            "Invalid port name '{0}' (category required)".format(name)
         )
 
     path = os.path.join("/usr/ports", name)
     if not os.path.isdir(path):
-        raise SaltInvocationError("Path '{}' does not exist".format(path))
+        raise SaltInvocationError("Path '{0}' does not exist".format(path))
 
     return path
 
@@ -109,7 +115,7 @@ def _write_options(name, configuration):
         try:
             os.makedirs(dirname)
         except OSError as exc:
-            raise CommandExecutionError("Unable to make {}: {}".format(dirname, exc))
+            raise CommandExecutionError("Unable to make {0}: {1}".format(dirname, exc))
 
     with salt.utils.files.fopen(os.path.join(dirname, "options"), "w") as fp_:
         sorted_options = list(conf_ptr)
@@ -140,7 +146,7 @@ def _normalize(val):
     """
     if isinstance(val, bool):
         return "on" if val else "off"
-    return str(val).lower()
+    return six.text_type(val).lower()
 
 
 def install(name, clean=True):
@@ -270,7 +276,7 @@ def showconfig(name, default=False, dict_return=False):
         error = result
 
     if error:
-        msg = "Error running 'make showconfig' for {}: {}".format(name, error)
+        msg = "Error running 'make showconfig' for {0}: {1}".format(name, error)
         log.error(msg)
         raise SaltInvocationError(msg)
 
@@ -328,27 +334,33 @@ def config(name, reset=False, **kwargs):
 
     if not configuration:
         raise CommandExecutionError(
-            "Unable to get port configuration for '{}'".format(name)
+            "Unable to get port configuration for '{0}'".format(name)
         )
 
     # Get top-level key for later reference
     pkg = next(iter(configuration))
     conf_ptr = configuration[pkg]
 
-    opts = {str(x): _normalize(kwargs[x]) for x in kwargs if not x.startswith("_")}
+    opts = dict(
+        (six.text_type(x), _normalize(kwargs[x]))
+        for x in kwargs
+        if not x.startswith("_")
+    )
 
     bad_opts = [x for x in opts if x not in conf_ptr]
     if bad_opts:
         raise SaltInvocationError(
-            "The following opts are not valid for port {}: {}".format(
+            "The following opts are not valid for port {0}: {1}".format(
                 name, ", ".join(bad_opts)
             )
         )
 
-    bad_vals = ["{}={}".format(x, y) for x, y in opts.items() if y not in ("on", "off")]
+    bad_vals = [
+        "{0}={1}".format(x, y) for x, y in six.iteritems(opts) if y not in ("on", "off")
+    ]
     if bad_vals:
         raise SaltInvocationError(
-            "The following key/value pairs are invalid: {}".format(", ".join(bad_vals))
+            "The following key/value pairs are invalid: {0}".format(", ".join(bad_vals))
         )
 
     conf_ptr.update(opts)
@@ -380,7 +392,7 @@ def update(extract=False):
     result = __salt__["cmd.run_all"](_portsnap() + ["fetch"], python_shell=False)
     if not result["retcode"] == 0:
         raise CommandExecutionError(
-            "Unable to fetch ports snapshot: {}".format(result["stderr"])
+            "Unable to fetch ports snapshot: {0}".format(result["stderr"])
         )
 
     ret = []
@@ -396,20 +408,20 @@ def update(extract=False):
     except AttributeError:
         new_port_count = 0
 
-    ret.append("Applied {} new patches".format(patch_count))
-    ret.append("Fetched {} new ports or files".format(new_port_count))
+    ret.append("Applied {0} new patches".format(patch_count))
+    ret.append("Fetched {0} new ports or files".format(new_port_count))
 
     if extract:
         result = __salt__["cmd.run_all"](_portsnap() + ["extract"], python_shell=False)
         if not result["retcode"] == 0:
             raise CommandExecutionError(
-                "Unable to extract ports snapshot {}".format(result["stderr"])
+                "Unable to extract ports snapshot {0}".format(result["stderr"])
             )
 
     result = __salt__["cmd.run_all"](_portsnap() + ["update"], python_shell=False)
     if not result["retcode"] == 0:
         raise CommandExecutionError(
-            "Unable to apply ports snapshot: {}".format(result["stderr"])
+            "Unable to apply ports snapshot: {0}".format(result["stderr"])
         )
 
     __context__.pop("ports.list_all", None)
@@ -457,7 +469,7 @@ def search(name):
 
         Takes a while to run
     """
-    name = str(name)
+    name = six.text_type(name)
     all_ports = list_all()
     if "/" in name:
         if name.count("/") > 1:

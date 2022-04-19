@@ -97,8 +97,7 @@ def test_filesystem_absent_fail(utils_patch):
                     "error",
                     "\n".join(
                         [
-                            "cannot destroy 'myzpool/filesystem': filesystem has"
-                            " children",
+                            "cannot destroy 'myzpool/filesystem': filesystem has children",
                             "use 'recursive=True' to destroy the following datasets:",
                             "myzpool/filesystem@snap",
                         ]
@@ -412,9 +411,7 @@ def test_hold_present_fail(utils_patch):
     ret = {
         "name": "myhold",
         "result": False,
-        "comment": (
-            "cannot hold snapshot 'zsalt/filesystem@snap': dataset does not exist"
-        ),
+        "comment": "cannot hold snapshot 'zsalt/filesystem@snap': dataset does not exist",
         "changes": {},
     }
 
@@ -425,8 +422,7 @@ def test_hold_present_fail(utils_patch):
                 ("held", False),
                 (
                     "error",
-                    "cannot hold snapshot 'zsalt/filesystem@snap': dataset does not"
-                    " exist",
+                    "cannot hold snapshot 'zsalt/filesystem@snap': dataset does not exist",
                 ),
             ]
         )
@@ -525,8 +521,7 @@ def test_filesystem_present_update(utils_patch):
         zfs.__utils__, utils_patch
     ):
         assert ret == zfs.filesystem_present(
-            name="myzpool/filesystem",
-            properties={"compression": "lz4"},
+            name="myzpool/filesystem", properties={"compression": "lz4"},
         )
 
 
@@ -646,9 +641,7 @@ def test_volume_present_update(utils_patch):
         zfs.__utils__, utils_patch
     ):
         assert ret == zfs.volume_present(
-            name="myzpool/volume",
-            volume_size="1G",
-            properties={"compression": "lz4"},
+            name="myzpool/volume", volume_size="1G", properties={"compression": "lz4"},
         )
 
 
@@ -703,9 +696,7 @@ def test_bookmark_present_new(utils_patch):
     ret = {
         "name": "myzpool/filesystem#mybookmark",
         "result": True,
-        "comment": (
-            "myzpool/filesystem@snap bookmarked as myzpool/filesystem#mybookmark"
-        ),
+        "comment": "myzpool/filesystem@snap bookmarked as myzpool/filesystem#mybookmark",
         "changes": {"myzpool/filesystem#mybookmark": "myzpool/filesystem@snap"},
     }
 
@@ -724,9 +715,7 @@ def test_bookmark_present_fail(utils_patch):
     ret = {
         "name": "myzpool/filesystem#mybookmark",
         "result": False,
-        "comment": (
-            "cannot bookmark snapshot 'zsalt/filesystem@snap': dataset does not exist"
-        ),
+        "comment": "cannot bookmark snapshot 'zsalt/filesystem@snap': dataset does not exist",
         "changes": {},
     }
 
@@ -737,8 +726,7 @@ def test_bookmark_present_fail(utils_patch):
                 ("bookmarked", False),
                 (
                     "error",
-                    "cannot bookmark snapshot 'zsalt/filesystem@snap': dataset does not"
-                    " exist",
+                    "cannot bookmark snapshot 'zsalt/filesystem@snap': dataset does not exist",
                 ),
             ]
         )
@@ -805,10 +793,7 @@ def test_snapshot_present_fail(utils_patch):
         return_value=OrderedDict(
             [
                 ("snapshotted", False),
-                (
-                    "error",
-                    "cannot open 'myzpool/filesystem': dataset does not exist",
-                ),
+                ("error", "cannot open 'myzpool/filesystem': dataset does not exist",),
             ]
         )
     )

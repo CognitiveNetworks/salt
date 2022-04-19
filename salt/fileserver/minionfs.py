@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Fileserver backend which serves files pushed to the Master
 
@@ -26,10 +27,14 @@ Other minionfs settings include: :conf_master:`minionfs_whitelist`,
 .. seealso:: :ref:`tutorial-minionfs`
 
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
+
+# Import python libs
 import os
 
+# Import salt libs
 import salt.fileserver
 import salt.utils.files
 import salt.utils.gzip_util
@@ -38,6 +43,9 @@ import salt.utils.path
 import salt.utils.stringutils
 import salt.utils.url
 import salt.utils.versions
+
+# Import third party libs
+from salt.ext import six
 
 log = logging.getLogger(__name__)
 
@@ -77,7 +85,8 @@ def find_file(path, tgt_env="base", **kwargs):  # pylint: disable=W0613
         return fnd
     if os.path.basename(path) == "top.sls":
         log.debug(
-            "minionfs will NOT serve top.sls for security reasons (path requested: %s)",
+            "minionfs will NOT serve top.sls "
+            "for security reasons (path requested: %s)",
             path,
         )
         return fnd
@@ -133,7 +142,7 @@ def serve_file(load, fnd):
     with salt.utils.files.fopen(fpath, "rb") as fp_:
         fp_.seek(load["loc"])
         data = fp_.read(__opts__["file_buffer_size"])
-        if data and not salt.utils.files.is_binary(fpath):
+        if data and six.PY3 and not salt.utils.files.is_binary(fpath):
             data = data.decode(__salt_system_encoding__)
         if gzip and data:
             data = salt.utils.gzip_util.compress(data, gzip)
@@ -183,7 +192,7 @@ def file_hash(load, fnd):
         "minionfs",
         "hash",
         load["saltenv"],
-        "{}.hash.{}".format(fnd["rel"], __opts__["hash_type"]),
+        "{0}.hash.{1}".format(fnd["rel"], __opts__["hash_type"]),
     )
     # if we have a cache, serve that if the mtime hasn't changed
     if os.path.exists(cache_path):
@@ -195,7 +204,8 @@ def file_hash(load, fnd):
                     )
                 except ValueError:
                     log.debug(
-                        "Fileserver attempted to read incomplete cache file. Retrying."
+                        "Fileserver attempted to read incomplete cache file. "
+                        "Retrying."
                     )
                     file_hash(load, fnd)
                     return ret
@@ -205,7 +215,9 @@ def file_hash(load, fnd):
                     return ret
         # Can't use Python select() because we need Windows support
         except os.error:
-            log.debug("Fileserver encountered lock when reading cache file. Retrying.")
+            log.debug(
+                "Fileserver encountered lock when reading cache file. " "Retrying."
+            )
             file_hash(load, fnd)
             return ret
 
@@ -216,7 +228,7 @@ def file_hash(load, fnd):
     if not os.path.exists(cache_dir):
         os.makedirs(cache_dir)
     # save the cache object "hash:mtime"
-    cache_object = "{}:{}".format(ret["hsum"], os.path.getmtime(path))
+    cache_object = "{0}:{1}".format(ret["hsum"], os.path.getmtime(path))
     with salt.utils.files.flopen(cache_path, "w") as fp_:
         fp_.write(cache_object)
     return ret

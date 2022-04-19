@@ -1,16 +1,23 @@
+# -*- coding: utf-8 -*-
 """
 Functions used to sync external modules
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import Python libs
 import logging
 import os
 import shutil
 
+# Import salt libs
 import salt.fileclient
 import salt.utils.files
 import salt.utils.hashutils
 import salt.utils.path
 import salt.utils.url
+
+# Import 3rd-party libs
+from salt.ext import six
 
 log = logging.getLogger(__name__)
 
@@ -41,7 +48,7 @@ def sync(opts, form, saltenv=None, extmod_whitelist=None, extmod_blacklist=None)
 
     if extmod_whitelist is None:
         extmod_whitelist = opts["extmod_whitelist"]
-    elif isinstance(extmod_whitelist, str):
+    elif isinstance(extmod_whitelist, six.string_types):
         extmod_whitelist = {form: extmod_whitelist.split(",")}
     elif not isinstance(extmod_whitelist, dict):
         log.error(
@@ -50,19 +57,19 @@ def sync(opts, form, saltenv=None, extmod_whitelist=None, extmod_blacklist=None)
 
     if extmod_blacklist is None:
         extmod_blacklist = opts["extmod_blacklist"]
-    elif isinstance(extmod_blacklist, str):
+    elif isinstance(extmod_blacklist, six.string_types):
         extmod_blacklist = {form: extmod_blacklist.split(",")}
     elif not isinstance(extmod_blacklist, dict):
         log.error(
             "extmod_blacklist must be a string or dictionary: %s", extmod_blacklist
         )
 
-    if isinstance(saltenv, str):
+    if isinstance(saltenv, six.string_types):
         saltenv = saltenv.split(",")
     ret = []
     remote = set()
     source = salt.utils.url.create("_" + form)
-    mod_dir = os.path.join(opts["extension_modules"], "{}".format(form))
+    mod_dir = os.path.join(opts["extension_modules"], "{0}".format(form))
     touched = False
     with salt.utils.files.set_umask(0o077):
         try:
@@ -70,9 +77,10 @@ def sync(opts, form, saltenv=None, extmod_whitelist=None, extmod_blacklist=None)
                 log.info("Creating module dir '%s'", mod_dir)
                 try:
                     os.makedirs(mod_dir)
-                except OSError:
+                except (IOError, OSError):
                     log.error(
-                        "Cannot create cache module directory %s. Check permissions.",
+                        "Cannot create cache module directory %s. Check "
+                        "permissions.",
                         mod_dir,
                     )
             fileclient = salt.fileclient.get_file_client(opts)
@@ -91,7 +99,7 @@ def sync(opts, form, saltenv=None, extmod_whitelist=None, extmod_blacklist=None)
                     )
                 )
                 local_cache_dir = os.path.join(
-                    opts["cachedir"], "files", sub_env, "_{}".format(form)
+                    opts["cachedir"], "files", sub_env, "_{0}".format(form)
                 )
                 log.debug("Local cache dir: '%s'", local_cache_dir)
                 for fn_ in cache:
@@ -120,13 +128,13 @@ def sync(opts, form, saltenv=None, extmod_whitelist=None, extmod_blacklist=None)
                         if src_digest != dst_digest:
                             # The downloaded file differs, replace!
                             shutil.copyfile(fn_, dest)
-                            ret.append("{}.{}".format(form, relname))
+                            ret.append("{0}.{1}".format(form, relname))
                     else:
                         dest_dir = os.path.dirname(dest)
                         if not os.path.isdir(dest_dir):
                             os.makedirs(dest_dir)
                         shutil.copyfile(fn_, dest)
-                        ret.append("{}.{}".format(form, relname))
+                        ret.append("{0}.{1}".format(form, relname))
 
             touched = bool(ret)
             if opts["clean_dynamic_modules"] is True:

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Process Management
 ==================
@@ -10,6 +11,7 @@ Ensure a process matching a given pattern is absent.
       process.absent:
         - name: apache2
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
 
 def __virtual__():
@@ -37,7 +39,7 @@ def absent(name, user=None, signal=None):
         running = __salt__["ps.pgrep"](name, user=user)
         ret["result"] = None
         if running:
-            ret["comment"] = "{} processes will be killed".format(len(running))
+            ret["comment"] = ("{0} processes will " "be killed").format(len(running))
         else:
             ret["comment"] = "No matching processes running"
         return ret
@@ -49,7 +51,7 @@ def absent(name, user=None, signal=None):
 
     ret["result"] = True
     if status:
-        ret["comment"] = "Killed {} processes".format(len(status["killed"]))
+        ret["comment"] = "Killed {0} processes".format(len(status["killed"]))
         ret["changes"] = status
     else:
         ret["comment"] = "No matching processes running"

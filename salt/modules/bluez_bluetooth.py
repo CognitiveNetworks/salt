@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Support for Bluetooth (using BlueZ in Linux).
 
@@ -8,10 +9,18 @@ The following packages are required packages for this module:
     bluez-utils >= 5.7
     pybluez >= 0.18
 """
-import shlex
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import salt libs
 import salt.utils.validate.net
 from salt.exceptions import CommandExecutionError
+
+# Import 3rd-party libs
+# pylint: disable=import-error
+from salt.ext.six.moves import shlex_quote as _cmd_quote
+
+# pylint: enable=import-error
+
 
 HAS_PYBLUEZ = False
 try:
@@ -80,7 +89,7 @@ def address_():
             dev = comps[0]
             ret[dev] = {
                 "device": dev,
-                "path": "/sys/class/bluetooth/{}".format(dev),
+                "path": "/sys/class/bluetooth/{0}".format(dev),
             }
         if "BD Address" in line:
             comps = line.split()
@@ -112,7 +121,7 @@ def power(dev, mode):
     else:
         state = "down"
         mode = "off"
-    cmd = "hciconfig {} {}".format(dev, state)
+    cmd = "hciconfig {0} {1}".format(dev, state)
     __salt__["cmd.run"](cmd).splitlines()
     info = address_()
     if info[dev]["power"] == mode:
@@ -133,9 +142,9 @@ def discoverable(dev):
     if dev not in address_():
         raise CommandExecutionError("Invalid dev passed to bluetooth.discoverable")
 
-    cmd = "hciconfig {} iscan".format(dev)
+    cmd = "hciconfig {0} iscan".format(dev)
     __salt__["cmd.run"](cmd).splitlines()
-    cmd = "hciconfig {}".format(dev)
+    cmd = "hciconfig {0}".format(dev)
     out = __salt__["cmd.run"](cmd)
     if "UP RUNNING ISCAN" in out:
         return True
@@ -155,9 +164,9 @@ def noscan(dev):
     if dev not in address_():
         raise CommandExecutionError("Invalid dev passed to bluetooth.noscan")
 
-    cmd = "hciconfig {} noscan".format(dev)
+    cmd = "hciconfig {0} noscan".format(dev)
     __salt__["cmd.run"](cmd).splitlines()
-    cmd = "hciconfig {}".format(dev)
+    cmd = "hciconfig {0}".format(dev)
     out = __salt__["cmd.run"](cmd)
     if "SCAN" in out:
         return False
@@ -194,7 +203,7 @@ def block(bdaddr):
     if not salt.utils.validate.net.mac(bdaddr):
         raise CommandExecutionError("Invalid BD address passed to bluetooth.block")
 
-    cmd = "hciconfig {} block".format(bdaddr)
+    cmd = "hciconfig {0} block".format(bdaddr)
     __salt__["cmd.run"](cmd).splitlines()
 
 
@@ -211,7 +220,7 @@ def unblock(bdaddr):
     if not salt.utils.validate.net.mac(bdaddr):
         raise CommandExecutionError("Invalid BD address passed to bluetooth.unblock")
 
-    cmd = "hciconfig {} unblock".format(bdaddr)
+    cmd = "hciconfig {0} unblock".format(bdaddr)
     __salt__["cmd.run"](cmd).splitlines()
 
 
@@ -242,8 +251,8 @@ def pair(address, key):
         )
 
     addy = address_()
-    cmd = "echo {} | bluez-simple-agent {} {}".format(
-        shlex.quote(addy["device"]), shlex.quote(address), shlex.quote(key)
+    cmd = "echo {0} | bluez-simple-agent {1} {2}".format(
+        _cmd_quote(addy["device"]), _cmd_quote(address), _cmd_quote(key)
     )
     out = __salt__["cmd.run"](cmd, python_shell=True).splitlines()
     return out
@@ -267,7 +276,7 @@ def unpair(address):
     if not salt.utils.validate.net.mac(address):
         raise CommandExecutionError("Invalid BD address passed to bluetooth.unpair")
 
-    cmd = "bluez-test-device remove {}".format(address)
+    cmd = "bluez-test-device remove {0}".format(address)
     out = __salt__["cmd.run"](cmd).splitlines()
     return out
 

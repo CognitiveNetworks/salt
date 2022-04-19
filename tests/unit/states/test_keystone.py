@@ -1,8 +1,14 @@
+# -*- coding: utf-8 -*-
 """
     :codeauthor: Jayesh Kariya <jayeshk@saltstack.com>
 """
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import Salt Libs
 import salt.states.keystone as keystone
+
+# Import Salt Testing Libs
 from tests.support.mixins import LoaderModuleMockMixin
 from tests.support.mock import MagicMock, patch
 from tests.support.unit import TestCase
@@ -33,7 +39,7 @@ class KeystoneTestCase(TestCase, LoaderModuleMockMixin):
         mock_f = MagicMock(return_value=False)
         mock_lst = MagicMock(return_value=["Error"])
         with patch.dict(keystone.__salt__, {"keystone.tenant_get": mock_lst}):
-            comt = 'Tenant / project "{}" does not exist'.format(tenant)
+            comt = 'Tenant / project "{0}" does not exist'.format(tenant)
             ret.update({"comment": comt})
             self.assertDictEqual(
                 keystone.user_present(name, password, email, tenant), ret
@@ -60,7 +66,7 @@ class KeystoneTestCase(TestCase, LoaderModuleMockMixin):
             },
         ):
             with patch.dict(keystone.__opts__, {"test": True}):
-                comt = 'User "{}" will be updated'.format(name)
+                comt = 'User "{0}" will be updated'.format(name)
                 ret.update(
                     {
                         "comment": comt,
@@ -120,7 +126,7 @@ class KeystoneTestCase(TestCase, LoaderModuleMockMixin):
                 self.assertDictEqual(keystone.user_present(name, password, email), ret)
 
             with patch.dict(keystone.__opts__, {"test": False}):
-                comt = "Keystone user {} has been added".format(name)
+                comt = "Keystone user {0} has been added".format(name)
                 ret.update(
                     {"comment": comt, "result": True, "changes": {"User": "Created"}}
                 )
@@ -138,7 +144,7 @@ class KeystoneTestCase(TestCase, LoaderModuleMockMixin):
             "name": name,
             "changes": {},
             "result": True,
-            "comment": 'User "{}" is already absent'.format(name),
+            "comment": 'User "{0}" is already absent'.format(name),
         }
 
         mock_lst = MagicMock(side_effect=[["Error"], []])
@@ -146,7 +152,7 @@ class KeystoneTestCase(TestCase, LoaderModuleMockMixin):
             self.assertDictEqual(keystone.user_absent(name), ret)
 
             with patch.dict(keystone.__opts__, {"test": True}):
-                comt = 'User "{}" will be deleted'.format(name)
+                comt = 'User "{0}" will be deleted'.format(name)
                 ret.update({"comment": comt, "result": None})
                 self.assertDictEqual(keystone.user_absent(name), ret)
 
@@ -163,7 +169,7 @@ class KeystoneTestCase(TestCase, LoaderModuleMockMixin):
             "name": name,
             "changes": {},
             "result": True,
-            "comment": 'Tenant / project "{}" already exists'.format(name),
+            "comment": 'Tenant / project "{0}" already exists'.format(name),
         }
 
         mock_dict = MagicMock(
@@ -180,7 +186,7 @@ class KeystoneTestCase(TestCase, LoaderModuleMockMixin):
             {"keystone.tenant_get": mock_dict, "keystone.tenant_create": mock_t},
         ):
             with patch.dict(keystone.__opts__, {"test": True}):
-                comt = 'Tenant / project "{}" will be updated'.format(name)
+                comt = 'Tenant / project "{0}" will be updated'.format(name)
                 ret.update(
                     {
                         "comment": comt,
@@ -190,7 +196,7 @@ class KeystoneTestCase(TestCase, LoaderModuleMockMixin):
                 )
                 self.assertDictEqual(keystone.tenant_present(name), ret)
 
-                comt = 'Tenant / project "{}" will be updated'.format(name)
+                comt = 'Tenant / project "{0}" will be updated'.format(name)
                 ret.update(
                     {
                         "comment": comt,
@@ -200,7 +206,7 @@ class KeystoneTestCase(TestCase, LoaderModuleMockMixin):
                 )
                 self.assertDictEqual(keystone.tenant_present(name, description), ret)
 
-                comt = 'Tenant / project "{}" will be added'.format(name)
+                comt = 'Tenant / project "{0}" will be added'.format(name)
                 ret.update(
                     {
                         "comment": comt,
@@ -211,7 +217,7 @@ class KeystoneTestCase(TestCase, LoaderModuleMockMixin):
                 self.assertDictEqual(keystone.tenant_present(name), ret)
 
             with patch.dict(keystone.__opts__, {"test": False}):
-                comt = 'Tenant / project "{}" has been added'.format(name)
+                comt = 'Tenant / project "{0}" has been added'.format(name)
                 ret.update(
                     {"comment": comt, "result": True, "changes": {"Tenant": "Created"}}
                 )
@@ -229,7 +235,7 @@ class KeystoneTestCase(TestCase, LoaderModuleMockMixin):
             "name": name,
             "changes": {},
             "result": True,
-            "comment": 'Tenant / project "{}" is already absent'.format(name),
+            "comment": 'Tenant / project "{0}" is already absent'.format(name),
         }
 
         mock_lst = MagicMock(side_effect=[["Error"], []])
@@ -237,7 +243,7 @@ class KeystoneTestCase(TestCase, LoaderModuleMockMixin):
             self.assertDictEqual(keystone.tenant_absent(name), ret)
 
             with patch.dict(keystone.__opts__, {"test": True}):
-                comt = 'Tenant / project "{}" will be deleted'.format(name)
+                comt = 'Tenant / project "{0}" will be deleted'.format(name)
                 ret.update({"comment": comt, "result": None})
                 self.assertDictEqual(keystone.tenant_absent(name), ret)
 
@@ -253,7 +259,7 @@ class KeystoneTestCase(TestCase, LoaderModuleMockMixin):
             "name": name,
             "changes": {},
             "result": True,
-            "comment": 'Role "{}" already exists'.format(name),
+            "comment": 'Role "{0}" already exists'.format(name),
         }
 
         mock_lst = MagicMock(side_effect=[[], ["Error"]])
@@ -261,7 +267,7 @@ class KeystoneTestCase(TestCase, LoaderModuleMockMixin):
             self.assertDictEqual(keystone.role_present(name), ret)
 
             with patch.dict(keystone.__opts__, {"test": True}):
-                comt = 'Role "{}" will be added'.format(name)
+                comt = 'Role "{0}" will be added'.format(name)
                 ret.update({"comment": comt, "result": None})
                 self.assertDictEqual(keystone.role_present(name), ret)
 
@@ -277,7 +283,7 @@ class KeystoneTestCase(TestCase, LoaderModuleMockMixin):
             "name": name,
             "changes": {},
             "result": True,
-            "comment": 'Role "{}" is already absent'.format(name),
+            "comment": 'Role "{0}" is already absent'.format(name),
         }
 
         mock_lst = MagicMock(side_effect=[["Error"], []])
@@ -285,7 +291,7 @@ class KeystoneTestCase(TestCase, LoaderModuleMockMixin):
             self.assertDictEqual(keystone.role_absent(name), ret)
 
             with patch.dict(keystone.__opts__, {"test": True}):
-                comt = 'Role "{}" will be deleted'.format(name)
+                comt = 'Role "{0}" will be deleted'.format(name)
                 ret.update({"comment": comt, "result": None})
                 self.assertDictEqual(keystone.role_absent(name), ret)
 
@@ -302,7 +308,7 @@ class KeystoneTestCase(TestCase, LoaderModuleMockMixin):
             "name": name,
             "changes": {},
             "result": True,
-            "comment": 'Service "{}" already exists'.format(name),
+            "comment": 'Service "{0}" already exists'.format(name),
         }
 
         mock_lst = MagicMock(side_effect=[[], ["Error"]])
@@ -310,7 +316,7 @@ class KeystoneTestCase(TestCase, LoaderModuleMockMixin):
             self.assertDictEqual(keystone.service_present(name, service_type), ret)
 
             with patch.dict(keystone.__opts__, {"test": True}):
-                comt = 'Service "{}" will be added'.format(name)
+                comt = 'Service "{0}" will be added'.format(name)
                 ret.update({"comment": comt, "result": None})
                 self.assertDictEqual(keystone.service_present(name, service_type), ret)
 
@@ -326,7 +332,7 @@ class KeystoneTestCase(TestCase, LoaderModuleMockMixin):
             "name": name,
             "changes": {},
             "result": True,
-            "comment": 'Service "{}" is already absent'.format(name),
+            "comment": 'Service "{0}" is already absent'.format(name),
         }
 
         mock_lst = MagicMock(side_effect=[["Error"], []])
@@ -334,7 +340,7 @@ class KeystoneTestCase(TestCase, LoaderModuleMockMixin):
             self.assertDictEqual(keystone.service_absent(name), ret)
 
             with patch.dict(keystone.__opts__, {"test": True}):
-                comt = 'Service "{}" will be deleted'.format(name)
+                comt = 'Service "{0}" will be deleted'.format(name)
                 ret.update({"comment": comt, "result": None})
                 self.assertDictEqual(keystone.service_absent(name), ret)
 
@@ -367,12 +373,12 @@ class KeystoneTestCase(TestCase, LoaderModuleMockMixin):
             {"keystone.endpoint_get": mock_lst, "keystone.endpoint_create": mock},
         ):
 
-            comt = 'Endpoint for service "{}" already exists'.format(name)
+            comt = 'Endpoint for service "{0}" already exists'.format(name)
             ret.update({"comment": comt, "result": True, "changes": {}})
             self.assertDictEqual(keystone.endpoint_present(name), ret)
 
             with patch.dict(keystone.__opts__, {"test": True}):
-                comt = 'Endpoint for service "{}" will be added'.format(name)
+                comt = 'Endpoint for service "{0}" will be added'.format(name)
                 ret.update(
                     {
                         "comment": comt,
@@ -382,12 +388,12 @@ class KeystoneTestCase(TestCase, LoaderModuleMockMixin):
                 )
                 self.assertDictEqual(keystone.endpoint_present(name), ret)
 
-                comt = 'Endpoint for service "{}" already exists'.format(name)
+                comt = 'Endpoint for service "{0}" already exists'.format(name)
                 ret.update({"comment": comt, "result": True, "changes": {}})
                 self.assertDictEqual(keystone.endpoint_present(name), ret)
 
             with patch.dict(keystone.__opts__, {"test": False}):
-                comt = 'Endpoint for service "{}" has been added'.format(name)
+                comt = 'Endpoint for service "{0}" has been added'.format(name)
                 ret.update({"comment": comt, "result": True, "changes": True})
                 self.assertDictEqual(keystone.endpoint_present(name), ret)
 
@@ -400,7 +406,7 @@ class KeystoneTestCase(TestCase, LoaderModuleMockMixin):
         """
         name = "nova"
         region = "RegionOne"
-        comment = 'Endpoint for service "{}" is already absent'.format(name)
+        comment = 'Endpoint for service "{0}" is already absent'.format(name)
         ret = {"name": name, "changes": {}, "result": True, "comment": comment}
 
         mock_lst = MagicMock(side_effect=[[], ["Error"]])
@@ -408,6 +414,6 @@ class KeystoneTestCase(TestCase, LoaderModuleMockMixin):
             self.assertDictEqual(keystone.endpoint_absent(name, region), ret)
 
             with patch.dict(keystone.__opts__, {"test": True}):
-                comt = 'Endpoint for service "{}" will be deleted'.format(name)
+                comt = 'Endpoint for service "{0}" will be deleted'.format(name)
                 ret.update({"comment": comt, "result": None})
                 self.assertDictEqual(keystone.endpoint_absent(name, region), ret)

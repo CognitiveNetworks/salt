@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 tests.unit.returners.test_highstate_return
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -5,13 +6,19 @@ tests.unit.returners.test_highstate_return
 Unit tests for the Highstate Returner Cache.
 """
 
+# Import Python libs
+from __future__ import absolute_import
 
 import json
 import logging
 import os
 
 import salt.returners.highstate_return as highstate
+
+# Import Salt libs
 import salt.utils.files
+
+# Import Salt Testing libs
 from tests.support.mixins import LoaderModuleMockMixin
 from tests.support.runtests import RUNTIME_VARS
 from tests.support.unit import TestCase
@@ -53,7 +60,7 @@ class HighstateReturnerTestCase(TestCase, LoaderModuleMockMixin):
                     "result": True,
                     "duration": 75.198,
                     "__run_num__": 0,
-                    "__sls__": "test",
+                    "__sls__": u"test",
                     "changes": {
                         "pid": 1429,
                         "retcode": 0,

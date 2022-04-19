@@ -1,5 +1,14 @@
+# -*- coding: utf-8 -*-
+
+# Import python libs
+from __future__ import absolute_import, print_function, unicode_literals
+
 import salt.modules.jboss7 as jboss7
+
+# Import salt libs
 from salt.utils.odict import OrderedDict
+
+# Import salt testing libs
 from tests.support.mixins import LoaderModuleMockMixin
 from tests.support.mock import MagicMock
 from tests.support.unit import TestCase
@@ -22,8 +31,7 @@ class JBoss7TestCase(TestCase, LoaderModuleMockMixin):
 
         self.org_run_operation.assert_called_with(
             self.jboss_config,
-            '/subsystem=naming/binding="java:global/env":add(binding-type=simple,'
-            ' value="DEV")',
+            '/subsystem=naming/binding="java:global/env":add(binding-type=simple, value="DEV")',
         )
 
     def test_create_simple_binding_with_backslash(self):
@@ -31,8 +39,7 @@ class JBoss7TestCase(TestCase, LoaderModuleMockMixin):
 
         self.org_run_operation.assert_called_with(
             self.jboss_config,
-            r'/subsystem=naming/binding="java:global/env":add(binding-type=simple,'
-            r' value="DEV\\\\2")',
+            r'/subsystem=naming/binding="java:global/env":add(binding-type=simple, value="DEV\\\\2")',
         )
 
     def test_update_binding(self):
@@ -40,8 +47,7 @@ class JBoss7TestCase(TestCase, LoaderModuleMockMixin):
 
         self.org_run_operation.assert_called_with(
             self.jboss_config,
-            '/subsystem=naming/binding="java:global/env":write-attribute(name=value,'
-            ' value="INT")',
+            '/subsystem=naming/binding="java:global/env":write-attribute(name=value, value="INT")',
         )
 
     def test_update_binding_with_backslash(self):
@@ -49,8 +55,7 @@ class JBoss7TestCase(TestCase, LoaderModuleMockMixin):
 
         self.org_run_operation.assert_called_with(
             self.jboss_config,
-            r'/subsystem=naming/binding="java:global/env":write-attribute(name=value,'
-            r' value="INT\\\\2")',
+            r'/subsystem=naming/binding="java:global/env":write-attribute(name=value, value="INT\\\\2")',
         )
 
     def test_read_binding(self):

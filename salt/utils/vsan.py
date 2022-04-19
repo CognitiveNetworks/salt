@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Connection library for VMware vSAN endpoint
 
@@ -41,6 +42,8 @@ The 5.5.0.2014.1.1 is a known stable version that this original VMware utils fil
 was developed against.
 """
 
+# Import Python Libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 import ssl
@@ -52,6 +55,9 @@ from salt.exceptions import (
     VMwareObjectRetrievalError,
     VMwareRuntimeError,
 )
+
+# Import Salt Libs
+from salt.ext import six
 
 try:
     from pyVmomi import vim, vmodl  # pylint: disable=no-name-in-module
@@ -99,7 +105,7 @@ def vsan_supported(service_instance):
     except vim.fault.NoPermission as exc:
         log.exception(exc)
         raise VMwareApiError(
-            "Not enough permissions. Required privilege: {}".format(exc.privilegeId)
+            "Not enough permissions. Required privilege: " "{0}".format(exc.privilegeId)
         )
     except vim.fault.VimFault as exc:
         log.exception(exc)
@@ -187,7 +193,7 @@ def get_host_vsan_system(service_instance, host_ref, hostname=None):
     )
     if not objs:
         raise VMwareObjectRetrievalError(
-            "Host's '{}' VSAN system was not retrieved".format(hostname)
+            "Host's '{0}' VSAN system was " "not retrieved".format(hostname)
         )
     log.trace("[%s] Retrieved VSAN system", hostname)
     return objs[0]["object"]
@@ -238,14 +244,14 @@ def create_diskgroup(
     except vim.fault.NoPermission as exc:
         log.exception(exc)
         raise VMwareApiError(
-            "Not enough permissions. Required privilege: {}".format(exc.privilegeId)
+            "Not enough permissions. Required privilege: " "{0}".format(exc.privilegeId)
         )
     except vim.fault.VimFault as exc:
         log.exception(exc)
         raise VMwareApiError(exc.msg)
     except vmodl.fault.MethodNotFound as exc:
         log.exception(exc)
-        raise VMwareRuntimeError("Method '{}' not found".format(exc.method))
+        raise VMwareRuntimeError("Method '{0}' not found".format(exc.method))
     except vmodl.RuntimeFault as exc:
         log.exception(exc)
         raise VMwareRuntimeError(exc.msg)
@@ -305,14 +311,14 @@ def add_capacity_to_diskgroup(
     except vim.fault.NoPermission as exc:
         log.exception(exc)
         raise VMwareApiError(
-            "Not enough permissions. Required privilege: {}".format(exc.privilegeId)
+            "Not enough permissions. Required privilege: " "{0}".format(exc.privilegeId)
         )
     except vim.fault.VimFault as exc:
         log.exception(exc)
         raise VMwareApiError(exc.msg)
     except vmodl.fault.MethodNotFound as exc:
         log.exception(exc)
-        raise VMwareRuntimeError("Method '{}' not found".format(exc.method))
+        raise VMwareRuntimeError("Method '{0}' not found".format(exc.method))
     except vmodl.RuntimeFault as exc:
         raise VMwareRuntimeError(exc.msg)
     _wait_for_tasks([task], service_instance)
@@ -389,7 +395,7 @@ def remove_capacity_from_diskgroup(
     except vim.fault.NoPermission as exc:
         log.exception(exc)
         raise VMwareApiError(
-            "Not enough permissions. Required privilege: {}".format(exc.privilegeId)
+            "Not enough permissions. Required privilege: " "{0}".format(exc.privilegeId)
         )
     except vim.fault.VimFault as exc:
         log.exception(exc)
@@ -436,7 +442,7 @@ def remove_diskgroup(
         hostname = salt.utils.vmware.get_managed_object_name(host_ref)
     cache_disk_id = diskgroup.ssd.canonicalName
     log.debug(
-        "Removing disk group with cache disk '%s' on host '%s'",
+        "Removing disk group with cache disk '%s' on " "host '%s'",
         cache_disk_id,
         hostname,
     )
@@ -457,7 +463,7 @@ def remove_diskgroup(
     except vim.fault.NoPermission as exc:
         log.exception(exc)
         raise VMwareApiError(
-            "Not enough permissions. Required privilege: {}".format(exc.privilegeId)
+            "Not enough permissions. Required privilege: " "{0}".format(exc.privilegeId)
         )
     except vim.fault.VimFault as exc:
         log.exception(exc)
@@ -490,7 +496,7 @@ def get_cluster_vsan_info(cluster_ref):
     except vim.fault.NoPermission as exc:
         log.exception(exc)
         raise VMwareApiError(
-            "Not enough permissions. Required privilege: {}".format(exc.privilegeId)
+            "Not enough permissions. Required privilege: " "{0}".format(exc.privilegeId)
         )
     except vim.fault.VimFault as exc:
         log.exception(exc)
@@ -519,7 +525,7 @@ def reconfigure_cluster_vsan(cluster_ref, cluster_vsan_spec):
     except vim.fault.NoPermission as exc:
         log.exception(exc)
         raise VMwareApiError(
-            "Not enough permissions. Required privilege: {}".format(exc.privilegeId)
+            "Not enough permissions. Required privilege: " "{0}".format(exc.privilegeId)
         )
     except vim.fault.VimFault as exc:
         log.exception(exc)
@@ -534,13 +540,15 @@ def _wait_for_tasks(tasks, service_instance):
     """
     Wait for tasks created via the VSAN API
     """
-    log.trace("Waiting for vsan tasks: {0}", ", ".join([str(t) for t in tasks]))
+    log.trace(
+        "Waiting for vsan tasks: {0}", ", ".join([six.text_type(t) for t in tasks])
+    )
     try:
         vsanapiutils.WaitForTasks(tasks, service_instance)
     except vim.fault.NoPermission as exc:
         log.exception(exc)
         raise VMwareApiError(
-            "Not enough permissions. Required privilege: {}".format(exc.privilegeId)
+            "Not enough permissions. Required privilege: " "{0}".format(exc.privilegeId)
         )
     except vim.fault.VimFault as exc:
         log.exception(exc)
@@ -548,4 +556,6 @@ def _wait_for_tasks(tasks, service_instance):
     except vmodl.RuntimeFault as exc:
         log.exception(exc)
         raise VMwareRuntimeError(exc.msg)
-    log.trace("Tasks %s finished successfully", ", ".join([str(t) for t in tasks]))
+    log.trace(
+        "Tasks %s finished successfully", ", ".join([six.text_type(t) for t in tasks])
+    )

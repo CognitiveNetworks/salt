@@ -1,13 +1,21 @@
+# -*- coding: utf-8 -*-
 """
 Functions to work with JSON
 """
 
+from __future__ import absolute_import, unicode_literals
 
-import json
+# Import Python libs
+import json  # future lint: blacklisted-module
 import logging
+import sys
 
+# Import Salt libs
 import salt.utils.data
 import salt.utils.stringutils
+
+# Import 3rd-party libs
+from salt.ext import six
 
 log = logging.getLogger(__name__)
 
@@ -39,7 +47,7 @@ def find_json(raw):
             working = "\n".join(salt.utils.data.decode(lines[ind:]))
 
         try:
-            ret = json.loads(working)
+            ret = json.loads(working)  # future lint: blacklisted-function
         except ValueError:
             continue
         if ret:
@@ -89,10 +97,10 @@ def loads(s, **kwargs):
         return json_module.loads(s, **kwargs)
     except TypeError as exc:
         # json.loads cannot load bytestrings in Python < 3.6
-        if isinstance(s, bytes):
+        if six.PY3 and isinstance(s, bytes):
             return json_module.loads(salt.utils.stringutils.to_unicode(s), **kwargs)
         else:
-            raise
+            six.reraise(*sys.exc_info())
 
 
 def dump(obj, fp, **kwargs):
@@ -113,7 +121,9 @@ def dump(obj, fp, **kwargs):
     json_module = kwargs.pop("_json_module", json)
     if "ensure_ascii" not in kwargs:
         kwargs["ensure_ascii"] = False
-    return json_module.dump(obj, fp, **kwargs)
+    if six.PY2:
+        obj = salt.utils.data.encode(obj)
+    return json_module.dump(obj, fp, **kwargs)  # future lint: blacklisted-function
 
 
 def dumps(obj, **kwargs):
@@ -134,4 +144,6 @@ def dumps(obj, **kwargs):
     json_module = kwargs.pop("_json_module", json)
     if "ensure_ascii" not in kwargs:
         kwargs["ensure_ascii"] = False
-    return json_module.dumps(obj, **kwargs)
+    if six.PY2:
+        obj = salt.utils.data.encode(obj)
+    return json_module.dumps(obj, **kwargs)  # future lint: blacklisted-function

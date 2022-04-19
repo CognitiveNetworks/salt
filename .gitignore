@@ -35,7 +35,6 @@ Pipfile.lock
 /tests/cachedir/
 /tests/unit/templates/roots/
 /var/
-/venv/
 
 # setuptools stuff
 *.egg-info
@@ -88,7 +87,6 @@ tests/unit/templates/roots
 
 # Pycharm
 .idea
-venv/
 
 # VS Code
 .vscode

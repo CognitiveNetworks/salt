@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Library for interacting with PagerDuty API
 
@@ -15,6 +16,7 @@ Library for interacting with PagerDuty API
             pagerduty.subdomain: mysubdomain
             pagerduty.api_key: F3Rbyjbve43rfFWf2214
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 
@@ -44,7 +46,7 @@ def query(
     """
     Query the PagerDuty API
     """
-    user_agent = "SaltStack {}".format(__version__)
+    user_agent = "SaltStack {0}".format(__version__)
 
     if opts is None:
         opts = {}
@@ -64,10 +66,10 @@ def query(
         creds["pagerduty.subdomain"] = subdomain
 
     if client_url is None:
-        client_url = "https://{}.pagerduty.com".format(creds["pagerduty.subdomain"])
+        client_url = "https://{0}.pagerduty.com".format(creds["pagerduty.subdomain"])
 
     if url is None:
-        url = "https://{}.pagerduty.com/{}/{}".format(
+        url = "https://{0}.pagerduty.com/{1}/{2}".format(
             creds["pagerduty.subdomain"], path, action
         )
 
@@ -94,7 +96,7 @@ def query(
 
     headers = {
         "User-Agent": user_agent,
-        "Authorization": "Token token={}".format(creds["pagerduty.api_key"]),
+        "Authorization": "Token token={0}".format(creds["pagerduty.api_key"]),
     }
     if method == "GET":
         data = {}

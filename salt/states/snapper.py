@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Managing implicit state and baselines using snapshots
 =====================================================
@@ -106,6 +107,7 @@ and include this change.
 :platform:      Linux
 """
 
+from __future__ import absolute_import, print_function, unicode_literals
 
 import os
 
@@ -179,7 +181,7 @@ def baseline_snapshot(
         snapshot = _get_baseline_from_tag(config, tag)
         if not snapshot:
             ret.update(
-                {"result": False, "comment": 'Baseline tag "{}" not found'.format(tag)}
+                {"result": False, "comment": 'Baseline tag "{0}" not found'.format(tag)}
             )
             return ret
         number = snapshot["id"]
@@ -209,7 +211,7 @@ def baseline_snapshot(
 
     if __opts__["test"] and status:
         ret["changes"] = status
-        ret["comment"] = "{} files changes are set to be undone".format(
+        ret["comment"] = "{0} files changes are set to be undone".format(
             len(status.keys())
         )
         ret["result"] = None

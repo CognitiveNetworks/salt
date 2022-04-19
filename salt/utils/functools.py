@@ -1,13 +1,23 @@
+# -*- coding: utf-8 -*-
 """
 Utility functions to modify other functions
 """
 
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
+
+# Import Python libs
 import types
 
 import salt.utils.args
+
+# Import salt libs
 from salt.exceptions import SaltInvocationError
+
+# Import 3rd-party libs
+from salt.ext import six
+from salt.ext.six.moves import zip
 
 log = logging.getLogger(__name__)
 
@@ -46,17 +56,17 @@ def alias_function(fun, name, doc=None):
     alias_fun = types.FunctionType(
         fun.__code__,
         fun.__globals__,
-        str(name),
+        str(name),  # future lint: disable=blacklisted-function
         fun.__defaults__,
         fun.__closure__,
     )
     alias_fun.__dict__.update(fun.__dict__)
 
-    if doc and isinstance(doc, str):
+    if doc and isinstance(doc, six.string_types):
         alias_fun.__doc__ = doc
     else:
         orig_name = fun.__name__
-        alias_msg = "\nThis function is an alias of ``{}``.\n".format(orig_name)
+        alias_msg = "\nThis function is an alias of " "``{0}``.\n".format(orig_name)
         alias_fun.__doc__ = alias_msg + (fun.__doc__ or "")
 
     return alias_fun
@@ -112,7 +122,7 @@ def call_function(salt_function, *args, **kwargs):
             # those to the arg list that we will pass to the func.
             function_args.append(funcset)
         else:
-            for kwarg_key in funcset.keys():
+            for kwarg_key in six.iterkeys(funcset):
                 # We are going to pass in a keyword argument. The trick here is to make certain
                 # that if we find that in the *args* list that we pass it there and not as a kwarg
                 if kwarg_key in expected_args:
@@ -139,12 +149,11 @@ def call_function(salt_function, *args, **kwargs):
                 # increase the _passed_prm count
                 _passed_prm += 1
     if missing:
-        raise SaltInvocationError("Missing arguments: {}".format(", ".join(missing)))
+        raise SaltInvocationError("Missing arguments: {0}".format(", ".join(missing)))
     elif _exp_prm > _passed_prm:
         raise SaltInvocationError(
-            "Function expects {} positional parameters, got only {}".format(
-                _exp_prm, _passed_prm
-            )
+            "Function expects {0} positional parameters, "
+            "got only {1}".format(_exp_prm, _passed_prm)
         )
 
     return salt_function(*function_args, **function_kwargs)

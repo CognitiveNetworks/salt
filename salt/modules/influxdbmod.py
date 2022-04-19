@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 InfluxDB - A distributed time series database
 
@@ -26,6 +27,7 @@ version 0.9+)
     would override ``user`` and ``password`` while still using the defaults for
     ``host`` and ``port``.
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
 import collections
 import logging
@@ -56,8 +58,10 @@ def __virtual__():
         return __virtualname__
     return (
         False,
-        "The influxdb execution module could not be loaded:"
-        "influxdb library not available.",
+        (
+            "The influxdb execution module could not be loaded:"
+            "influxdb library not available."
+        ),
     )
 
 
@@ -364,9 +368,11 @@ def get_retention_policy(database, name, **client_args):
 
     try:
         return next(
-            p
-            for p in client.get_list_retention_policies(database)
-            if p.get("name") == name
+            (
+                p
+                for p in client.get_list_retention_policies(database)
+                if p.get("name") == name
+            )
         )
     except StopIteration:
         return {}
@@ -603,7 +609,7 @@ def get_continuous_query(database, name, **client_args):
     try:
         for db, cqs in client.query("SHOW CONTINUOUS QUERIES").items():
             if db[0] == database:
-                return next(cq for cq in cqs if cq.get("name") == name)
+                return next((cq for cq in cqs if cq.get("name") == name))
     except StopIteration:
         return {}
     return {}
@@ -635,7 +641,7 @@ def create_continuous_query(
 
     .. code-block:: bash
 
-        salt '*' influxdb.create_continuous_query mydb cq_month 'SELECT mean(*) INTO mydb.a_month.:MEASUREMENT FROM mydb.a_week./.*/ GROUP BY time(5m), *'"""
+        salt '*' influxdb.create_continuous_query mydb cq_month 'SELECT mean(*) INTO mydb.a_month.:MEASUREMENT FROM mydb.a_week./.*/ GROUP BY time(5m), *' """
     client = _client(**client_args)
     full_query = "CREATE CONTINUOUS QUERY {name} ON {database}"
     if resample_time:
@@ -673,7 +679,7 @@ def drop_continuous_query(database, name, **client_args):
     """
     client = _client(**client_args)
 
-    query = "DROP CONTINUOUS QUERY {} ON {}".format(name, database)
+    query = "DROP CONTINUOUS QUERY {0} ON {1}".format(name, database)
     client.query(query)
     return True
 

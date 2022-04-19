@@ -1,10 +1,15 @@
+# -*- coding: utf-8 -*-
 """
 Module for apcupsd
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import Python libs
 import logging
 
 import salt.utils.decorators as decorators
+
+# Import Salt libs
 import salt.utils.path
 
 log = logging.getLogger(__name__)
@@ -29,7 +34,7 @@ def __virtual__():
         return __virtualname__
     return (
         False,
-        "{} module can only be loaded on when apcupsd is installed".format(
+        "{0} module can only be loaded on when apcupsd is installed".format(
             __virtualname__
         ),
     )

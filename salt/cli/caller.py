@@ -69,6 +69,7 @@ class BaseCaller:
         """
         self.opts = opts
         self.opts["caller"] = True
+        self.serial = salt.payload.Serial(self.opts)
         # Handle this here so other deeper code which might
         # be imported as part of the salt api doesn't do  a
         # nasty sys.exit() and tick off our developer users
@@ -184,7 +185,7 @@ class BaseCaller:
             )
             try:
                 with salt.utils.files.fopen(proc_fn, "w+b") as fp_:
-                    fp_.write(salt.payload.dumps(sdata))
+                    fp_.write(self.serial.dumps(sdata))
             except NameError:
                 # Don't require msgpack with local
                 pass

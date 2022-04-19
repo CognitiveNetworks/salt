@@ -1,14 +1,20 @@
+# -*- coding: utf-8 -*-
 """
     :codeauthor: Jayesh Kariya <jayeshk@saltstack.com>
 """
 
+# Import Python Libs
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import Salt Libs
 import salt.modules.win_disk as win_disk
+
+# Import Salt Testing Libs
 from tests.support.mixins import LoaderModuleMockMixin
 from tests.support.unit import TestCase
 
 
-class MockKernel32:
+class MockKernel32(object):
     """
     Mock windll class
     """
@@ -24,7 +30,7 @@ class MockKernel32:
         return 1
 
 
-class MockWindll:
+class MockWindll(object):
     """
     Mock windll class
     """
@@ -33,7 +39,7 @@ class MockWindll:
         self.kernel32 = MockKernel32()
 
 
-class MockCtypes:
+class MockCtypes(object):
     """
     Mock ctypes class
     """

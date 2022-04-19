@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Utility functions for zfs
 
@@ -12,6 +13,8 @@ These functions are for dealing with type conversion and basic execution
 
 """
 
+# Import python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 import math
@@ -20,6 +23,11 @@ import re
 from numbers import Number
 
 import salt.modules.cmdmod
+
+# Import 3rd-party libs
+from salt.ext.six.moves import zip
+
+# Import salt libs
 from salt.utils.decorators import memoize as real_memoize
 from salt.utils.odict import OrderedDict
 from salt.utils.stringutils import to_num as str_to_num
@@ -543,16 +551,10 @@ def to_size(value, convert_to_human=True):
         #       see libzfs implementation linked above
         v_size_float = float(value) / v_multiplier
         if v_size_float == int(v_size_float):
-            value = "{:.0f}{}".format(
-                v_size_float,
-                zfs_size[v_power - 1],
-            )
+            value = "{:.0f}{}".format(v_size_float, zfs_size[v_power - 1],)
         else:
             for v_precision in ["{:.2f}{}", "{:.1f}{}", "{:.0f}{}"]:
-                v_size = v_precision.format(
-                    v_size_float,
-                    zfs_size[v_power - 1],
-                )
+                v_size = v_precision.format(v_size_float, zfs_size[v_power - 1],)
                 if len(v_size) <= 5:
                     value = v_size
                     break

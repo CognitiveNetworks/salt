@@ -17,7 +17,6 @@ import os.path
 import shutil
 import tempfile
 
-import salt.payload
 import salt.utils.atomicfile
 import salt.utils.files
 from salt.exceptions import SaltCacheError
@@ -59,7 +58,7 @@ def store(bank, key, data, cachedir):
     os.close(tmpfh)
     try:
         with salt.utils.files.fopen(tmpfname, "w+b") as fh_:
-            salt.payload.dump(data, fh_)
+            __context__["serial"].dump(data, fh_)
         # On Windows, os.rename will fail if the destination file exists.
         salt.utils.atomicfile.atomic_rename(tmpfname, outfile)
     except OSError as exc:
@@ -85,9 +84,9 @@ def fetch(bank, key, cachedir):
     try:
         with salt.utils.files.fopen(key_file, "rb") as fh_:
             if inkey:
-                return salt.payload.load(fh_)[key]
+                return __context__["serial"].load(fh_)[key]
             else:
-                return salt.payload.load(fh_)
+                return __context__["serial"].load(fh_)
     except OSError as exc:
         raise SaltCacheError(
             'There was an error reading the cache file "{}": {}'.format(key_file, exc)

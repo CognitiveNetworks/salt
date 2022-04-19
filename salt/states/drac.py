@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Management of Dell DRAC
 
@@ -35,6 +36,7 @@ Ensure DRAC network is in a consistent state
         - gateway: 10.225.108.1
 
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
 import salt.exceptions
 import salt.utils.path
@@ -68,18 +70,18 @@ def present(name, password, permission):
 
     if __opts__["test"]:
         if name in users:
-            ret["comment"] = "`{}` already exists".format(name)
+            ret["comment"] = "`{0}` already exists".format(name)
         else:
-            ret["comment"] = "`{}` will be created".format(name)
+            ret["comment"] = "`{0}` will be created".format(name)
             ret["changes"] = {name: "will be created"}
 
         return ret
 
     if name in users:
-        ret["comment"] = "`{}` already exists".format(name)
+        ret["comment"] = "`{0}` already exists".format(name)
     else:
         if __salt__["drac.create_user"](name, password, permission, users):
-            ret["comment"] = "`{}` user created".format(name)
+            ret["comment"] = "`{0}` user created".format(name)
             ret["changes"] = {name: "new user created"}
         else:
             ret["comment"] = "Unable to create user"
@@ -101,22 +103,22 @@ def absent(name):
 
     if __opts__["test"]:
         if name in users:
-            ret["comment"] = "`{}` is set to be deleted".format(name)
+            ret["comment"] = "`{0}` is set to be deleted".format(name)
             ret["changes"] = {name: "will be deleted"}
         else:
-            ret["comment"] = "`{}` does not exist".format(name)
+            ret["comment"] = "`{0}` does not exist".format(name)
 
         return ret
 
     if name in users:
         if __salt__["drac.delete_user"](name, users[name]["index"]):
-            ret["comment"] = "`{}` deleted".format(name)
+            ret["comment"] = "`{0}` deleted".format(name)
             ret["changes"] = {name: "deleted"}
         else:
             ret["comment"] = "Unable to delete user"
             ret["result"] = False
     else:
-        ret["comment"] = "`{}` does not exist".format(name)
+        ret["comment"] = "`{0}` does not exist".format(name)
 
     return ret
 

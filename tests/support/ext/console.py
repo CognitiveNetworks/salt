@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # vim: sw=4 ts=4 fenc=utf-8
 """
 getTerminalSize()
@@ -6,6 +7,8 @@ getTerminalSize()
  - taken from http://stackoverflow.com/questions/566746/how-to-get-console-window-width-in-python
 """
 
+# Import python libs
+from __future__ import absolute_import, print_function
 
 import ctypes
 import fcntl
@@ -115,4 +118,4 @@ def _getTerminalSize_linux():
 
 if __name__ == "__main__":
     sizex, sizey = getTerminalSize()
-    print("width = {}  height = {}".format(sizex, sizey))
+    print("width = {0}  height = {1}".format(sizex, sizey))

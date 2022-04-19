@@ -1,10 +1,16 @@
+# -*- coding: utf-8 -*-
 """
     :codeauthor: Rupesh Tare <rupesht@saltstack.com>
 """
 
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import Salt Libs
 import salt.modules.pw_user as pw_user
 from salt.exceptions import CommandExecutionError
+
+# Import Salt Testing Libs
 from tests.support.mixins import LoaderModuleMockMixin
 from tests.support.mock import MagicMock, patch
 from tests.support.unit import TestCase, skipIf
@@ -49,7 +55,7 @@ class PwUserTestCase(TestCase, LoaderModuleMockMixin):
         """
         mock_user = "saltdude"
 
-        class MockData:
+        class MockData(object):
             pw_name = mock_user
 
         with patch("pwd.getpwall", MagicMock(return_value=[MockData()])):
@@ -324,7 +330,7 @@ class PwUserTestCase(TestCase, LoaderModuleMockMixin):
         """
         mock_user = "saltdude"
 
-        class MockData:
+        class MockData(object):
             pw_name = mock_user
 
         with patch("pwd.getpwall", MagicMock(return_value=[MockData()])):

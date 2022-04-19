@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
 """
 tests.support.sminion
 ~~~~~~~~~~~~~~~~~~~~~
 
 SMinion's support functions
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
 import fnmatch
 import hashlib

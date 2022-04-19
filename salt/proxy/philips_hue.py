@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 # Copyright 2015 SUSE LLC
 #
@@ -33,13 +34,16 @@ To configure the proxy minion:
 """
 
 # pylint: disable=import-error,no-name-in-module,redefined-builtin
+from __future__ import absolute_import, print_function, unicode_literals
 
-import http.client
+# Import python libs
 import logging
 import time
 
+import salt.ext.six.moves.http_client as http_client
 import salt.utils.json
 from salt.exceptions import CommandExecutionError, MinionError
+from salt.ext import six
 
 __proxyenabled__ = ["philips_hue"]
 
@@ -47,7 +51,7 @@ CONFIG = {}
 log = logging.getLogger(__file__)
 
 
-class Const:
+class Const(object):
     """
     Constants for the lamp operations.
     """
@@ -89,7 +93,7 @@ def init(cnf):
             message="Cannot find 'user' parameter in the proxy configuration"
         )
 
-    CONFIG["uri"] = "/api/{}".format(CONFIG["user"])
+    CONFIG["uri"] = "/api/{0}".format(CONFIG["user"])
 
 
 def ping(*args, **kw):
@@ -117,20 +121,20 @@ def _query(lamp_id, state, action="", method="GET"):
     # Because salt.utils.query is that dreadful... :(
 
     err = None
-    url = "{}/lights{}".format(
-        CONFIG["uri"], lamp_id and "/{}".format(lamp_id) or ""
-    ) + (action and "/{}".format(action) or "")
-    conn = http.client.HTTPConnection(CONFIG["host"])
+    url = "{0}/lights{1}".format(
+        CONFIG["uri"], lamp_id and "/{0}".format(lamp_id) or ""
+    ) + (action and "/{0}".format(action) or "")
+    conn = http_client.HTTPConnection(CONFIG["host"])
     if method == "PUT":
         conn.request(method, url, salt.utils.json.dumps(state))
     else:
         conn.request(method, url)
     resp = conn.getresponse()
 
-    if resp.status == http.client.OK:
+    if resp.status == http_client.OK:
         res = salt.utils.json.loads(resp.read())
     else:
-        err = "HTTP error: {}, {}".format(resp.status, resp.reason)
+        err = "HTTP error: {0}, {1}".format(resp.status, resp.reason)
     conn.close()
     if err:
         raise CommandExecutionError(err)
@@ -208,8 +212,8 @@ def call_lights(*args, **kwargs):
     res = dict()
     lights = _get_lights()
     for dev_id in "id" in kwargs and _get_devices(kwargs) or sorted(lights.keys()):
-        if lights.get(str(dev_id)):
-            res[dev_id] = lights[str(dev_id)]
+        if lights.get(six.text_type(dev_id)):
+            res[dev_id] = lights[six.text_type(dev_id)]
 
     return res or False
 
@@ -242,7 +246,9 @@ def call_switch(*args, **kwargs):
         else:
             # Invert the current state
             state = (
-                devices[str(dev_id)]["state"]["on"] and Const.LAMP_OFF or Const.LAMP_ON
+                devices[six.text_type(dev_id)]["state"]["on"]
+                and Const.LAMP_OFF
+                or Const.LAMP_ON
             )
         out[dev_id] = _set(dev_id, state)
 
@@ -269,7 +275,7 @@ def call_blink(*args, **kwargs):
     pause = kwargs.get("pause", 0)
     res = dict()
     for dev_id in "id" not in kwargs and sorted(devices.keys()) or _get_devices(kwargs):
-        state = devices[str(dev_id)]["state"]["on"]
+        state = devices[six.text_type(dev_id)]["state"]["on"]
         _set(dev_id, state and Const.LAMP_OFF or Const.LAMP_ON)
         if pause:
             time.sleep(pause)
@@ -315,7 +321,7 @@ def call_status(*args, **kwargs):
     res = dict()
     devices = _get_lights()
     for dev_id in "id" not in kwargs and sorted(devices.keys()) or _get_devices(kwargs):
-        dev_id = str(dev_id)
+        dev_id = six.text_type(dev_id)
         res[dev_id] = {
             "on": devices[dev_id]["state"]["on"],
             "reachable": devices[dev_id]["state"]["reachable"],

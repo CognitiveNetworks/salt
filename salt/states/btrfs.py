@@ -9,6 +9,7 @@ import functools
 import logging
 import os.path
 import tempfile
+import traceback
 
 from salt.exceptions import CommandExecutionError
 
@@ -99,9 +100,9 @@ def __mount_device(action):
                     ret["comment"].append(msg)
                 kwargs["__dest"] = dest
             ret = action(*args, **kwargs)
-        except Exception as exc:  # pylint: disable=broad-except
-            log.error("Exception raised while mounting device: %s", exc, exc_info=True)
-            ret["comment"].append(exc)
+        except Exception as e:  # pylint: disable=broad-except
+            log.error("""Traceback: {}""".format(traceback.format_exc()))
+            ret["comment"].append(e)
         finally:
             if device:
                 _umount(dest)

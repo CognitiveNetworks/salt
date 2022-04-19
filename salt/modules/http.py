@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Module for making various web calls. Primarily designed for webhooks and the
 like, but also useful for basic http testing.
@@ -5,11 +6,17 @@ like, but also useful for basic http testing.
 .. versionadded:: 2015.5.0
 """
 
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import time
 
+# Import Salt libs
 import salt.utils.http
 from salt.exceptions import CommandExecutionError
+
+# Import 3rd-party libs
+from salt.ext import six
 
 
 def query(url, **kwargs):
@@ -33,7 +40,7 @@ def query(url, **kwargs):
 
         salt '*' http.query http://somelink.com/
         salt '*' http.query http://somelink.com/ method=POST \
-            params='{"key1": "val1", "key2": "val2"}'
+            params='key1=val1&key2=val2'
         salt '*' http.query http://somelink.com/ method=POST \
             data='<xml>somecontent</xml>'
     """
@@ -45,7 +52,7 @@ def query(url, **kwargs):
     try:
         return salt.utils.http.query(url=url, opts=opts, **kwargs)
     except Exception as exc:  # pylint: disable=broad-except
-        raise CommandExecutionError(str(exc))
+        raise CommandExecutionError(six.text_type(exc))
 
 
 def wait_for_successful_query(url, wait_for=300, **kwargs):

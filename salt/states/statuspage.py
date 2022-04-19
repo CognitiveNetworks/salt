@@ -18,6 +18,8 @@ In the minion configuration file, the following block is required:
 """
 
 import logging
+
+# import python std lib
 import time
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -478,10 +480,7 @@ def managed(
         ret.update(
             {
                 "result": False,
-                "comment": (
-                    "Cannot remove everything. To allow this, please set the option"
-                    " `allow_empty` as True."
-                ),
+                "comment": "Cannot remove everything. To allow this, please set the option `allow_empty` as True.",
             }
         )
         return ret
@@ -507,10 +506,7 @@ def managed(
         ret.update(
             {
                 "result": False,
-                "comment": (
-                    "Cannot remove everything. To allow this, please set the option"
-                    " `allow_empty` as True."
-                ),
+                "comment": "Cannot remove everything. To allow this, please set the option `allow_empty` as True.",
             }
         )
         return ret

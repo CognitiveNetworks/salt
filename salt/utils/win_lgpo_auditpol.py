@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 r"""
 A salt util for modifying the audit policies on the machine. This util is used
 by the ``win_auditpol`` and ``win_lgpo`` modules.
@@ -58,15 +59,21 @@ Usage:
     salt.utils.win_lgpo_auditpol.set_setting(name='Credential Validation',
                                              value='No Auditing')
 """
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 import re
 import tempfile
 
+# Import Salt libs
 import salt.modules.cmdmod
 import salt.utils.files
 import salt.utils.platform
 from salt.exceptions import CommandExecutionError
+
+# Import 3rd Party libs
+from salt.ext.six.moves import zip
 
 log = logging.getLogger(__name__)
 __virtualname__ = "auditpol"
@@ -116,11 +123,11 @@ def _auditpol_cmd(cmd):
     Raises:
         CommandExecutionError: If the command encounters an error
     """
-    ret = salt.modules.cmdmod.run_all(cmd="auditpol {}".format(cmd), python_shell=True)
+    ret = salt.modules.cmdmod.run_all(cmd="auditpol {0}".format(cmd), python_shell=True)
     if ret["retcode"] == 0:
         return ret["stdout"].splitlines()
 
-    msg = "Error executing auditpol command: {}\n".format(cmd)
+    msg = "Error executing auditpol command: {0}\n".format(cmd)
     msg += "\n".join(ret["stdout"])
     raise CommandExecutionError(msg)
 
@@ -173,9 +180,9 @@ def get_settings(category="All"):
     if category.lower() in ["all", "*"]:
         category = "*"
     elif category.lower() not in [x.lower() for x in categories]:
-        raise KeyError('Invalid category: "{}"'.format(category))
+        raise KeyError('Invalid category: "{0}"'.format(category))
 
-    cmd = '/get /category:"{}"'.format(category)
+    cmd = '/get /category:"{0}"'.format(category)
     results = _auditpol_cmd(cmd)
 
     ret = {}
@@ -213,7 +220,7 @@ def get_setting(name):
     for setting in current_settings:
         if name.lower() == setting.lower():
             return current_settings[setting]
-    raise KeyError("Invalid name: {}".format(name))
+    raise KeyError("Invalid name: {0}".format(name))
 
 
 def _get_valid_names():
@@ -264,13 +271,13 @@ def set_setting(name, value):
     """
     # Input validation
     if name.lower() not in _get_valid_names():
-        raise KeyError("Invalid name: {}".format(name))
+        raise KeyError("Invalid name: {0}".format(name))
     for setting in settings:
         if value.lower() == setting.lower():
-            cmd = '/set /subcategory:"{}" {}'.format(name, settings[setting])
+            cmd = '/set /subcategory:"{0}" {1}'.format(name, settings[setting])
             break
     else:
-        raise KeyError("Invalid setting value: {}".format(value))
+        raise KeyError("Invalid setting value: {0}".format(value))
 
     _auditpol_cmd(cmd)
 
@@ -298,7 +305,7 @@ def get_auditpol_dump():
     with tempfile.NamedTemporaryFile(suffix=".csv") as tmp_file:
         csv_file = tmp_file.name
 
-    cmd = "/backup /file:{}".format(csv_file)
+    cmd = "/backup /file:{0}".format(csv_file)
     _auditpol_cmd(cmd)
 
     with salt.utils.files.fopen(csv_file) as fp:

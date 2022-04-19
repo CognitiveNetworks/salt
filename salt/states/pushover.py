@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Send a message to PushOver
 ==========================
@@ -26,6 +27,9 @@ The api key can be specified in the master or minion configuration like below:
       token: peWcBiMOS9HrZG15peWcBiMOS9HrZG15
 
 """
+
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 
 def __virtual__():
@@ -102,18 +106,18 @@ def post_message(
     ret = {"name": name, "changes": {}, "result": False, "comment": ""}
 
     if __opts__["test"]:
-        ret["comment"] = "The following message is to be sent to PushOver: {}".format(
+        ret["comment"] = "The following message is to be sent to PushOver: {0}".format(
             message
         )
         ret["result"] = None
         return ret
 
     if not user:
-        ret["comment"] = "PushOver user is missing: {}".format(user)
+        ret["comment"] = "PushOver user is missing: {0}".format(user)
         return ret
 
     if not message:
-        ret["comment"] = "PushOver message is missing: {}".format(message)
+        ret["comment"] = "PushOver message is missing: {0}".format(message)
         return ret
 
     result = __salt__["pushover.post_message"](
@@ -129,8 +133,8 @@ def post_message(
 
     if result:
         ret["result"] = True
-        ret["comment"] = "Sent message: {}".format(name)
+        ret["comment"] = "Sent message: {0}".format(name)
     else:
-        ret["comment"] = "Failed to send message: {}".format(name)
+        ret["comment"] = "Failed to send message: {0}".format(name)
 
     return ret

@@ -1,6 +1,8 @@
 import pytest
 import salt.modules.kubeadm as kubeadm
 from salt.exceptions import CommandExecutionError
+
+# Import Salt Testing Libs
 from tests.support.mixins import LoaderModuleMockMixin
 from tests.support.mock import MagicMock, patch
 from tests.support.unit import TestCase
@@ -638,16 +640,13 @@ class KubeAdmTestCase(TestCase, LoaderModuleMockMixin):
             "cmd.run_all": MagicMock(return_value=result),
         }
         with patch.dict(kubeadm.__salt__, salt_mock):
-            assert (
-                kubeadm.config_images_list(
-                    config="/kubeadm.cfg",
-                    feature_gates="k=v",
-                    kubernetes_version="version",
-                    kubeconfig="/kube.cfg",
-                    rootfs="/mnt",
-                )
-                == ["image1", "image2"]
-            )
+            assert kubeadm.config_images_list(
+                config="/kubeadm.cfg",
+                feature_gates="k=v",
+                kubernetes_version="version",
+                kubeconfig="/kube.cfg",
+                rootfs="/mnt",
+            ) == ["image1", "image2"]
             salt_mock["cmd.run_all"].assert_called_with(
                 [
                     "kubeadm",
@@ -685,7 +684,8 @@ class KubeAdmTestCase(TestCase, LoaderModuleMockMixin):
         """
         result = {
             "retcode": 0,
-            "stdout": "[config/images] Pulled image1\n[config/images] Pulled image2\n",
+            "stdout": "[config/images] Pulled image1\n"
+            "[config/images] Pulled image2\n",
         }
         salt_mock = {
             "cmd.run_all": MagicMock(return_value=result),
@@ -702,23 +702,21 @@ class KubeAdmTestCase(TestCase, LoaderModuleMockMixin):
         """
         result = {
             "retcode": 0,
-            "stdout": "[config/images] Pulled image1\n[config/images] Pulled image2\n",
+            "stdout": "[config/images] Pulled image1\n"
+            "[config/images] Pulled image2\n",
         }
         salt_mock = {
             "cmd.run_all": MagicMock(return_value=result),
         }
         with patch.dict(kubeadm.__salt__, salt_mock):
-            assert (
-                kubeadm.config_images_pull(
-                    config="/kubeadm.cfg",
-                    cri_socket="socket",
-                    feature_gates="k=v",
-                    kubernetes_version="version",
-                    kubeconfig="/kube.cfg",
-                    rootfs="/mnt",
-                )
-                == ["image1", "image2"]
-            )
+            assert kubeadm.config_images_pull(
+                config="/kubeadm.cfg",
+                cri_socket="socket",
+                feature_gates="k=v",
+                kubernetes_version="version",
+                kubeconfig="/kube.cfg",
+                rootfs="/mnt",
+            ) == ["image1", "image2"]
             salt_mock["cmd.run_all"].assert_called_with(
                 [
                     "kubeadm",

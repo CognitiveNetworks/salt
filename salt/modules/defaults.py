@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
 """
 Module to work with salt formula defaults files
 
 """
 
+from __future__ import absolute_import, print_function, unicode_literals
 
 import copy
 import logging

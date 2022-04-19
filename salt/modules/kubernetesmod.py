@@ -213,13 +213,11 @@ def _setup_conn(**kwargs):
                 return _setup_conn_old(**kwargs)
             except Exception:  # pylint: disable=broad-except
                 raise CommandExecutionError(
-                    "Old style kubernetes configuration is only supported up to"
-                    " python-kubernetes 2.0.0"
+                    "Old style kubernetes configuration is only supported up to python-kubernetes 2.0.0"
                 )
         else:
             raise CommandExecutionError(
-                "Invalid kubernetes configuration. Parameter 'kubeconfig' and 'context'"
-                " are required."
+                "Invalid kubernetes configuration. Parameter 'kubeconfig' and 'context' are required."
             )
     kubernetes.config.load_kube_config(config_file=kubeconfig, context=context)
 
@@ -501,7 +499,9 @@ def services(namespace="default", **kwargs):
         if isinstance(exc, ApiException) and exc.status == 404:
             return None
         else:
-            log.exception("Exception when calling CoreV1Api->list_namespaced_service")
+            log.exception(
+                "Exception when calling " "CoreV1Api->list_namespaced_service"
+            )
             raise CommandExecutionError(exc)
     finally:
         _cleanup(**cfg)
@@ -528,7 +528,7 @@ def pods(namespace="default", **kwargs):
         if isinstance(exc, ApiException) and exc.status == 404:
             return None
         else:
-            log.exception("Exception when calling CoreV1Api->list_namespaced_pod")
+            log.exception("Exception when calling " "CoreV1Api->list_namespaced_pod")
             raise CommandExecutionError(exc)
     finally:
         _cleanup(**cfg)
@@ -557,7 +557,7 @@ def secrets(namespace="default", **kwargs):
         if isinstance(exc, ApiException) and exc.status == 404:
             return None
         else:
-            log.exception("Exception when calling CoreV1Api->list_namespaced_secret")
+            log.exception("Exception when calling " "CoreV1Api->list_namespaced_secret")
             raise CommandExecutionError(exc)
     finally:
         _cleanup(**cfg)
@@ -587,7 +587,7 @@ def configmaps(namespace="default", **kwargs):
             return None
         else:
             log.exception(
-                "Exception when calling CoreV1Api->list_namespaced_config_map"
+                "Exception when calling " "CoreV1Api->list_namespaced_config_map"
             )
             raise CommandExecutionError(exc)
     finally:
@@ -645,7 +645,9 @@ def show_service(name, namespace="default", **kwargs):
         if isinstance(exc, ApiException) and exc.status == 404:
             return None
         else:
-            log.exception("Exception when calling CoreV1Api->read_namespaced_service")
+            log.exception(
+                "Exception when calling " "CoreV1Api->read_namespaced_service"
+            )
             raise CommandExecutionError(exc)
     finally:
         _cleanup(**cfg)
@@ -672,7 +674,7 @@ def show_pod(name, namespace="default", **kwargs):
         if isinstance(exc, ApiException) and exc.status == 404:
             return None
         else:
-            log.exception("Exception when calling CoreV1Api->read_namespaced_pod")
+            log.exception("Exception when calling " "CoreV1Api->read_namespaced_pod")
             raise CommandExecutionError(exc)
     finally:
         _cleanup(**cfg)
@@ -698,7 +700,7 @@ def show_namespace(name, **kwargs):
         if isinstance(exc, ApiException) and exc.status == 404:
             return None
         else:
-            log.exception("Exception when calling CoreV1Api->read_namespace")
+            log.exception("Exception when calling " "CoreV1Api->read_namespace")
             raise CommandExecutionError(exc)
     finally:
         _cleanup(**cfg)
@@ -733,7 +735,7 @@ def show_secret(name, namespace="default", decode=False, **kwargs):
         if isinstance(exc, ApiException) and exc.status == 404:
             return None
         else:
-            log.exception("Exception when calling CoreV1Api->read_namespaced_secret")
+            log.exception("Exception when calling " "CoreV1Api->read_namespaced_secret")
             raise CommandExecutionError(exc)
     finally:
         _cleanup(**cfg)
@@ -761,7 +763,7 @@ def show_configmap(name, namespace="default", **kwargs):
             return None
         else:
             log.exception(
-                "Exception when calling CoreV1Api->read_namespaced_config_map"
+                "Exception when calling " "CoreV1Api->read_namespaced_config_map"
             )
             raise CommandExecutionError(exc)
     finally:
@@ -881,7 +883,7 @@ def delete_pod(name, namespace="default", **kwargs):
         if isinstance(exc, ApiException) and exc.status == 404:
             return None
         else:
-            log.exception("Exception when calling CoreV1Api->delete_namespaced_pod")
+            log.exception("Exception when calling " "CoreV1Api->delete_namespaced_pod")
             raise CommandExecutionError(exc)
     finally:
         _cleanup(**cfg)
@@ -909,7 +911,7 @@ def delete_namespace(name, **kwargs):
         if isinstance(exc, ApiException) and exc.status == 404:
             return None
         else:
-            log.exception("Exception when calling CoreV1Api->delete_namespace")
+            log.exception("Exception when calling " "CoreV1Api->delete_namespace")
             raise CommandExecutionError(exc)
     finally:
         _cleanup(**cfg)
@@ -972,7 +974,7 @@ def delete_configmap(name, namespace="default", **kwargs):
             return None
         else:
             log.exception(
-                "Exception when calling CoreV1Api->delete_namespaced_config_map"
+                "Exception when calling " "CoreV1Api->delete_namespaced_config_map"
             )
             raise CommandExecutionError(exc)
     finally:
@@ -1046,7 +1048,7 @@ def create_pod(name, namespace, metadata, spec, source, template, saltenv, **kwa
         if isinstance(exc, ApiException) and exc.status == 404:
             return None
         else:
-            log.exception("Exception when calling CoreV1Api->create_namespaced_pod")
+            log.exception("Exception when calling " "CoreV1Api->create_namespaced_pod")
             raise CommandExecutionError(exc)
     finally:
         _cleanup(**cfg)
@@ -1082,7 +1084,9 @@ def create_service(
         if isinstance(exc, ApiException) and exc.status == 404:
             return None
         else:
-            log.exception("Exception when calling CoreV1Api->create_namespaced_service")
+            log.exception(
+                "Exception when calling " "CoreV1Api->create_namespaced_service"
+            )
             raise CommandExecutionError(exc)
     finally:
         _cleanup(**cfg)
@@ -1136,7 +1140,9 @@ def create_secret(
         if isinstance(exc, ApiException) and exc.status == 404:
             return None
         else:
-            log.exception("Exception when calling CoreV1Api->create_namespaced_secret")
+            log.exception(
+                "Exception when calling " "CoreV1Api->create_namespaced_secret"
+            )
             raise CommandExecutionError(exc)
     finally:
         _cleanup(**cfg)
@@ -1181,7 +1187,7 @@ def create_configmap(
             return None
         else:
             log.exception(
-                "Exception when calling CoreV1Api->create_namespaced_config_map"
+                "Exception when calling " "CoreV1Api->create_namespaced_config_map"
             )
             raise CommandExecutionError(exc)
     finally:
@@ -1215,7 +1221,7 @@ def create_namespace(name, **kwargs):
         if isinstance(exc, ApiException) and exc.status == 404:
             return None
         else:
-            log.exception("Exception when calling CoreV1Api->create_namespace")
+            log.exception("Exception when calling " "CoreV1Api->create_namespace")
             raise CommandExecutionError(exc)
     finally:
         _cleanup(**cfg)
@@ -1306,7 +1312,7 @@ def replace_service(
             return None
         else:
             log.exception(
-                "Exception when calling CoreV1Api->replace_namespaced_service"
+                "Exception when calling " "CoreV1Api->replace_namespaced_service"
             )
             raise CommandExecutionError(exc)
     finally:
@@ -1362,7 +1368,9 @@ def replace_secret(
         if isinstance(exc, ApiException) and exc.status == 404:
             return None
         else:
-            log.exception("Exception when calling CoreV1Api->replace_namespaced_secret")
+            log.exception(
+                "Exception when calling " "CoreV1Api->replace_namespaced_secret"
+            )
             raise CommandExecutionError(exc)
     finally:
         _cleanup(**cfg)
@@ -1412,7 +1420,7 @@ def replace_configmap(
             return None
         else:
             log.exception(
-                "Exception when calling CoreV1Api->replace_namespaced_configmap"
+                "Exception when calling " "CoreV1Api->replace_namespaced_configmap"
             )
             raise CommandExecutionError(exc)
     finally:
@@ -1442,7 +1450,7 @@ def __create_object_body(
             or src_obj["kind"] != kind
         ):
             raise CommandExecutionError(
-                "The source file should define only a {} object".format(kind)
+                "The source file should define only " "a {} object".format(kind)
             )
 
         if "metadata" in src_obj:
@@ -1487,7 +1495,8 @@ def __read_and_render_yaml_file(source, template, saltenv):
                 if not data["result"]:
                     # Failed to render the template
                     raise CommandExecutionError(
-                        "Failed to render file path with error: {}".format(data["data"])
+                        "Failed to render file path with error: "
+                        "{}".format(data["data"])
                     )
 
                 contents = data["data"].encode("utf-8")

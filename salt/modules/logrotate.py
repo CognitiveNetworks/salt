@@ -1,14 +1,21 @@
+# -*- coding: utf-8 -*-
 """
 Module for managing logrotate.
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
+
+# Import python libs
 import os
 
 import salt.utils.files
 import salt.utils.platform
 import salt.utils.stringutils
 from salt.exceptions import SaltInvocationError
+
+# Import salt libs
+from salt.ext import six
 
 _LOG = logging.getLogger(__name__)
 _DEFAULT_CONF = "/etc/logrotate.conf"
@@ -41,7 +48,7 @@ def _convert_if_int(value):
     :rtype: bool|int|str
     """
     try:
-        value = int(str(value))
+        value = int(six.text_type(value))
     except ValueError:
         pass
     return value
@@ -206,12 +213,12 @@ def set_(key, value, setting=None, conf_file=_DEFAULT_CONF):
         if key in conf["include files"][include]:
             conf_file = os.path.join(conf["include"], include)
 
-    new_line = ""
+    new_line = six.text_type()
     kwargs = {
         "flags": 8,
         "backup": False,
         "path": conf_file,
-        "pattern": "^{}.*".format(key),
+        "pattern": "^{0}.*".format(key),
         "show_changes": False,
     }
 
@@ -219,10 +226,11 @@ def set_(key, value, setting=None, conf_file=_DEFAULT_CONF):
         current_value = conf.get(key, False)
 
         if isinstance(current_value, dict):
-            raise SaltInvocationError(
-                "Error: {} includes a dict, and a specific setting inside the "
-                "dict was not declared".format(key)
-            )
+            error_msg = (
+                "Error: {0} includes a dict, and a specific setting inside the "
+                "dict was not declared"
+            ).format(key)
+            raise SaltInvocationError(error_msg)
 
         if value == current_value:
             _LOG.debug("Command '%s' already has: %s", key, value)
@@ -232,7 +240,7 @@ def set_(key, value, setting=None, conf_file=_DEFAULT_CONF):
         if value is True:
             new_line = key
         elif value:
-            new_line = "{} {}".format(key, value)
+            new_line = "{0} {1}".format(key, value)
 
         kwargs.update({"prepend_if_not_found": True})
     else:
@@ -279,5 +287,5 @@ def _dict_to_stanza(key, stanza):
     for skey in stanza:
         if stanza[skey] is True:
             stanza[skey] = ""
-        ret += "    {} {}\n".format(skey, stanza[skey])
+        ret += "    {0} {1}\n".format(skey, stanza[skey])
     return "{0} {{\n{1}}}".format(key, ret)

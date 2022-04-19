@@ -1,14 +1,21 @@
+# -*- coding: utf-8 -*-
 """
     salt.utils.gzip
     ~~~~~~~~~~~~~~~
     Helper module for handling gzip consistently between 2.7+ and 2.6-
 """
 
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import python libs
 import gzip
-import io
 
+# Import Salt libs
 import salt.utils.files
+
+# Import 3rd-party libs
+from salt.ext import six
+from salt.ext.six import BytesIO
 
 
 class GzipFile(gzip.GzipFile):
@@ -46,9 +53,9 @@ def compress(data, compresslevel=9):
     """
     Returns the data compressed at gzip level compression.
     """
-    buf = io.BytesIO()
+    buf = BytesIO()
     with open_fileobj(buf, "wb", compresslevel) as ogz:
-        if not isinstance(data, bytes):
+        if six.PY3 and not isinstance(data, bytes):
             data = data.encode(__salt_system_encoding__)
         ogz.write(data)
     compressed = buf.getvalue()
@@ -56,7 +63,7 @@ def compress(data, compresslevel=9):
 
 
 def uncompress(data):
-    buf = io.BytesIO(data)
+    buf = BytesIO(data)
     with open_fileobj(buf, "rb") as igz:
         unc = igz.read()
         return unc
@@ -81,7 +88,7 @@ def compress_file(fh_, compresslevel=9, chunk_size=1048576):
         raise ValueError("chunk_size must be an integer")
     try:
         while bytes_read == chunk_size:
-            buf = io.BytesIO()
+            buf = BytesIO()
             with open_fileobj(buf, "wb", compresslevel) as ogz:
                 try:
                     bytes_read = ogz.write(fh_.read(chunk_size))

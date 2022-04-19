@@ -1,8 +1,11 @@
+# -*- coding: utf-8 -*-
 """
 Module to provide RabbitMQ compatibility to Salt.
 Todo: A lot, need to add cluster support, logging, and minion configuration
 data.
 """
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 import os
@@ -10,12 +13,17 @@ import random
 import re
 import string
 
+# Import Salt libs
 import salt.utils.itertools
 import salt.utils.json
 import salt.utils.path
 import salt.utils.platform
 import salt.utils.user
 from salt.exceptions import CommandExecutionError, SaltInvocationError
+
+# Import 3rd-party libs
+from salt.ext import six
+from salt.ext.six.moves import range
 from salt.utils.versions import LooseVersion as _LooseVersion
 
 log = logging.getLogger(__name__)
@@ -32,7 +40,7 @@ def __virtual__():
     global RABBITMQ_PLUGINS
 
     if salt.utils.platform.is_windows():
-        import winreg
+        from salt.ext.six.moves import winreg
 
         key = None
         try:
@@ -45,10 +53,10 @@ def __virtual__():
             (dir_path, value_type) = winreg.QueryValueEx(key, "Install_Dir")
             if value_type != winreg.REG_SZ:
                 raise TypeError(
-                    "Invalid RabbitMQ Server directory type: {}".format(value_type)
+                    "Invalid RabbitMQ Server directory type: {0}".format(value_type)
                 )
             if not os.path.isdir(dir_path):
-                raise OSError("RabbitMQ directory not found: {}".format(dir_path))
+                raise IOError("RabbitMQ directory not found: {0}".format(dir_path))
             subdir_match = ""
             for name in os.listdir(dir_path):
                 if name.startswith("rabbitmq_server-"):
@@ -57,8 +65,10 @@ def __virtual__():
                     if os.path.isdir(subdir_path) and subdir_path > subdir_match:
                         subdir_match = subdir_path
             if not subdir_match:
-                raise OSError(
-                    '"rabbitmq_server-*" subdirectory not found in: {}'.format(dir_path)
+                raise IOError(
+                    '"rabbitmq_server-*" subdirectory not found in: {0}'.format(
+                        dir_path
+                    )
                 )
             RABBITMQCTL = os.path.join(subdir_match, "sbin", "rabbitmqctl.bat")
             RABBITMQ_PLUGINS = os.path.join(
@@ -82,24 +92,24 @@ def _check_response(response):
     if isinstance(response, dict):
         if response["retcode"] != 0 or response["stderr"]:
             raise CommandExecutionError(
-                "RabbitMQ command failed: {}".format(response["stderr"])
+                "RabbitMQ command failed: {0}".format(response["stderr"])
             )
     else:
         if "Error" in response:
-            raise CommandExecutionError("RabbitMQ command failed: {}".format(response))
+            raise CommandExecutionError("RabbitMQ command failed: {0}".format(response))
 
 
 def _format_response(response, msg):
     if isinstance(response, dict):
         if response["retcode"] != 0 or response["stderr"]:
             raise CommandExecutionError(
-                "RabbitMQ command failed: {}".format(response["stderr"])
+                "RabbitMQ command failed: {0}".format(response["stderr"])
             )
         else:
             response = response["stdout"]
     else:
         if "Error" in response:
-            raise CommandExecutionError("RabbitMQ command failed: {}".format(response))
+            raise CommandExecutionError("RabbitMQ command failed: {0}".format(response))
     return {msg: response}
 
 
@@ -115,10 +125,8 @@ def _get_rabbitmq_plugin():
     if RABBITMQ_PLUGINS is None:
         version = __salt__["pkg.version"]("rabbitmq-server").split("-")[0]
         RABBITMQ_PLUGINS = (
-            "/usr/lib/rabbitmq/lib/rabbitmq_server-{}/sbin/rabbitmq-plugins".format(
-                version
-            )
-        )
+            "/usr/lib/rabbitmq/lib/rabbitmq_server-{0}" "/sbin/rabbitmq-plugins"
+        ).format(version)
 
     return RABBITMQ_PLUGINS
 
@@ -159,7 +167,7 @@ def _output_to_dict(cmdoutput, values_mapper=None):
     if isinstance(cmdoutput, dict):
         if cmdoutput["retcode"] != 0 or cmdoutput["stderr"]:
             raise CommandExecutionError(
-                "RabbitMQ command failed: {}".format(cmdoutput["stderr"])
+                "RabbitMQ command failed: {0}".format(cmdoutput["stderr"])
             )
         cmdoutput = cmdoutput["stdout"]
 
@@ -378,7 +386,7 @@ def add_user(name, password=None, runas=None):
         #         command,\r\noperable program or batch file.
         # Work around this by using a shell and a quoted command.
         python_shell = True
-        cmd = '"{}" add_user "{}" "{}"'.format(RABBITMQCTL, name, password)
+        cmd = '"{0}" add_user "{1}" "{2}"'.format(RABBITMQCTL, name, password)
     else:
         python_shell = False
         cmd = [RABBITMQCTL, "add_user", name, password]
@@ -448,7 +456,7 @@ def change_password(name, password, runas=None):
         #         command,\r\noperable program or batch file.
         # Work around this by using a shell and a quoted command.
         python_shell = True
-        cmd = '"{}" change_password "{}" "{}"'.format(RABBITMQCTL, name, password)
+        cmd = '"{0}" change_password "{1}" "{2}"'.format(RABBITMQCTL, name, password)
     else:
         python_shell = False
         cmd = [RABBITMQCTL, "change_password", name, password]
@@ -539,7 +547,9 @@ def check_password(name, password, runas=None):
             #         command,\r\noperable program or batch file.
             # Work around this by using a shell and a quoted command.
             python_shell = True
-            cmd = '"{}" authenticate_user "{}" "{}"'.format(RABBITMQCTL, name, password)
+            cmd = '"{0}" authenticate_user "{1}" "{2}"'.format(
+                RABBITMQCTL, name, password
+            )
         else:
             python_shell = False
             cmd = [RABBITMQCTL, "authenticate_user", name, password]
@@ -558,10 +568,8 @@ def check_password(name, password, runas=None):
 
     cmd = (
         "rabbit_auth_backend_internal:check_user_login"
-        '(<<"{}">>, [{{password, <<"{}">>}}]).'.format(
-            name.replace('"', '\\"'), password.replace('"', '\\"')
-        )
-    )
+        '(<<"{0}">>, [{{password, <<"{1}">>}}]).'
+    ).format(name.replace('"', '\\"'), password.replace('"', '\\"'))
 
     res = __salt__["cmd.run_all"](
         [RABBITMQCTL, "eval", cmd],
@@ -661,19 +669,13 @@ def list_permissions(vhost, runas=None):
     if runas is None and not salt.utils.platform.is_windows():
         runas = salt.utils.user.get_user()
     res = __salt__["cmd.run_all"](
-        [RABBITMQCTL, "list_permissions", "--formatter=json", "-p", vhost],
+        [RABBITMQCTL, "list_permissions", "-q", "-p", vhost],
         reset_system_locale=False,
         runas=runas,
         python_shell=False,
     )
 
-    perms = salt.utils.json.loads(res["stdout"])
-    perms_dict = {}
-    for perm in perms:
-        user = perm["user"]
-        perms_dict[user] = perm
-        del perms_dict[user]["user"]
-    return perms_dict
+    return _output_to_dict(res)
 
 
 def list_user_permissions(name, runas=None):
@@ -689,19 +691,13 @@ def list_user_permissions(name, runas=None):
     if runas is None and not salt.utils.platform.is_windows():
         runas = salt.utils.user.get_user()
     res = __salt__["cmd.run_all"](
-        [RABBITMQCTL, "list_user_permissions", name, "--formatter=json"],
+        [RABBITMQCTL, "list_user_permissions", name, "-q"],
         reset_system_locale=False,
         runas=runas,
         python_shell=False,
     )
 
-    perms = salt.utils.json.loads(res["stdout"])
-    perms_dict = {}
-    for perm in perms:
-        vhost = perm["vhost"]
-        perms_dict[vhost] = perm
-        del perms_dict[vhost]["vhost"]
-    return perms_dict
+    return _output_to_dict(res)
 
 
 def set_user_tags(name, tags, runas=None):
@@ -786,7 +782,7 @@ def join_cluster(host, user="rabbit", ram_node=None, runas=None):
     cmd = [RABBITMQCTL, "join_cluster"]
     if ram_node:
         cmd.append("--ram")
-    cmd.append("{}@{}".format(user, host))
+    cmd.append("{0}@{1}".format(user, host))
 
     if runas is None and not salt.utils.platform.is_windows():
         runas = salt.utils.user.get_user()
@@ -1017,7 +1013,7 @@ def set_policy(
         runas = salt.utils.user.get_user()
     if isinstance(definition, dict):
         definition = salt.utils.json.dumps(definition)
-    if not isinstance(definition, str):
+    if not isinstance(definition, six.string_types):
         raise SaltInvocationError(
             "The 'definition' argument must be a dictionary or JSON string"
         )

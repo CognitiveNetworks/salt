@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Return data to an ODBC compliant server.  This driver was
 developed with Microsoft SQL Server in mind, but theoretically
@@ -122,12 +123,17 @@ To override individual configuration items, append --return_kwargs '{"key:": "va
     salt '*' test.ping --return odbc --return_kwargs '{"dsn": "dsn-name"}'
 
 """
+# Import python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import salt.returners
+
+# Import Salt libs
 import salt.utils.jid
 import salt.utils.json
 
 # FIXME We'll need to handle this differently for Windows.
+# Import third party libs
 try:
     import pyodbc
 
@@ -153,7 +159,7 @@ def _get_options(ret=None):
     attrs = {"dsn": "dsn", "user": "user", "passwd": "passwd"}
 
     _options = salt.returners.get_returner_options(
-        "returner.{}".format(__virtualname__),
+        "returner.{0}".format(__virtualname__),
         ret,
         attrs,
         __salt__=__salt__,
@@ -171,7 +177,7 @@ def _get_conn(ret=None):
     user = _options.get("user")
     passwd = _options.get("passwd")
 
-    return pyodbc.connect("DSN={};UID={};PWD={}".format(dsn, user, passwd))
+    return pyodbc.connect("DSN={0};UID={1};PWD={2}".format(dsn, user, passwd))
 
 
 def _close_conn(conn):

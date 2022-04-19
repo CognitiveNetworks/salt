@@ -46,8 +46,3 @@ skip="salt/ext,tests/kitchen,templates"
         directory = "added"
         name = "Added"
         showcontent = true
-
-    [[tool.towncrier.type]]
-        directory = "security"
-        name = "Security"
-        showcontent = true

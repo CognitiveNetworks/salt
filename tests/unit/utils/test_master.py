@@ -1,5 +1,13 @@
+# -*- coding: utf-8 -*-
+
+# Import python libs
+from __future__ import absolute_import, unicode_literals
+
+# Import Salt Libs
 import salt.utils.master
 from tests.support.mock import patch
+
+# Import Salt Testing Libs
 from tests.support.unit import TestCase
 
 

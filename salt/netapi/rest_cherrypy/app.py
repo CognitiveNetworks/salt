@@ -616,7 +616,8 @@ try:
 except AttributeError:
     cpstats = None
     logger.warn(
-        "Import of cherrypy.cpstats failed. Possible upstream bug: "
+        "Import of cherrypy.cpstats failed. "
+        "Possible upstream bug: "
         "https://github.com/cherrypy/cherrypy/issues/1444"
     )
 except ImportError:
@@ -708,9 +709,9 @@ def salt_api_acl_tool(username, request):
     :param request: Cherrypy request to check against the API.
     :type request: cherrypy.request
     """
-    failure_str = "[api_acl] Authentication failed for " "user %s from IP %s"
-    success_str = "[api_acl] Authentication successful for user %s from IP %s"
-    pass_str = "[api_acl] Authentication not checked for " "user %s from IP %s"
+    failure_str = "[api_acl] Authentication failed for " "user {0} from IP {1}"
+    success_str = "[api_acl] Authentication successful for user {0} from IP {1}"
+    pass_str = "[api_acl] Authentication not checked for " "user {0} from IP {1}"
 
     acl = None
     # Salt Configuration
@@ -728,23 +729,23 @@ def salt_api_acl_tool(username, request):
         if users:
             if username in users:
                 if ip in users[username] or "*" in users[username]:
-                    logger.info(success_str, username, ip)
+                    logger.info(success_str.format(username, ip))
                     return True
                 else:
-                    logger.info(failure_str, username, ip)
+                    logger.info(failure_str.format(username, ip))
                     return False
             elif username not in users and "*" in users:
                 if ip in users["*"] or "*" in users["*"]:
-                    logger.info(success_str, username, ip)
+                    logger.info(success_str.format(username, ip))
                     return True
                 else:
-                    logger.info(failure_str, username, ip)
+                    logger.info(failure_str.format(username, ip))
                     return False
             else:
-                logger.info(failure_str, username, ip)
+                logger.info(failure_str.format(username, ip))
                 return False
     else:
-        logger.info(pass_str, username, ip)
+        logger.info(pass_str.format(username, ip))
         return True
 
 
@@ -761,11 +762,11 @@ def salt_ip_verify_tool():
         if cherrypy_conf:
             auth_ip_list = cherrypy_conf.get("authorized_ips", None)
             if auth_ip_list:
-                logger.debug("Found IP list: %s", auth_ip_list)
+                logger.debug("Found IP list: {}".format(auth_ip_list))
                 rem_ip = cherrypy.request.headers.get("Remote-Addr", None)
-                logger.debug("Request from IP: %s", rem_ip)
+                logger.debug("Request from IP: {}".format(rem_ip))
                 if rem_ip not in auth_ip_list:
-                    logger.error("Blocked IP: %s", rem_ip)
+                    logger.error("Blocked IP: {}".format(rem_ip))
                     raise cherrypy.HTTPError(403, "Bad IP")
 
 
@@ -893,7 +894,7 @@ def hypermedia_handler(*args, **kwargs):
 
         ret = {
             "status": cherrypy.response.status,
-            "return": "{}".format(traceback.format_exc())
+            "return": "{}".format(traceback.format_exc(exc))
             if cherrypy.config["debug"]
             else "An unexpected error occurred",
         }
@@ -1897,9 +1898,10 @@ class Login(LowDataAdapter):
                 logger.debug("Eauth permission list not found.")
         except Exception:  # pylint: disable=broad-except
             logger.debug(
-                "Configuration for external_auth malformed for eauth %r, and user %r.",
-                token.get("eauth"),
-                token.get("name"),
+                "Configuration for external_auth malformed for "
+                "eauth '{}', and user '{}'.".format(
+                    token.get("eauth"), token.get("name")
+                ),
                 exc_info=True,
             )
             perms = None
@@ -2361,12 +2363,16 @@ class Events:
             ) as event:
                 stream = event.iter_events(full=True, auto_reconnect=True)
 
-                yield "retry: 400\n"
+                yield "retry: 400\n"  # future lint: disable=blacklisted-function
 
                 while True:
                     data = next(stream)
-                    yield "tag: {}\n".format(data.get("tag", ""))
-                    yield "data: {}\n\n".format(salt.utils.json.dumps(data))
+                    yield "tag: {}\n".format(
+                        data.get("tag", "")
+                    )  # future lint: disable=blacklisted-function
+                    yield "data: {}\n\n".format(
+                        salt.utils.json.dumps(data)
+                    )  # future lint: disable=blacklisted-function
 
         return listen()
 
@@ -2551,12 +2557,14 @@ class WebsocketEndpoint:
                                 SaltInfo.process(data, salt_token, self.opts)
                             else:
                                 handler.send(
-                                    "data: {}\n\n".format(salt.utils.json.dumps(data)),
+                                    "data: {}\n\n".format(
+                                        salt.utils.json.dumps(data)
+                                    ),  # future lint: disable=blacklisted-function
                                     False,
                                 )
                         except UnicodeDecodeError:
                             logger.error(
-                                "Error: Salt event has non UTF-8 data:\n%s", data
+                                "Error: Salt event has non UTF-8 data:\n{}".format(data)
                             )
 
         parent_pipe, child_pipe = Pipe()

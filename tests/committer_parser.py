@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 #
 # committer_parser.py
 #
@@ -12,6 +13,8 @@ To use this commit parser script pipe git log into the stdin:
 """
 # pylint: disable=resource-leakage
 
+# Import python libs
+from __future__ import absolute_import, print_function
 
 import datetime
 import email.utils
@@ -22,7 +25,9 @@ import sys
 
 class Usage(Exception):
     def __init__(self, msg):  # pylint: disable=W0231
-        self.msg = "committer_parser.py [-c | --contributor-detail] - | <logfilename>\n"
+        self.msg = (
+            "committer_parser.py [-c | --contributor-detail] - |" " <logfilename>\n"
+        )
         self.msg += (
             "   : Parse commit log from git and print number of "
             "commits and unique committers\n"
@@ -78,7 +83,7 @@ def parse_gitlog(filename=None):
 
             if len(line) < 2 and new_commit:
                 new_commit = False
-                key = "{}-{}".format(d.year, str(d.month).zfill(2))
+                key = "{0}-{1}".format(d.year, str(d.month).zfill(2))
 
                 if key not in results:
                     results[key] = []
@@ -108,15 +113,15 @@ def counts_by_contributor(commits_by_contributor, results):
     output = ""
     dates = sorted(results.keys())
     for d in dates:
-        output += "\t{}".format(d)
+        output += "\t{0}".format(d)
 
     output += "\n"
 
     for email in sorted(commits_by_contributor.keys()):
-        output += "'{}".format(email)
+        output += "'{0}".format(email)
         for d in dates:
             if d in commits_by_contributor[email]:
-                output += "\t{}".format(commits_by_contributor[email][d])
+                output += "\t{0}".format(commits_by_contributor[email][d])
             else:
                 output += "\t"
         output += "\n"
@@ -127,7 +132,7 @@ def count_results(results, commits):
     result_str = ""
     print("Date\tContributors\tCommits")
     for k in sorted(results.keys()):
-        result_str += "{}\t{}\t{}".format(k, len(results[k]), commits[k])
+        result_str += "{0}\t{1}\t{2}".format(k, len(results[k]), commits[k])
         result_str += "\n"
     return result_str
 

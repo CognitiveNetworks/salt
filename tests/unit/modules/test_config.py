@@ -1,6 +1,13 @@
+# -*- coding: utf-8 -*-
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
+
 import fnmatch
 
+# Import Salt libs
 import salt.modules.config as config
+
+# Import Salt Testing libs
 from tests.support.mixins import LoaderModuleMockMixin
 from tests.support.mock import patch
 from tests.support.unit import TestCase

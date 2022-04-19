@@ -5,7 +5,6 @@ Beacon to emit when a display is available to a linux machine
 """
 import logging
 
-import salt.utils.beacons
 import salt.utils.path
 
 log = logging.getLogger(__name__)
@@ -30,14 +29,18 @@ def validate(config):
     """
     # Configuration for glxinfo beacon should be a dictionary
     if not isinstance(config, list):
-        return False, "Configuration for glxinfo beacon must be a list."
+        return False, ("Configuration for glxinfo beacon must be a list.")
 
-    config = salt.utils.beacons.list_to_dict(config)
+    _config = {}
+    list(map(_config.update, config))
 
-    if "user" not in config:
+    if "user" not in _config:
         return (
             False,
-            "Configuration for glxinfo beacon must include a user as glxinfo is not available to root.",
+            (
+                "Configuration for glxinfo beacon must "
+                "include a user as glxinfo is not available to root."
+            ),
         )
     return True, "Valid beacon configuration"
 
@@ -61,13 +64,14 @@ def beacon(config):
     log.trace("glxinfo beacon starting")
     ret = []
 
-    config = salt.utils.beacons.list_to_dict(config)
+    _config = {}
+    list(map(_config.update, config))
 
     retcode = __salt__["cmd.retcode"](
-        "DISPLAY=:0 glxinfo", runas=config["user"], python_shell=True
+        "DISPLAY=:0 glxinfo", runas=_config["user"], python_shell=True
     )
 
-    if "screen_event" in config and config["screen_event"]:
+    if "screen_event" in _config and _config["screen_event"]:
         last_value = last_state.get("screen_available", False)
         screen_available = retcode == 0
         if last_value != screen_available or "screen_available" not in last_state:

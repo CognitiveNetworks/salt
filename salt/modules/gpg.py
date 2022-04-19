@@ -11,6 +11,7 @@ Sign, encrypt and sign plus encrypt text and files.
 
 """
 
+
 import functools
 import logging
 import os
@@ -23,6 +24,7 @@ import salt.utils.stringutils
 from salt.exceptions import SaltInvocationError
 from salt.utils.versions import LooseVersion as _LooseVersion
 
+# Set up logging
 log = logging.getLogger(__name__)
 
 # Define the module's virtual name
@@ -89,7 +91,8 @@ def __virtual__():
     if not _gpg():
         return (
             False,
-            "The gpg execution module cannot be loaded: gpg binary is not in the path.",
+            "The gpg execution module cannot be loaded: "
+            "gpg binary is not in the path.",
         )
 
     return (
@@ -97,8 +100,8 @@ def __virtual__():
         if HAS_GPG_BINDINGS
         else (
             False,
-            "The gpg execution module cannot be loaded; the gnupg python module is not"
-            " installed.",
+            "The gpg execution module cannot be loaded; the "
+            "gnupg python module is not installed.",
         )
     )
 
@@ -108,7 +111,7 @@ def _get_user_info(user=None):
     Wrapper for user.info Salt function
     """
     if not user:
-        # Get user Salt running as
+        # Get user Salt runnining as
         user = __salt__["config.option"]("user")
 
     userinfo = __salt__["user.info"](user)
@@ -533,7 +536,7 @@ def delete_key(
         Whether to use a passphrase with the signing key. Passphrase is received
         from Pillar.
 
-        .. versionadded:: 3003
+        .. versionadded: 3003
 
     CLI Example:
 
@@ -830,7 +833,7 @@ def export_key(
         Whether to use a passphrase with the signing key. Passphrase is received
         from Pillar.
 
-        .. versionadded:: 3003
+        .. versionadded: 3003
 
     CLI Example:
 

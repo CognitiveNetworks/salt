@@ -1,6 +1,13 @@
 """
-:codeauthor: Thayne Harbaugh (tharbaug@adobe.com)
+    :codeauthor: Thayne Harbaugh (tharbaug@adobe.com)
+
+    tests.integration.shell.saltcli
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    :NOTE: this was named ``saltcli`` rather than ``salt`` because ``salt`` conflates
+           in the python importer with the expected ``salt`` namespace and breaks imports.
 """
+
 
 import logging
 import os

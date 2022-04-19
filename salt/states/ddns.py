@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Dynamic DNS updates
 ===================
@@ -24,6 +25,7 @@ Example:
         - nameserver: 123.234.345.456
         - keyfile: /srv/salt/dnspy_tsig_key.txt
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
 
 def __virtual__():
@@ -64,19 +66,19 @@ def present(name, zone, ttl, data, rdtype="A", **kwargs):
 
     if __opts__["test"]:
         ret["result"] = None
-        ret["comment"] = '{} record "{}" will be updated'.format(rdtype, name)
+        ret["comment"] = '{0} record "{1}" will be updated'.format(rdtype, name)
         return ret
 
     status = __salt__["ddns.update"](zone, name, ttl, rdtype, data, **kwargs)
 
     if status is None:
         ret["result"] = True
-        ret["comment"] = '{} record "{}" already present with ttl of {}'.format(
+        ret["comment"] = '{0} record "{1}" already present with ttl of {2}'.format(
             rdtype, name, ttl
         )
     elif status:
         ret["result"] = True
-        ret["comment"] = 'Updated {} record for "{}"'.format(rdtype, name)
+        ret["comment"] = 'Updated {0} record for "{1}"'.format(rdtype, name)
         ret["changes"] = {
             "name": name,
             "zone": zone,
@@ -86,7 +88,7 @@ def present(name, zone, ttl, data, rdtype="A", **kwargs):
         }
     else:
         ret["result"] = False
-        ret["comment"] = 'Failed to create or update {} record for "{}"'.format(
+        ret["comment"] = 'Failed to create or update {0} record for "{1}"'.format(
             rdtype, name
         )
     return ret
@@ -122,7 +124,7 @@ def absent(name, zone, data=None, rdtype=None, **kwargs):
 
     if __opts__["test"]:
         ret["result"] = None
-        ret["comment"] = '{} record "{}" will be deleted'.format(rdtype, name)
+        ret["comment"] = '{0} record "{1}" will be deleted'.format(rdtype, name)
         return ret
 
     status = __salt__["ddns.delete"](zone, name, rdtype, data, **kwargs)

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Management of Zabbix host groups.
 
@@ -5,6 +6,12 @@ Management of Zabbix host groups.
 
 
 """
+
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
+
+# Import Salt libs
+from salt.ext import six
 
 
 def __virtual__():
@@ -45,13 +52,13 @@ def present(name, **kwargs):
     ret = {"name": name, "changes": {}, "result": False, "comment": ""}
 
     # Comment and change messages
-    comment_hostgroup_created = "Host group {} created.".format(name)
-    comment_hostgroup_notcreated = "Unable to create host group: {}. ".format(name)
-    comment_hostgroup_exists = "Host group {} already exists.".format(name)
+    comment_hostgroup_created = "Host group {0} created.".format(name)
+    comment_hostgroup_notcreated = "Unable to create host group: {0}. ".format(name)
+    comment_hostgroup_exists = "Host group {0} already exists.".format(name)
     changes_hostgroup_created = {
         name: {
-            "old": "Host group {} does not exist.".format(name),
-            "new": "Host group {} created.".format(name),
+            "old": "Host group {0} does not exist.".format(name),
+            "new": "Host group {0} created.".format(name),
         }
     }
 
@@ -80,7 +87,7 @@ def present(name, **kwargs):
             ret["changes"] = changes_hostgroup_created
         else:
             ret["result"] = False
-            ret["comment"] = comment_hostgroup_notcreated + str(
+            ret["comment"] = comment_hostgroup_notcreated + six.text_type(
                 hostgroup_create["error"]
             )
 
@@ -109,13 +116,13 @@ def absent(name, **kwargs):
     ret = {"name": name, "changes": {}, "result": False, "comment": ""}
 
     # Comment and change messages
-    comment_hostgroup_deleted = "Host group {} deleted.".format(name)
-    comment_hostgroup_notdeleted = "Unable to delete host group: {}. ".format(name)
-    comment_hostgroup_notexists = "Host group {} does not exist.".format(name)
+    comment_hostgroup_deleted = "Host group {0} deleted.".format(name)
+    comment_hostgroup_notdeleted = "Unable to delete host group: {0}. ".format(name)
+    comment_hostgroup_notexists = "Host group {0} does not exist.".format(name)
     changes_hostgroup_deleted = {
         name: {
-            "old": "Host group {} exists.".format(name),
-            "new": "Host group {} deleted.".format(name),
+            "old": "Host group {0} exists.".format(name),
+            "new": "Host group {0} deleted.".format(name),
         }
     }
 
@@ -160,7 +167,7 @@ def absent(name, **kwargs):
             ret["changes"] = changes_hostgroup_deleted
         else:
             ret["result"] = False
-            ret["comment"] = comment_hostgroup_notdeleted + str(
+            ret["comment"] = comment_hostgroup_notdeleted + six.text_type(
                 hostgroup_delete["error"]
             )
 

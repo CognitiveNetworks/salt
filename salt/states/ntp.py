@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Management of NTP servers
 =========================
@@ -14,10 +15,16 @@ This state is used to manage NTP servers. Currently only Windows is supported.
           - pool.ntp.org
           - us.pool.ntp.org
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import Python libs
 import logging
 
+# Import Salt libs
 import salt.utils.platform
+
+# Import 3rd-party libs
+from salt.ext import six
 
 log = logging.getLogger(__name__)
 
@@ -35,7 +42,7 @@ def _check_servers(servers):
     if not isinstance(servers, list):
         return False
     for server in servers:
-        if not isinstance(server, str):
+        if not isinstance(server, six.string_types):
             return False
     return True
 
@@ -44,7 +51,7 @@ def _get_servers():
     try:
         return set(__salt__["ntp.get_servers"]())
     except TypeError:
-        return {False}
+        return set([False])
 
 
 def managed(name, servers=None):
@@ -73,7 +80,7 @@ def managed(name, servers=None):
 
     if __opts__["test"]:
         ret["result"] = None
-        ret["comment"] = "NTP servers will be updated to: {}".format(
+        ret["comment"] = "NTP servers will be updated to: {0}".format(
             ", ".join(sorted(desired_servers))
         )
         return ret

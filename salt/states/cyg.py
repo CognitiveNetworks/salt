@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Installation of Cygwin packages.
 
@@ -9,10 +10,11 @@ or removed.
     dos2unix:
       cyg.installed
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 def __virtual__():
@@ -53,10 +55,13 @@ def installed(name, cyg_arch="x86_64", mirrors=None):
 
     if cyg_arch not in ["x86", "x86_64"]:
         ret["result"] = False
-        ret["comment"] = "The 'cyg_arch' argument must be one of 'x86' or 'x86_64'"
+        ret[
+            "comment"
+        ] = "The 'cyg_arch' argument must\
+ be one of 'x86' or 'x86_64'"
         return ret
 
-    log.debug("Installed State: Initial Mirror list: %s", mirrors)
+    LOG.debug("Installed State: Initial Mirror list: {0}".format(mirrors))
 
     if not __salt__["cyg.check_valid_package"](
         name, cyg_arch=cyg_arch, mirrors=mirrors
@@ -72,7 +77,12 @@ def installed(name, cyg_arch="x86_64", mirrors=None):
         return ret
 
     if __opts__["test"]:
-        ret["comment"] = "The package {} would have been installed".format(name)
+        ret[
+            "comment"
+        ] = "The package {0} would\
+ have been installed".format(
+            name
+        )
         return ret
 
     if __salt__["cyg.install"](name, cyg_arch=cyg_arch, mirrors=mirrors):
@@ -115,7 +125,10 @@ def removed(name, cyg_arch="x86_64", mirrors=None):
 
     if cyg_arch not in ["x86", "x86_64"]:
         ret["result"] = False
-        ret["comment"] = "The 'cyg_arch' argument must be one of 'x86' or 'x86_64'"
+        ret[
+            "comment"
+        ] = "The 'cyg_arch' argument must\
+ be one of 'x86' or 'x86_64'"
         return ret
 
     if not __salt__["cyg.check_valid_package"](
@@ -131,7 +144,7 @@ def removed(name, cyg_arch="x86_64", mirrors=None):
         return ret
 
     if __opts__["test"]:
-        ret["comment"] = "The package {} would have been removed".format(name)
+        ret["comment"] = "The package {0} would have been removed".format(name)
         return ret
     if __salt__["cyg.uninstall"](name, cyg_arch):
         ret["result"] = True
@@ -172,7 +185,10 @@ def updated(name=None, cyg_arch="x86_64", mirrors=None):
 
     if cyg_arch not in ["x86", "x86_64"]:
         ret["result"] = False
-        ret["comment"] = "The 'cyg_arch' argument must be one of 'x86' or 'x86_64'"
+        ret[
+            "comment"
+        ] = "The 'cyg_arch' argument must\
+ be one of 'x86' or 'x86_64'"
         return ret
 
     if __opts__["test"]:
@@ -180,7 +196,7 @@ def updated(name=None, cyg_arch="x86_64", mirrors=None):
         return ret
 
     if not mirrors:
-        log.warning("No mirror given, using the default.")
+        LOG.warning("No mirror given, using the default.")
 
     before = __salt__["cyg.list"](cyg_arch=cyg_arch)
     if __salt__["cyg.update"](cyg_arch, mirrors=mirrors):
@@ -207,7 +223,7 @@ def updated(name=None, cyg_arch="x86_64", mirrors=None):
 # http://stackoverflow.com/a/1165552
 
 
-class DictDiffer:
+class DictDiffer(object):
     """
     Calculate the difference between two dictionaries.
 
@@ -249,10 +265,14 @@ class DictDiffer:
         """
         Return a set of the keys with changed values.
         """
-        return {o for o in self.intersect if self.past_dict[o] != self.current_dict[o]}
+        return set(
+            o for o in self.intersect if self.past_dict[o] != self.current_dict[o]
+        )
 
     def unchanged(self):
         """
         Return a set of the keys with unchanged values.
         """
-        return {o for o in self.intersect if self.past_dict[o] == self.current_dict[o]}
+        return set(
+            o for o in self.intersect if self.past_dict[o] == self.current_dict[o]
+        )

@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+
+
 def _preferred_ip(ip_set, preferred=None):
     """
     Returns a function that reacts which ip is preferred

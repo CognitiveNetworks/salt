@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Module for OpenStack Management
 
@@ -6,10 +7,13 @@ Module for OpenStack Management
 :depends:       openstack-utils
 :platform:      linux
 """
+# Import python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 import os.path
 
+# Import salt libs
 import salt.utils.files
 import salt.utils.stringutils
 

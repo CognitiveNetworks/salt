@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Return data to a memcache server
 
@@ -44,15 +45,19 @@ To override individual configuration items, append --return_kwargs '{"key:": "va
     salt '*' test.ping --return memcache --return_kwargs '{"host": "hostname.domain.com"}'
 
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import python libs
 import logging
 
 import salt.returners
 import salt.utils.jid
 import salt.utils.json
+from salt.ext import six
 
 log = logging.getLogger(__name__)
 
+# Import third party libs
 try:
     import memcache
 
@@ -103,7 +108,7 @@ def _get_serv(ret):
     # Combine host and port to conform syntax of python memcache client
     memcacheoptions = (host, port)
 
-    return memcache.Client(["{}:{}".format(*memcacheoptions)], debug=0)
+    return memcache.Client(["{0}:{1}".format(*memcacheoptions)], debug=0)
     # # TODO: make memcacheoptions cluster aware
     # Servers can be passed in two forms:
     # 1. Strings of the form C{"host:port"}, which implies a default weight of 1
@@ -121,9 +126,9 @@ def _get_list(serv, key):
 def _append_list(serv, key, value):
     if value in _get_list(serv, key):
         return
-    r = serv.append(key, "{},".format(value))
+    r = serv.append(key, "{0},".format(value))
     if not r:
-        serv.add(key, "{},".format(value))
+        serv.add(key, "{0},".format(value))
 
 
 def prep_jid(nocache=False, passed_jid=None):  # pylint: disable=unused-argument
@@ -142,8 +147,8 @@ def returner(ret):
     jid = ret["jid"]
     fun = ret["fun"]
     rets = salt.utils.json.dumps(ret)
-    serv.set("{}:{}".format(jid, minion), rets)  # cache for get_jid
-    serv.set("{}:{}".format(fun, minion), rets)  # cache for get_fun
+    serv.set("{0}:{1}".format(jid, minion), rets)  # cache for get_jid
+    serv.set("{0}:{1}".format(fun, minion), rets)  # cache for get_fun
 
     # The following operations are neither efficient nor atomic.
     # If there is a way to make them so, this should be updated.
@@ -183,10 +188,10 @@ def get_jid(jid):
     """
     serv = _get_serv(ret=None)
     minions = _get_list(serv, "minions")
-    returns = serv.get_multi(minions, key_prefix="{}:".format(jid))
+    returns = serv.get_multi(minions, key_prefix="{0}:".format(jid))
     # returns = {minion: return, minion: return, ...}
     ret = {}
-    for minion, data in returns.items():
+    for minion, data in six.iteritems(returns):
         ret[minion] = salt.utils.json.loads(data)
     return ret
 
@@ -197,10 +202,10 @@ def get_fun(fun):
     """
     serv = _get_serv(ret=None)
     minions = _get_list(serv, "minions")
-    returns = serv.get_multi(minions, key_prefix="{}:".format(fun))
+    returns = serv.get_multi(minions, key_prefix="{0}:".format(fun))
     # returns = {minion: return, minion: return, ...}
     ret = {}
-    for minion, data in returns.items():
+    for minion, data in six.iteritems(returns):
         ret[minion] = salt.utils.json.loads(data)
     return ret
 
@@ -213,7 +218,7 @@ def get_jids():
     jids = _get_list(serv, "jids")
     loads = serv.get_multi(jids)  # {jid: load, jid: load, ...}
     ret = {}
-    for jid, load in loads.items():
+    for jid, load in six.iteritems(loads):
         ret[jid] = salt.utils.jid.format_jid_instance(jid, salt.utils.json.loads(load))
     return ret
 

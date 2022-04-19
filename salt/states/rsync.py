@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 # Copyright 2015 SUSE LLC
 #
@@ -26,6 +27,7 @@ State to synchronize files and directories with rsync.
 
 """
 
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 import os

@@ -94,6 +94,9 @@ else:
 USE_STATIC_REQUIREMENTS = os.environ.get("USE_STATIC_REQUIREMENTS")
 if USE_STATIC_REQUIREMENTS is not None:
     USE_STATIC_REQUIREMENTS = USE_STATIC_REQUIREMENTS == "1"
+# Are we running pop-build
+if "TIAMAT_BUILD" in os.environ:
+    USE_STATIC_REQUIREMENTS = True
 
 try:
     # Add the esky bdist target if the module is available
@@ -299,9 +302,8 @@ class WriteSaltVersion(Command):
         ):
             # Write the version file
             if getattr(self.distribution, "salt_version_hardcoded_path", None) is None:
-                self.distribution.salt_version_hardcoded_path = SALT_VERSION_HARDCODED
-                sys.stderr.write("This command is not meant to be called on it's own\n")
-                sys.stderr.flush()
+                print("This command is not meant to be called on it's own")
+                exit(1)
 
             if not self.distribution.with_salt_version:
                 salt_version = (
@@ -501,21 +503,19 @@ class DownloadWindowsDlls(Command):
                 yield
 
         platform_bits, _ = platform.architecture()
-        url = "https://repo.saltproject.io/windows/dependencies/{bits}/{fname}"
-        dest = os.path.join(os.path.dirname(sys.executable), "{fname}")
+        url = "https://repo.saltstack.com/windows/dependencies/{bits}/{fname}.dll"
+        dest = os.path.join(os.path.dirname(sys.executable), "{fname}.dll")
         with indent_log():
-            for fname in (
-                "openssl/1.1.1k/ssleay32.dll",
-                "openssl/1.1.1k/libeay32.dll",
-                "libsodium/1.0.18/libsodium.dll",
-            ):
+            for fname in ("libeay32", "ssleay32", "libsodium"):
                 # See if the library is already on the system
                 if find_library(fname):
                     continue
                 furl = url.format(bits=platform_bits[:2], fname=fname)
-                fdest = dest.format(fname=os.path.basename(fname))
+                fdest = dest.format(fname=fname)
                 if not os.path.exists(fdest):
-                    log.info("Downloading {} to {} from {}".format(fname, fdest, furl))
+                    log.info(
+                        "Downloading {}.dll to {} from {}".format(fname, fdest, furl)
+                    )
                     try:
                         from contextlib import closing
 
@@ -530,7 +530,7 @@ class DownloadWindowsDlls(Command):
                                             wfh.flush()
                             else:
                                 log.error(
-                                    "Failed to download {} to {} from {}".format(
+                                    "Failed to download {}.dll to {} from {}".format(
                                         fname, fdest, furl
                                     )
                                 )
@@ -547,7 +547,7 @@ class DownloadWindowsDlls(Command):
                                     wfh.flush()
                         else:
                             log.error(
-                                "Failed to download {} to {} from {}".format(
+                                "Failed to download {}.dll to {} from {}".format(
                                     fname, fdest, furl
                                 )
                             )
@@ -1011,10 +1011,7 @@ class SaltDistribution(distutils.dist.Distribution):
 
         self.name = "salt-ssh" if PACKAGED_FOR_SALT_SSH else "salt"
         self.salt_version = __version__  # pylint: disable=undefined-variable
-        self.description = (
-            "Portable, distributed, remote execution and configuration management"
-            " system"
-        )
+        self.description = "Portable, distributed, remote execution and configuration management system"
         with open(SALT_LONG_DESCRIPTION_FILE, encoding="utf-8") as f:
             self.long_description = f.read()
         self.long_description_content_type = "text/x-rst"

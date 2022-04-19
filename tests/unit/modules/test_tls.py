@@ -1,12 +1,21 @@
+# -*- coding: utf-8 -*-
 """
     :codeauthor: Joe Julian <me@joejulian.name>
 """
 # Import the future
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import Python libs
 import logging
 
+# Import 3rd party Libs
+import salt.ext as six
+
+# Import Salt Libs
 import salt.modules.tls as tls
 from salt.utils.versions import LooseVersion
+
+# Import Salt Testing Libs
 from tests.support.helpers import with_tempdir
 from tests.support.mixins import LoaderModuleMockMixin
 from tests.support.mock import MagicMock, mock_open, patch
@@ -271,11 +280,11 @@ class TLSAddTestCase(TestCase, LoaderModuleMockMixin):
                     # releases of PyOpenSSL with https://github.com/pyca/pyopenssl/pull/476
                     if (
                         "'_cffi_backend.CDataGCP' object has no attribute 'cert_info'"
-                        == str(err)
+                        == six.text_type(err)
                     ):
                         log.exception(err)
                         self.skipTest(
-                            "Encountered an upstream error with PyOpenSSL: {}".format(
+                            "Encountered an upstream error with PyOpenSSL: {0}".format(
                                 err
                             )
                         )
@@ -285,7 +294,7 @@ class TLSAddTestCase(TestCase, LoaderModuleMockMixin):
                     ):
                         log.exception(err)
                         self.skipTest(
-                            "Encountered an upstream error with PyOpenSSL: {}".format(
+                            "Encountered an upstream error with PyOpenSSL: {0}".format(
                                 err
                             )
                         )
@@ -295,9 +304,8 @@ class TLSAddTestCase(TestCase, LoaderModuleMockMixin):
                     if LooseVersion(OpenSSL.__version__) == LooseVersion("0.14"):
                         log.exception(err)
                         self.skipTest(
-                            "Encountered a package conflict. OpenSSL version 0.14"
-                            ' cannot be used with the "junos-eznc" pip package on this'
-                            " test. Skipping."
+                            "Encountered a package conflict. OpenSSL version 0.14 cannot be used with "
+                            'the "junos-eznc" pip package on this test. Skipping.'
                         )
                     result = {}
 
@@ -312,7 +320,7 @@ class TLSAddTestCase(TestCase, LoaderModuleMockMixin):
         ca_name = "test_ca"
         certp = "{0}/{1}/{1}_ca_cert.crt".format(ca_path, ca_name)
         certk = "{0}/{1}/{1}_ca_cert.key".format(ca_path, ca_name)
-        ret = 'Created Private Key: "{}." Created CA "{}": "{}."'.format(
+        ret = 'Created Private Key: "{0}." Created CA "{1}": "{2}."'.format(
             certk, ca_name, certp
         )
         mock_opt = MagicMock(return_value=ca_path)
@@ -339,7 +347,7 @@ class TLSAddTestCase(TestCase, LoaderModuleMockMixin):
         ca_name = "test_ca"
         certp = "{0}/{1}/{1}_ca_cert.crt".format(ca_path, ca_name)
         certk = "{0}/{1}/{1}_ca_cert.key".format(ca_path, ca_name)
-        ret = 'Created Private Key: "{}." Created CA "{}": "{}."'.format(
+        ret = 'Created Private Key: "{0}." Created CA "{1}": "{2}."'.format(
             certk, ca_name, certp
         )
         mock_opt = MagicMock(return_value=ca_path)
@@ -367,13 +375,13 @@ class TLSAddTestCase(TestCase, LoaderModuleMockMixin):
         Test creating certificate signing request
         """
         ca_name = "test_ca"
-        certp = "{}/{}/certs/{}.csr".format(
+        certp = "{0}/{1}/certs/{2}.csr".format(
             ca_path, ca_name, _TLS_TEST_DATA["create_ca"]["CN"]
         )
-        certk = "{}/{}/certs/{}.key".format(
+        certk = "{0}/{1}/certs/{2}.key".format(
             ca_path, ca_name, _TLS_TEST_DATA["create_ca"]["CN"]
         )
-        ret = 'Created Private Key: "{}." Created CSR for "{}": "{}."'.format(
+        ret = ('Created Private Key: "{0}." ' 'Created CSR for "{1}": "{2}."').format(
             certk, _TLS_TEST_DATA["create_ca"]["CN"], certp
         )
         mock_opt = MagicMock(return_value=ca_path)
@@ -402,13 +410,13 @@ class TLSAddTestCase(TestCase, LoaderModuleMockMixin):
         Test creating certificate signing request when one already exists
         """
         ca_name = "test_ca"
-        certp = "{}/{}/certs/{}.csr".format(
+        certp = "{0}/{1}/certs/{2}.csr".format(
             ca_path, ca_name, _TLS_TEST_DATA["create_ca"]["CN"]
         )
-        certk = "{}/{}/certs/{}.key".format(
+        certk = "{0}/{1}/certs/{2}.key".format(
             ca_path, ca_name, _TLS_TEST_DATA["create_ca"]["CN"]
         )
-        ret = 'Created Private Key: "{}." Created CSR for "{}": "{}."'.format(
+        ret = ('Created Private Key: "{0}." ' 'Created CSR for "{1}": "{2}."').format(
             certk, _TLS_TEST_DATA["create_ca"]["CN"], certp
         )
         mock_opt = MagicMock(return_value=ca_path)
@@ -440,13 +448,13 @@ class TLSAddTestCase(TestCase, LoaderModuleMockMixin):
         Test creating self signed certificate
         """
         tls_dir = "test_tls"
-        certp = "{}/{}/certs/{}.crt".format(
+        certp = "{0}/{1}/certs/{2}.crt".format(
             ca_path, tls_dir, _TLS_TEST_DATA["create_ca"]["CN"]
         )
-        certk = "{}/{}/certs/{}.key".format(
+        certk = "{0}/{1}/certs/{2}.key".format(
             ca_path, tls_dir, _TLS_TEST_DATA["create_ca"]["CN"]
         )
-        ret = 'Created Private Key: "{}." Created Certificate: "{}."'.format(
+        ret = ('Created Private Key: "{0}." ' 'Created Certificate: "{1}."').format(
             certk, certp
         )
         mock_opt = MagicMock(return_value=ca_path)
@@ -468,13 +476,13 @@ class TLSAddTestCase(TestCase, LoaderModuleMockMixin):
         Test creating self signed certificate when one already exists
         """
         tls_dir = "test_tls"
-        certp = "{}/{}/certs/{}.crt".format(
+        certp = "{0}/{1}/certs/{2}.crt".format(
             ca_path, tls_dir, _TLS_TEST_DATA["create_ca"]["CN"]
         )
-        certk = "{}/{}/certs/{}.key".format(
+        certk = "{0}/{1}/certs/{2}.key".format(
             ca_path, tls_dir, _TLS_TEST_DATA["create_ca"]["CN"]
         )
-        ret = 'Created Private Key: "{}." Created Certificate: "{}."'.format(
+        ret = ('Created Private Key: "{0}." ' 'Created Certificate: "{1}."').format(
             certk, certp
         )
         mock_opt = MagicMock(return_value=ca_path)
@@ -496,10 +504,10 @@ class TLSAddTestCase(TestCase, LoaderModuleMockMixin):
         Test signing certificate from request
         """
         ca_name = "test_ca"
-        certp = "{}/{}/certs/{}.crt".format(
+        certp = "{0}/{1}/certs/{2}.crt".format(
             ca_path, ca_name, _TLS_TEST_DATA["create_ca"]["CN"]
         )
-        ret = 'Created Certificate for "{}": "{}"'.format(
+        ret = 'Created Certificate for "{0}": "{1}"'.format(
             _TLS_TEST_DATA["create_ca"]["CN"], certp
         )
         mock_opt = MagicMock(return_value=ca_path)
@@ -530,10 +538,10 @@ class TLSAddTestCase(TestCase, LoaderModuleMockMixin):
         Test signing certificate from request when certificate exists
         """
         ca_name = "test_ca"
-        certp = "{}/{}/certs/{}.crt".format(
+        certp = "{0}/{1}/certs/{2}.crt".format(
             ca_path, ca_name, _TLS_TEST_DATA["create_ca"]["CN"]
         )
-        ret = 'Created Certificate for "{}": "{}"'.format(
+        ret = 'Created Certificate for "{0}": "{1}"'.format(
             _TLS_TEST_DATA["create_ca"]["CN"], certp
         )
         mock_opt = MagicMock(return_value=ca_path)
@@ -567,10 +575,10 @@ class TLSAddTestCase(TestCase, LoaderModuleMockMixin):
         Test creating pkcs12
         """
         ca_name = "test_ca"
-        certp = "{}/{}/certs/{}.p12".format(
+        certp = "{0}/{1}/certs/{2}.p12".format(
             ca_path, ca_name, _TLS_TEST_DATA["create_ca"]["CN"]
         )
-        ret = 'Created PKCS#12 Certificate for "{}": "{}"'.format(
+        ret = 'Created PKCS#12 Certificate for "{0}": "{1}"'.format(
             _TLS_TEST_DATA["create_ca"]["CN"], certp
         )
         mock_opt = MagicMock(return_value=ca_path)
@@ -604,10 +612,10 @@ class TLSAddTestCase(TestCase, LoaderModuleMockMixin):
         Test creating pkcs12 when it already exists
         """
         ca_name = "test_ca"
-        certp = "{}/{}/certs/{}.p12".format(
+        certp = "{0}/{1}/certs/{2}.p12".format(
             ca_path, ca_name, _TLS_TEST_DATA["create_ca"]["CN"]
         )
-        ret = 'Created PKCS#12 Certificate for "{}": "{}"'.format(
+        ret = 'Created PKCS#12 Certificate for "{0}": "{1}"'.format(
             _TLS_TEST_DATA["create_ca"]["CN"], certp
         )
         mock_opt = MagicMock(return_value=ca_path)
@@ -686,7 +694,7 @@ class TLSAddTestCase(TestCase, LoaderModuleMockMixin):
         ca_name = "test_ca"
         certp = "{0}/{1}/{1}_ca_cert.crt".format(ca_path, ca_name)
         certk = "{0}/{1}/{1}_ca_cert.key".format(ca_path, ca_name)
-        ret = 'Created Private Key: "{}." Created CA "{}": "{}."'.format(
+        ret = 'Created Private Key: "{0}." Created CA "{1}": "{2}."'.format(
             certk, ca_name, certp
         )
         mock_opt = MagicMock(return_value=ca_path)
@@ -745,13 +753,13 @@ class TLSAddTestCase(TestCase, LoaderModuleMockMixin):
                             ret,
                         )
 
-        certp = "{}/{}/certs/{}.csr".format(
+        certp = "{0}/{1}/certs/{2}.csr".format(
             ca_path, ca_name, _TLS_TEST_DATA["create_ca"]["CN"]
         )
-        certk = "{}/{}/certs/{}.key".format(
+        certk = "{0}/{1}/certs/{2}.key".format(
             ca_path, ca_name, _TLS_TEST_DATA["create_ca"]["CN"]
         )
-        ret = 'Created Private Key: "{}." Created CSR for "{}": "{}."'.format(
+        ret = ('Created Private Key: "{0}." ' 'Created CSR for "{1}": "{2}."').format(
             certk, _TLS_TEST_DATA["create_ca"]["CN"], certp
         )
         with patch.dict(

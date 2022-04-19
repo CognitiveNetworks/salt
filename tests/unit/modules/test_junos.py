@@ -1679,10 +1679,9 @@ class Test_Junos_Module(TestCase, LoaderModuleMockMixin, XMLEqualityMixin):
             mock_commit_check.return_value = False
 
             ret = dict()
-            ret["message"] = (
-                "Loaded configuration but commit check failed, hence rolling back"
-                " configuration."
-            )
+            ret[
+                "message"
+            ] = "Loaded configuration but commit check failed, hence rolling back configuration."
             ret["out"] = False
             self.assertEqual(junos.install_config("actual/path/config.xml"), ret)
 
@@ -1741,10 +1740,9 @@ class Test_Junos_Module(TestCase, LoaderModuleMockMixin, XMLEqualityMixin):
             mock_diff.return_value = "diff"
             mock_commit_check.return_value = True
             ret = dict()
-            ret["message"] = (
-                "Commit check passed, but skipping commit for dry-run and rolling back"
-                " configuration."
-            )
+            ret[
+                "message"
+            ] = "Commit check passed, but skipping commit for dry-run and rolling back configuration."
             ret["out"] = True
             self.assertEqual(junos.install_config("actual/path/config", test=True), ret)
             mock_commit.assert_not_called()
@@ -1871,10 +1869,9 @@ class Test_Junos_Module(TestCase, LoaderModuleMockMixin, XMLEqualityMixin):
                     "Invalid path. Please provide a valid image path",
                 )
                 ret = dict()
-                ret["message"] = (
-                    "Installation failed. Reason: Invalid path. Please provide a valid"
-                    " image path"
-                )
+                ret[
+                    "message"
+                ] = "Installation failed. Reason: Invalid path. Please provide a valid image path"
                 ret["out"] = False
                 self.assertEqual(junos.install_os("salt://image/path/"), ret)
 
@@ -2317,9 +2314,7 @@ class Test_Junos_Module(TestCase, LoaderModuleMockMixin, XMLEqualityMixin):
     def test_load_none_path(self):
         ret_exp = {
             "out": False,
-            "message": (
-                "Please provide the salt path where the configuration is present"
-            ),
+            "message": "Please provide the salt path where the configuration is present",
         }
         ret = junos.load()
         self.assertEqual(ret, ret_exp)
@@ -2327,10 +2322,7 @@ class Test_Junos_Module(TestCase, LoaderModuleMockMixin, XMLEqualityMixin):
     def test_load_wrong_tmp_file(self):
         ret_exp = {
             "out": False,
-            "message": (
-                'Could not load configuration due to : "[Errno 2] No such file or'
-                " directory: '/pat/to/tmp/file'\""
-            ),
+            "message": "Could not load configuration due to : \"[Errno 2] No such file or directory: '/pat/to/tmp/file'\"",
             "format": "text",
         }
         with patch.dict(
@@ -2614,9 +2606,7 @@ class Test_Junos_Module(TestCase, LoaderModuleMockMixin, XMLEqualityMixin):
         file = "inventory.yml"
         table_yamlload = {
             "ModuleTable": {
-                "item": (
-                    ".//chassis-sub-module|.//chassis-module|.//chassis-sub-sub-module"
-                ),
+                "item": ".//chassis-sub-module|.//chassis-module|.//chassis-sub-sub-module",
                 "key": "name",
                 "rpc": "get-chassis-inventory",
                 "view": "ModuleTableView",
@@ -2635,11 +2625,8 @@ class Test_Junos_Module(TestCase, LoaderModuleMockMixin, XMLEqualityMixin):
             "out": False,
             "hostname": "1.1.1.1",
             "tablename": "sample",
-            "message": (
-                "Uncaught exception during get API call - please report: '{}'".format(
-                    str(table)
-                )
-            ),
+            "message": "Uncaught exception during get API call - please report:"
+            " '{}'".format(str(table)),
         }
         with patch("jnpr.junos.device.Device.execute") as mock_execute, patch(
             "yaml.load"
@@ -2657,9 +2644,7 @@ class Test_Junos_Module(TestCase, LoaderModuleMockMixin, XMLEqualityMixin):
         file = "inventory.yml"
         table_yamlload = {
             "ModuleTable": {
-                "item": (
-                    ".//chassis-sub-module|.//chassis-module|.//chassis-sub-sub-module"
-                ),
+                "item": ".//chassis-sub-module|.//chassis-module|.//chassis-sub-sub-module",
                 "key": "name",
                 "rpc": "get-chassis-inventory",
                 "view": "ModuleTableView",
@@ -2678,9 +2663,7 @@ class Test_Junos_Module(TestCase, LoaderModuleMockMixin, XMLEqualityMixin):
             "out": False,
             "hostname": "1.1.1.1",
             "tablename": "ModuleTable",
-            "message": (
-                "Got ConnectClosedError exception. Connection lost with Device(1.1.1.1)"
-            ),
+            "message": "Got ConnectClosedError exception. Connection lost with Device(1.1.1.1)",
         }
         with patch("jnpr.junos.factory.optable.OpTable.get") as mock_load, patch(
             "yaml.load"
@@ -2702,9 +2685,7 @@ class Test_Junos_Module(TestCase, LoaderModuleMockMixin, XMLEqualityMixin):
         path = pyez_tables_path
         table_yamlload = {
             "ModuleTable": {
-                "item": (
-                    ".//chassis-sub-module|.//chassis-module|.//chassis-sub-sub-module"
-                ),
+                "item": ".//chassis-sub-module|.//chassis-module|.//chassis-sub-sub-module",
                 "key": "name",
                 "rpc": "get-chassis-inventory",
                 "view": "ModuleTableView",
@@ -2734,9 +2715,7 @@ class Test_Junos_Module(TestCase, LoaderModuleMockMixin, XMLEqualityMixin):
         file = "inventory.yml"
         table_yamlload = {
             "ModuleTable": {
-                "item": (
-                    ".//chassis-sub-module|.//chassis-module|.//chassis-sub-sub-module"
-                ),
+                "item": ".//chassis-sub-module|.//chassis-module|.//chassis-sub-sub-module",
                 "key": "name",
                 "rpc": "get-chassis-inventory",
                 "view": "ModuleTableView",

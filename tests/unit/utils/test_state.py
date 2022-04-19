@@ -1,13 +1,21 @@
+# -*- coding: utf-8 -*-
 """
 Unit Tests for functions located in salt.utils.state.py.
 """
 
+# Import python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import copy
 import textwrap
 
 import salt.utils.odict
 import salt.utils.state
+
+# Import Salt libs
+from salt.ext import six
+
+# Import Salt Testing libs
 from tests.support.unit import TestCase
 
 
@@ -121,9 +129,9 @@ class StateUtilTestCase(TestCase):
                 ]
             ),
         }
-        for test, data in test_valid_false_states.items():
+        for test, data in six.iteritems(test_valid_false_states):
             self.assertFalse(
-                salt.utils.state.check_result(data), msg="{} failed".format(test)
+                salt.utils.state.check_result(data), msg="{0} failed".format(test)
             )
         test_valid_true_states = {
             "test1": salt.utils.odict.OrderedDict(
@@ -213,9 +221,9 @@ class StateUtilTestCase(TestCase):
                 ]
             ),
         }
-        for test, data in test_valid_true_states.items():
+        for test, data in six.iteritems(test_valid_true_states):
             self.assertTrue(
-                salt.utils.state.check_result(data), msg="{} failed".format(test)
+                salt.utils.state.check_result(data), msg="{0} failed".format(test)
             )
         test_invalid_true_ht_states = {
             "test_onfail_simple2": (
@@ -510,7 +518,7 @@ class StateUtilTestCase(TestCase):
                 {},
             ),
         }
-        for test, testdata in test_invalid_true_ht_states.items():
+        for test, testdata in six.iteritems(test_invalid_true_ht_states):
             data, ht = testdata
             for t_ in [a for a in data["host1"]]:
                 tdata = data["host1"][t_]
@@ -519,7 +527,7 @@ class StateUtilTestCase(TestCase):
                 tdata["__id__"] = t_
             self.assertFalse(
                 salt.utils.state.check_result(data, highstate=ht),
-                msg="{} failed".format(test),
+                msg="{0} failed".format(test),
             )
 
         test_valid_true_ht_states = {
@@ -737,7 +745,7 @@ class StateUtilTestCase(TestCase):
                 },
             ),
         }
-        for test, testdata in test_valid_true_ht_states.items():
+        for test, testdata in six.iteritems(test_valid_true_ht_states):
             data, ht = testdata
             for t_ in [a for a in data["host1"]]:
                 tdata = data["host1"][t_]
@@ -746,7 +754,7 @@ class StateUtilTestCase(TestCase):
                 tdata["__id__"] = t_
             self.assertTrue(
                 salt.utils.state.check_result(data, highstate=ht),
-                msg="{} failed".format(test),
+                msg="{0} failed".format(test),
             )
         test_valid_false_state = {"host1": {"test_state": {"result": False}}}
         self.assertFalse(salt.utils.state.check_result(test_valid_false_state))
@@ -835,7 +843,7 @@ class UtilStateMergeSubreturnTestcase(TestCase):
         main_comment_1 = "First primary comment."
         main_comment_2 = "Second primary comment."
         sub_comment_1 = "First secondary comment,\nwhich spans two lines."
-        sub_comment_2 = "Second secondary comment: {}".format(
+        sub_comment_2 = "Second secondary comment: {0}".format(
             "some error\n  And a traceback",
         )
         final_comment = textwrap.dedent(

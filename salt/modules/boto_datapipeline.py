@@ -67,9 +67,7 @@ def create_pipeline(
     r = {}
     try:
         response = client.create_pipeline(
-            name=name,
-            uniqueId=unique_id,
-            description=description,
+            name=name, uniqueId=unique_id, description=description,
         )
         r["result"] = response["pipelineId"]
     except (botocore.exceptions.BotoCoreError, botocore.exceptions.ClientError) as e:
@@ -132,8 +130,7 @@ def get_pipeline_definition(
     r = {}
     try:
         r["result"] = client.get_pipeline_definition(
-            pipelineId=pipeline_id,
-            version=version,
+            pipelineId=pipeline_id, version=version,
         )
     except (botocore.exceptions.BotoCoreError, botocore.exceptions.ClientError) as e:
         r["error"] = str(e)
@@ -258,7 +255,5 @@ def _get_session(region, key, keyid, profile):
         region = "us-east-1"
 
     return boto3.session.Session(
-        region_name=region,
-        aws_secret_access_key=key,
-        aws_access_key_id=keyid,
+        region_name=region, aws_secret_access_key=key, aws_access_key_id=keyid,
     )

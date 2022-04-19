@@ -2,8 +2,10 @@
 Detect LVM Volumes
 """
 
+# Import python libs
 import logging
 
+# Import salt libs
 import salt.modules.cmdmod
 import salt.utils.files
 import salt.utils.path

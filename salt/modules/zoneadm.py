@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Module for Solaris 10's zoneadm
 
@@ -10,11 +11,16 @@ Module for Solaris 10's zoneadm
 .. warning::
     Oracle Solaris 11's zoneadm is not supported by this module!
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import Python libs
 import logging
 
 import salt.utils.decorators
+
+# Import Salt libs
 import salt.utils.path
+from salt.ext.six.moves import range
 
 log = logging.getLogger(__name__)
 
@@ -64,7 +70,9 @@ def __virtual__():
             return __virtualname__
     return (
         False,
-        "{} module can only be loaded in a solaris globalzone.".format(__virtualname__),
+        "{0} module can only be loaded in a solaris globalzone.".format(
+            __virtualname__
+        ),
     )
 
 
@@ -98,8 +106,8 @@ def list_zones(verbose=True, installed=False, configured=False, hide_global=True
 
             # create zone_t
             zone_t = {}
-            for num, val in enumerate(header):
-                zone_t[val] = zone[num]
+            for i in range(0, len(header)):
+                zone_t[header[i]] = zone[i]
 
             # skip if global and hide_global
             if hide_global and zone_t["zonename"] == "global":
@@ -145,18 +153,18 @@ def boot(zone, single=False, altinit=None, smf_options=None):
     ## build boot_options
     boot_options = ""
     if single:
-        boot_options = "-s {}".format(boot_options)
+        boot_options = "-s {0}".format(boot_options)
     if altinit:  # note: we cannot validate the path, as this is local to the zonepath.
-        boot_options = "-i {} {}".format(altinit, boot_options)
+        boot_options = "-i {0} {1}".format(altinit, boot_options)
     if smf_options:
-        boot_options = "-m {} {}".format(smf_options, boot_options)
+        boot_options = "-m {0} {1}".format(smf_options, boot_options)
     if boot_options != "":
-        boot_options = " -- {}".format(boot_options.strip())
+        boot_options = " -- {0}".format(boot_options.strip())
 
     ## execute boot
     res = __salt__["cmd.run_all"](
         "zoneadm {zone} boot{boot_opts}".format(
-            zone="-u {}".format(zone) if _is_uuid(zone) else "-z {}".format(zone),
+            zone="-u {0}".format(zone) if _is_uuid(zone) else "-z {0}".format(zone),
             boot_opts=boot_options,
         )
     )
@@ -195,18 +203,18 @@ def reboot(zone, single=False, altinit=None, smf_options=None):
     ## build boot_options
     boot_options = ""
     if single:
-        boot_options = "-s {}".format(boot_options)
+        boot_options = "-s {0}".format(boot_options)
     if altinit:  # note: we cannot validate the path, as this is local to the zonepath.
-        boot_options = "-i {} {}".format(altinit, boot_options)
+        boot_options = "-i {0} {1}".format(altinit, boot_options)
     if smf_options:
-        boot_options = "-m {} {}".format(smf_options, boot_options)
+        boot_options = "-m {0} {1}".format(smf_options, boot_options)
     if boot_options != "":
-        boot_options = " -- {}".format(boot_options.strip())
+        boot_options = " -- {0}".format(boot_options.strip())
 
     ## execute reboot
     res = __salt__["cmd.run_all"](
         "zoneadm {zone} reboot{boot_opts}".format(
-            zone="-u {}".format(zone) if _is_uuid(zone) else "-z {}".format(zone),
+            zone="-u {0}".format(zone) if _is_uuid(zone) else "-z {0}".format(zone),
             boot_opts=boot_options,
         )
     )
@@ -240,7 +248,7 @@ def halt(zone):
     ## halt zone
     res = __salt__["cmd.run_all"](
         "zoneadm {zone} halt".format(
-            zone="-u {}".format(zone) if _is_uuid(zone) else "-z {}".format(zone),
+            zone="-u {0}".format(zone) if _is_uuid(zone) else "-z {0}".format(zone),
         )
     )
     ret["status"] = res["retcode"] == 0
@@ -280,18 +288,18 @@ def shutdown(zone, reboot=False, single=False, altinit=None, smf_options=None):
     ## build boot_options
     boot_options = ""
     if single:
-        boot_options = "-s {}".format(boot_options)
+        boot_options = "-s {0}".format(boot_options)
     if altinit:  # note: we cannot validate the path, as this is local to the zonepath.
-        boot_options = "-i {} {}".format(altinit, boot_options)
+        boot_options = "-i {0} {1}".format(altinit, boot_options)
     if smf_options:
-        boot_options = "-m {} {}".format(smf_options, boot_options)
+        boot_options = "-m {0} {1}".format(smf_options, boot_options)
     if boot_options != "":
-        boot_options = " -- {}".format(boot_options.strip())
+        boot_options = " -- {0}".format(boot_options.strip())
 
     ## shutdown zone
     res = __salt__["cmd.run_all"](
         "zoneadm {zone} shutdown{reboot}{boot_opts}".format(
-            zone="-u {}".format(zone) if _is_uuid(zone) else "-z {}".format(zone),
+            zone="-u {0}".format(zone) if _is_uuid(zone) else "-z {0}".format(zone),
             reboot=" -r" if reboot else "",
             boot_opts=boot_options,
         )
@@ -323,7 +331,7 @@ def detach(zone):
     ## detach zone
     res = __salt__["cmd.run_all"](
         "zoneadm {zone} detach".format(
-            zone="-u {}".format(zone) if _is_uuid(zone) else "-z {}".format(zone),
+            zone="-u {0}".format(zone) if _is_uuid(zone) else "-z {0}".format(zone),
         )
     )
     ret["status"] = res["retcode"] == 0
@@ -360,7 +368,7 @@ def attach(zone, force=False, brand_opts=None):
         "zoneadm -z {zone} attach{force}{brand_opts}".format(
             zone=zone,
             force=" -F" if force else "",
-            brand_opts=" {}".format(brand_opts) if brand_opts else "",
+            brand_opts=" {0}".format(brand_opts) if brand_opts else "",
         )
     )
     ret["status"] = res["retcode"] == 0
@@ -390,7 +398,7 @@ def ready(zone):
     ## ready zone
     res = __salt__["cmd.run_all"](
         "zoneadm {zone} ready".format(
-            zone="-u {}".format(zone) if _is_uuid(zone) else "-z {}".format(zone),
+            zone="-u {0}".format(zone) if _is_uuid(zone) else "-z {0}".format(zone),
         )
     )
     ret["status"] = res["retcode"] == 0
@@ -419,11 +427,7 @@ def verify(zone):
     ret = {"status": True}
 
     ## verify zone
-    res = __salt__["cmd.run_all"](
-        "zoneadm -z {zone} verify".format(
-            zone=zone,
-        )
-    )
+    res = __salt__["cmd.run_all"]("zoneadm -z {zone} verify".format(zone=zone,))
     ret["status"] = res["retcode"] == 0
     ret["message"] = res["stdout"] if ret["status"] else res["stderr"]
     ret["message"] = ret["message"].replace("zoneadm: ", "")
@@ -453,7 +457,7 @@ def move(zone, zonepath):
     ## verify zone
     res = __salt__["cmd.run_all"](
         "zoneadm {zone} move {path}".format(
-            zone="-u {}".format(zone) if _is_uuid(zone) else "-z {}".format(zone),
+            zone="-u {0}".format(zone) if _is_uuid(zone) else "-z {0}".format(zone),
             path=zonepath,
         )
     )
@@ -487,7 +491,7 @@ def uninstall(zone):
     ## uninstall zone
     res = __salt__["cmd.run_all"](
         "zoneadm {zone} uninstall -F".format(
-            zone="-u {}".format(zone) if _is_uuid(zone) else "-z {}".format(zone),
+            zone="-u {0}".format(zone) if _is_uuid(zone) else "-z {0}".format(zone),
         )
     )
     ret["status"] = res["retcode"] == 0
@@ -524,7 +528,7 @@ def install(zone, nodataset=False, brand_opts=None):
         "zoneadm -z {zone} install{nodataset}{brand_opts}".format(
             zone=zone,
             nodataset=" -x nodataset" if nodataset else "",
-            brand_opts=" {}".format(brand_opts) if brand_opts else "",
+            brand_opts=" {0}".format(brand_opts) if brand_opts else "",
         )
     )
     ret["status"] = res["retcode"] == 0
@@ -560,7 +564,7 @@ def clone(zone, source, snapshot=None):
         "zoneadm -z {zone} clone {snapshot}{source}".format(
             zone=zone,
             source=source,
-            snapshot="-s {} ".format(snapshot) if snapshot else "",
+            snapshot="-s {0} ".format(snapshot) if snapshot else "",
         )
     )
     ret["status"] = res["retcode"] == 0

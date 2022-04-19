@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Manage Grafana v2.0 Dashboards
 
@@ -37,11 +38,16 @@ they exist in dashboards. The module will not manage rows that are not defined,
 allowing users to manage their own custom rows.
 """
 
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import copy
 
 import requests
+
+# Import Salt libs
 import salt.utils.json
+from salt.ext import six
 from salt.utils.dictdiffer import DictDiffer
 
 
@@ -96,7 +102,7 @@ def present(
     base_rows_from_pillar = base_rows_from_pillar or []
     dashboard = dashboard or {}
 
-    if isinstance(profile, str):
+    if isinstance(profile, six.string_types):
         profile = __salt__["config.option"](profile)
 
     # Add pillar keys for default configuration
@@ -121,21 +127,21 @@ def present(
     _ensure_annotations(new_dashboard)
 
     # Create dashboard if it does not exist
-    url = "db/{}".format(name)
+    url = "db/{0}".format(name)
     old_dashboard = _get(url, profile)
     if not old_dashboard:
         if __opts__["test"]:
             ret["result"] = None
-            ret["comment"] = "Dashboard {} is set to be created.".format(name)
+            ret["comment"] = "Dashboard {0} is set to be created.".format(name)
             return ret
 
         response = _update(new_dashboard, profile)
         if response.get("status") == "success":
-            ret["comment"] = "Dashboard {} created.".format(name)
-            ret["changes"]["new"] = "Dashboard {} created.".format(name)
+            ret["comment"] = "Dashboard {0} created.".format(name)
+            ret["changes"]["new"] = "Dashboard {0} created.".format(name)
         else:
             ret["result"] = False
-            ret["comment"] = "Failed to create dashboard {}, response={}".format(
+            ret["comment"] = ("Failed to create dashboard {0}, " "response={1}").format(
                 name, response
             )
         return ret
@@ -158,7 +164,9 @@ def present(
     if updated_needed:
         if __opts__["test"]:
             ret["result"] = None
-            ret["comment"] = "Dashboard {} is set to be updated, changes={}".format(
+            ret["comment"] = str(
+                "Dashboard {0} is set to be updated, changes={1}"
+            ).format(  # future lint: blacklisted-function
                 name,
                 salt.utils.json.dumps(
                     _dashboard_diff(_cleaned(new_dashboard), _cleaned(old_dashboard)),
@@ -173,13 +181,13 @@ def present(
             dashboard_diff = DictDiffer(
                 _cleaned(updated_dashboard), _cleaned(old_dashboard)
             )
-            ret["comment"] = "Dashboard {} updated.".format(name)
+            ret["comment"] = "Dashboard {0} updated.".format(name)
             ret["changes"] = _dashboard_diff(
                 _cleaned(new_dashboard), _cleaned(old_dashboard)
             )
         else:
             ret["result"] = False
-            ret["comment"] = "Failed to update dashboard {}, response={}".format(
+            ret["comment"] = ("Failed to update dashboard {0}, " "response={1}").format(
                 name, response
             )
         return ret
@@ -200,20 +208,20 @@ def absent(name, profile="grafana"):
     """
     ret = {"name": name, "result": True, "comment": "", "changes": {}}
 
-    if isinstance(profile, str):
+    if isinstance(profile, six.string_types):
         profile = __salt__["config.option"](profile)
 
-    url = "db/{}".format(name)
+    url = "db/{0}".format(name)
     existing_dashboard = _get(url, profile)
     if existing_dashboard:
         if __opts__["test"]:
             ret["result"] = None
-            ret["comment"] = "Dashboard {} is set to be deleted.".format(name)
+            ret["comment"] = "Dashboard {0} is set to be deleted.".format(name)
             return ret
 
         _delete(url, profile)
-        ret["comment"] = "Dashboard {} deleted.".format(name)
-        ret["changes"]["new"] = "Dashboard {} deleted.".format(name)
+        ret["comment"] = "Dashboard {0} deleted.".format(name)
+        ret["changes"]["new"] = "Dashboard {0} deleted.".format(name)
         return ret
 
     ret["comment"] = "Dashboard absent"
@@ -265,7 +273,7 @@ def _inherited_dashboard(dashboard, base_dashboards_from_pillar, ret):
             base_dashboards.append(base_dashboard)
         elif base_dashboard_from_pillar != _DEFAULT_DASHBOARD_PILLAR:
             ret.setdefault("warnings", [])
-            warning_message = 'Cannot find dashboard pillar "{}".'.format(
+            warning_message = 'Cannot find dashboard pillar "{0}".'.format(
                 base_dashboard_from_pillar
             )
             if warning_message not in ret["warnings"]:
@@ -290,7 +298,7 @@ def _inherited_row(row, base_rows_from_pillar, ret):
             base_rows.append(base_row)
         elif base_row_from_pillar != _DEFAULT_ROW_PILLAR:
             ret.setdefault("warnings", [])
-            warning_message = 'Cannot find row pillar "{}".'.format(
+            warning_message = 'Cannot find row pillar "{0}".'.format(
                 base_row_from_pillar
             )
             if warning_message not in ret["warnings"]:
@@ -312,7 +320,7 @@ def _inherited_panel(panel, base_panels_from_pillar, ret):
             base_panels.append(base_panel)
         elif base_panel_from_pillar != _DEFAULT_PANEL_PILLAR:
             ret.setdefault("warnings", [])
-            warning_message = 'Cannot find panel pillar "{}".'.format(
+            warning_message = 'Cannot find panel pillar "{0}".'.format(
                 base_panel_from_pillar
             )
             if warning_message not in ret["warnings"]:
@@ -418,12 +426,12 @@ def _ensure_annotations(dashboard):
 
 def _get(url, profile):
     """Get a specific dashboard."""
-    request_url = "{}/api/dashboards/{}".format(profile.get("grafana_url"), url)
+    request_url = "{0}/api/dashboards/{1}".format(profile.get("grafana_url"), url)
     response = requests.get(
         request_url,
         headers={
             "Accept": "application/json",
-            "Authorization": "Bearer {}".format(profile.get("grafana_token")),
+            "Authorization": "Bearer {0}".format(profile.get("grafana_token")),
         },
         timeout=profile.get("grafana_timeout", 3),
     )
@@ -437,12 +445,12 @@ def _get(url, profile):
 
 def _delete(url, profile):
     """Delete a specific dashboard."""
-    request_url = "{}/api/dashboards/{}".format(profile.get("grafana_url"), url)
+    request_url = "{0}/api/dashboards/{1}".format(profile.get("grafana_url"), url)
     response = requests.delete(
         request_url,
         headers={
             "Accept": "application/json",
-            "Authorization": "Bearer {}".format(profile.get("grafana_token")),
+            "Authorization": "Bearer {0}".format(profile.get("grafana_token")),
         },
         timeout=profile.get("grafana_timeout"),
     )
@@ -453,10 +461,10 @@ def _delete(url, profile):
 def _update(dashboard, profile):
     """Update a specific dashboard."""
     payload = {"dashboard": dashboard, "overwrite": True}
-    request_url = "{}/api/dashboards/db".format(profile.get("grafana_url"))
+    request_url = "{0}/api/dashboards/db".format(profile.get("grafana_url"))
     response = requests.post(
         request_url,
-        headers={"Authorization": "Bearer {}".format(profile.get("grafana_token"))},
+        headers={"Authorization": "Bearer {0}".format(profile.get("grafana_token"))},
         json=payload,
     )
     return response.json()
@@ -546,7 +554,7 @@ def _dashboard_diff(_new_dashboard, _old_dashboard):
 def _stripped(d):
     """Strip falsey entries."""
     ret = {}
-    for k, v in d.items():
+    for k, v in six.iteritems(d):
         if v:
             ret[k] = v
     return ret

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     tests.support.zfs
     ~~~~~~~~~~~~~~~~~
@@ -5,12 +6,17 @@
     ZFS related unit test data structures
 """
 
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import salt libs
 import salt.utils.zfs
+
+# Import Salt tests libs
 from tests.support.mock import MagicMock, patch
 
 
-class ZFSMockData:
+class ZFSMockData(object):
     def __init__(self):
         # property_map mocks
         self.pmap_exec_zpool = {
@@ -20,8 +26,7 @@ class ZFSMockData:
                 [
                     "missing property argument",
                     "usage:",
-                    '        get [-Hp] [-o "all" | field[,...]] <"all" |'
-                    " property[,...]> <pool> ...",
+                    '        get [-Hp] [-o "all" | field[,...]] <"all" | property[,...]> <pool> ...',
                     "",
                     "the following properties are supported:",
                     "",
@@ -116,8 +121,6 @@ class ZFSMockData:
             "frag": {"edit": False, "type": "str", "values": "<percent>"},
             "fragmentation": {"edit": False, "type": "str", "values": "<percent>"},
         }
-
-        # fmt: off
         self.pmap_exec_zfs = {
             "retcode": 2,
             "stdout": "",
@@ -127,8 +130,7 @@ class ZFSMockData:
                     "usage:",
                     '        get [-crHp] [-d max] [-o "all" | field[,...]]',
                     "            [-t type[,...]] [-s source[,...]]",
-                    '            <"all" | property[,...]>'
-                    " [filesystem|volume|snapshot|bookmark] ...",
+                    '            <"all" | property[,...]> [filesystem|volume|snapshot|bookmark] ...',
                     "",
                     "The following properties are supported:",
                     "",
@@ -214,7 +216,6 @@ class ZFSMockData:
                 ]
             ),
         }
-        # fmt: on
         self.pmap_zfs = {
             "origin": {
                 "edit": False,
@@ -279,10 +280,7 @@ class ZFSMockData:
             "dedup": {
                 "edit": True,
                 "inherit": True,
-                "values": (
-                    "on | off | verify | sha256[,verify], sha512[,verify],"
-                    " skein[,verify], edonr,verify"
-                ),
+                "values": "on | off | verify | sha256[,verify], sha512[,verify], skein[,verify], edonr,verify",
                 "type": "bool",
             },
             "sharenfs": {
@@ -420,9 +418,7 @@ class ZFSMockData:
             "aclinherit": {
                 "edit": True,
                 "inherit": True,
-                "values": (
-                    "discard | noallow | restricted | passthrough | passthrough-x"
-                ),
+                "values": "discard | noallow | restricted | passthrough | passthrough-x",
                 "type": "str",
             },
             "compressratio": {
@@ -668,9 +664,7 @@ class ZFSMockData:
             "checksum": {
                 "edit": True,
                 "inherit": True,
-                "values": (
-                    "on | off | fletcher2 | fletcher4 | sha256 | sha512 | skein | edonr"
-                ),
+                "values": "on | off | fletcher2 | fletcher4 | sha256 | sha512 | skein | edonr",
                 "type": "bool",
             },
             "nbmand": {

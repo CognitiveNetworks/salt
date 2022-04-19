@@ -236,8 +236,7 @@ def create_or_update_alarm(
         dimensions = salt.utils.json.loads(dimensions)
         if not isinstance(dimensions, dict):
             log.error(
-                "could not parse dimensions argument: must be json encoding of a dict:"
-                " '%s'",
+                "could not parse dimensions argument: must be json encoding of a dict: '%s'",
                 dimensions,
             )
             return False

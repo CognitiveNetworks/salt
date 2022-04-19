@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Read tops data from a mongodb collection
 
@@ -40,10 +41,13 @@ Configuring the Mongo Tops Subsystem
 Module Documentation
 ====================
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import python libs
 import logging
 import re
 
+# Import third party libs
 try:
     import pymongo
 

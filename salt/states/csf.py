@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 CSF Ip tables management
 ========================
@@ -13,8 +14,13 @@ CSF Ip tables management
         ip: 1.2.3.4
         method: allow
 """  # pylint: disable=W0105
+# Import Python Libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
+
+# Import Salt Libs
+from salt.ext import six
 
 log = logging.getLogger(__name__)
 
@@ -107,8 +113,8 @@ def rule_present(
         return ret
     else:
         if ttl:
-            method = "temp{}".format(method)
-        func = __salt__["csf.{}".format(method)]
+            method = "temp{0}".format(method)
+        func = __salt__["csf.{0}".format(method)]
         rule = func(
             ip,
             port=port,
@@ -244,7 +250,7 @@ def ports_open(name, ports, proto="tcp", direction="in"):
         traffic, or both.
     """
 
-    ports = list(map(str, ports))
+    ports = list(six.moves.map(six.text_type, ports))
     diff = False
     ret = {
         "name": ",".join(ports),
@@ -387,7 +393,7 @@ def option_present(name, value, reload=False):
     if current_option:
         l = __salt__["csf.split_option"](current_option)
         option_value = l[1]
-        if '"{}"'.format(value) == option_value:
+        if '"{0}"'.format(value) == option_value:
             return ret
         else:
             result = __salt__["csf.set_option"](option, value)
@@ -395,7 +401,7 @@ def option_present(name, value, reload=False):
             ret["changes"]["Option"] = "Changed"
     else:
         result = __salt__["file.append"](
-            "/etc/csf/csf.conf", args='{} = "{}"'.format(option, value)
+            "/etc/csf/csf.conf", args='{0} = "{1}"'.format(option, value)
         )
         ret["comment"] = "Option not present. Appended to csf.conf"
         ret["changes"]["Option"] = "Changed."

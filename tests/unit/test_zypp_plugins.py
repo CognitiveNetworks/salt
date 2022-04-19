@@ -1,10 +1,18 @@
+# -*- coding: utf-8 -*-
 """
     :codeauthor: Bo Maryniuk <bo@suse.de>
 """
+
+# Import Python Libs
+from __future__ import absolute_import
+
 import imp
 import os
+import sys
 
 from tests.support.mock import MagicMock, patch
+
+# Import Salt Testing Libs
 from tests.support.unit import TestCase, skipIf
 
 try:
@@ -14,7 +22,10 @@ try:
 except ImportError:
     HAS_ZYPP_PLUGIN = False
 
-BUILTINS_OPEN = "builtins.open"
+if sys.version_info >= (3,):
+    BUILTINS_OPEN = "builtins.open"
+else:
+    BUILTINS_OPEN = "__builtin__.open"
 
 ZYPPNOTIFY_FILE = os.path.sep.join(
     os.path.dirname(__file__).split(os.path.sep)[:-2]

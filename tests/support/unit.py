@@ -33,8 +33,8 @@ from unittest import TestSuite as _TestSuite
 from unittest import TextTestResult as _TextTestResult
 from unittest import TextTestRunner as _TextTestRunner
 from unittest import expectedFailure, skip, skipIf
-if sys.version_info < (2, 7):
-    from unittest2.case import _id
+from unittest.case import SkipTest, _id
+
 try:
     import psutil
 
@@ -243,6 +243,16 @@ class TestCase(_TestCase):
         """
         assert isinstance(state_ret, dict), state_ret
         return {x.split("_|-")[1]: y for x, y in state_ret.items()}
+
+    @staticmethod
+    def assert_called_once(mock):
+        """
+        mock.assert_called_once only exists in PY3 in 3.6 and newer
+        """
+        try:
+            mock.assert_called_once()
+        except AttributeError:
+            log.warning("assert_called_once invoked, but not available")
 
 
 class TextTestResult(_TextTestResult):

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Use `Varstack <https://github.com/conversis/varstack>`_ data as a Pillar source
 
@@ -18,6 +19,7 @@ data to return as pillar information. From there you can take a look at the
 varstack on how this file is evaluated.
 """
 
+from __future__ import absolute_import, print_function, unicode_literals
 
 try:
     import varstack

@@ -1,9 +1,12 @@
+# -*- coding: utf-8 -*-
 """
 Enforce state for SSL/TLS
 =========================
 
 """
 
+# Import Python Libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import datetime
 import logging
@@ -30,7 +33,7 @@ def valid_certificate(name, weeks=0, days=0, hours=0, minutes=0, seconds=0):
     now = time.time()
     try:
         cert_info = __salt__["tls.cert_info"](name)
-    except OSError as exc:
+    except IOError as exc:
         ret["comment"] = "{}".format(exc)
         ret["result"] = False
         log.error(ret["comment"])
@@ -57,11 +60,13 @@ def valid_certificate(name, weeks=0, days=0, hours=0, minutes=0, seconds=0):
     delta_min = datetime.timedelta(**delta_kind_map)
     # if ther eisn't enough time remaining, we consider it a failure
     if delta_remaining < delta_min:
-        ret["comment"] = "Certificate will expire in {}, which is less than {}".format(
+        ret[
+            "comment"
+        ] = "Certificate will expire in {0}, which is less than {1}".format(
             delta_remaining, delta_min
         )
         return ret
 
     ret["result"] = True
-    ret["comment"] = "Certificate is valid for {}".format(delta_remaining)
+    ret["comment"] = "Certificate is valid for {0}".format(delta_remaining)
     return ret

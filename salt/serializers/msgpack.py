@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     salt.serializers.msgpack
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -5,11 +6,17 @@
     Implements MsgPack serializer.
 """
 
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import copy
 import logging
 
+# Import Salt Libs
 import salt.utils.msgpack
+
+# Import 3rd-party libs
+from salt.ext import six
 from salt.serializers import DeserializationError, SerializationError
 
 log = logging.getLogger(__name__)
@@ -73,7 +80,7 @@ else:  # msgpack.version < 0.2.0
         tuples.
         """
         if isinstance(obj, dict):
-            data = [(key, _encoder(value)) for key, value in obj.items()]
+            data = [(key, _encoder(value)) for key, value in six.iteritems(obj)]
             return dict(data)
         elif isinstance(obj, (list, tuple)):
             return [_encoder(value) for value in obj]

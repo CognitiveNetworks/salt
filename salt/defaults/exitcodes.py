@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Classification of Salt exit codes.  These are intended to augment
 universal exit codes (found in Python's `os` module with the `EX_`

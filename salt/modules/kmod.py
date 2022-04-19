@@ -1,11 +1,16 @@
+# -*- coding: utf-8 -*-
 """
 Module to manage Linux kernel modules
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
+
+# Import python libs
 import os
 import re
 
+# Import salt libs
 import salt.utils.files
 import salt.utils.path
 
@@ -83,12 +88,12 @@ def _set_persistent_module(mod):
     escape_mod = re.escape(mod)
     # If module is commented only uncomment it
     if __salt__["file.search"](
-        conf, "^#[\t ]*{}[\t ]*$".format(escape_mod), multiline=True
+        conf, "^#[\t ]*{0}[\t ]*$".format(escape_mod), multiline=True
     ):
         __salt__["file.uncomment"](conf, escape_mod)
     else:
         __salt__["file.append"](conf, mod)
-    return {mod_name}
+    return set([mod_name])
 
 
 def _remove_persistent_module(mod, comment):
@@ -102,10 +107,10 @@ def _remove_persistent_module(mod, comment):
         return set()
     escape_mod = re.escape(mod)
     if comment:
-        __salt__["file.comment"](conf, "^[\t ]*{}[\t ]?".format(escape_mod))
+        __salt__["file.comment"](conf, "^[\t ]*{0}[\t ]?".format(escape_mod))
     else:
-        __salt__["file.sed"](conf, "^[\t ]*{}[\t ]?".format(escape_mod), "")
-    return {mod_name}
+        __salt__["file.sed"](conf, "^[\t ]*{0}[\t ]?".format(escape_mod), "")
+    return set([mod_name])
 
 
 def available():
@@ -212,7 +217,7 @@ def mod_list(only_persist=False):
                         mod_name = _strip_module_name(line)
                         if not line.startswith("#") and mod_name:
                             mods.add(mod_name)
-            except OSError:
+            except IOError:
                 log.error("kmod module could not open modules file at %s", conf)
     else:
         for mod in lsmod():
@@ -237,7 +242,7 @@ def load(mod, persist=False):
         salt '*' kmod.load kvm
     """
     pre_mods = lsmod()
-    res = __salt__["cmd.run_all"]("modprobe {}".format(mod), python_shell=False)
+    res = __salt__["cmd.run_all"]("modprobe {0}".format(mod), python_shell=False)
     if res["retcode"] == 0:
         post_mods = lsmod()
         mods = _new_mods(pre_mods, post_mods)
@@ -246,7 +251,7 @@ def load(mod, persist=False):
             persist_mods = _set_persistent_module(mod)
         return sorted(list(mods | persist_mods))
     else:
-        return "Error loading module {}: {}".format(mod, res["stderr"])
+        return "Error loading module {0}: {1}".format(mod, res["stderr"])
 
 
 def is_loaded(mod):
@@ -283,7 +288,7 @@ def remove(mod, persist=False, comment=True):
         salt '*' kmod.remove kvm
     """
     pre_mods = lsmod()
-    res = __salt__["cmd.run_all"]("rmmod {}".format(mod), python_shell=False)
+    res = __salt__["cmd.run_all"]("rmmod {0}".format(mod), python_shell=False)
     if res["retcode"] == 0:
         post_mods = lsmod()
         mods = _rm_mods(pre_mods, post_mods)
@@ -292,4 +297,4 @@ def remove(mod, persist=False, comment=True):
             persist_mods = _remove_persistent_module(mod, comment)
         return sorted(list(mods | persist_mods))
     else:
-        return "Error removing module {}: {}".format(mod, res["stderr"])
+        return "Error removing module {0}: {1}".format(mod, res["stderr"])

@@ -1,14 +1,17 @@
+# -*- coding: utf-8 -*-
 """
 Jinja-specific decorators
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import Python libs
 # Ensure we're using the custom logging from Salt
 import salt.log.setup as logging
 
 log = logging.getLogger(__name__)
 
 
-class JinjaFilter:
+class JinjaFilter(object):
     """
     This decorator is used to specify that a function is to be loaded as a
     Jinja filter.
@@ -17,11 +20,13 @@ class JinjaFilter:
     salt_jinja_filters = {}
 
     def __init__(self, name=None):
-        """ """
+        """
+        """
         self.name = name
 
     def __call__(self, function):
-        """ """
+        """
+        """
         name = self.name or function.__name__
         if name not in self.salt_jinja_filters:
             log.debug("Marking '%s' as a jinja filter", name)
@@ -32,7 +37,7 @@ class JinjaFilter:
 jinja_filter = JinjaFilter
 
 
-class JinjaTest:
+class JinjaTest(object):
     """
     This decorator is used to specify that a function is to be loaded as a
     Jinja test.
@@ -41,11 +46,13 @@ class JinjaTest:
     salt_jinja_tests = {}
 
     def __init__(self, name=None):
-        """ """
+        """
+        """
         self.name = name
 
     def __call__(self, function):
-        """ """
+        """
+        """
         name = self.name or function.__name__
         if name not in self.salt_jinja_tests:
             log.debug("Marking '%s' as a jinja test", name)
@@ -56,7 +63,7 @@ class JinjaTest:
 jinja_test = JinjaTest
 
 
-class JinjaGlobal:
+class JinjaGlobal(object):
     """
     This decorator is used to specify that a function is to be loaded as a
     Jinja global.
@@ -65,11 +72,13 @@ class JinjaGlobal:
     salt_jinja_globals = {}
 
     def __init__(self, name=None):
-        """ """
+        """
+        """
         self.name = name
 
     def __call__(self, function):
-        """ """
+        """
+        """
         name = self.name or function.__name__
         if name not in self.salt_jinja_globals:
             log.debug("Marking '%s' as a jinja global", name)

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Installation of Cabal Packages
 ==============================
@@ -22,6 +23,7 @@ pkg.installed state for the package which provides cabal
 
 """
 
+from __future__ import absolute_import, print_function, unicode_literals
 
 import salt.utils.path
 from salt.exceptions import CommandExecutionError, CommandNotFoundError
@@ -84,7 +86,7 @@ def installed(name, pkgs=None, user=None, install_global=False, env=None):
         call = __salt__["cabal.update"](user=user, env=env)
     except (CommandNotFoundError, CommandExecutionError) as err:
         ret["result"] = False
-        ret["comment"] = "Could not run cabal update {}".format(err)
+        ret["comment"] = "Could not run cabal update {0}".format(err)
         return ret
 
     if pkgs is not None:
@@ -96,7 +98,7 @@ def installed(name, pkgs=None, user=None, install_global=False, env=None):
         installed_pkgs = __salt__["cabal.list"](user=user, installed=True, env=env)
     except (CommandNotFoundError, CommandExecutionError) as err:
         ret["result"] = False
-        ret["comment"] = "Error looking up '{}': {}".format(name, err)
+        ret["comment"] = "Error looking up '{0}': {1}".format(name, err)
         return ret
 
     pkgs_satisfied = []
@@ -123,14 +125,14 @@ def installed(name, pkgs=None, user=None, install_global=False, env=None):
 
         if pkgs_to_install:
             comment_msg.append(
-                "Packages(s) '{}' are set to be installed".format(
+                "Packages(s) '{0}' are set to be installed".format(
                     ", ".join(pkgs_to_install)
                 )
             )
 
         if pkgs_satisfied:
             comment_msg.append(
-                "Packages(s) '{}' satisfied by {}".format(
+                "Packages(s) '{0}' satisfied by {1}".format(
                     ", ".join(pkg_list), ", ".join(pkgs_satisfied)
                 )
             )
@@ -140,7 +142,7 @@ def installed(name, pkgs=None, user=None, install_global=False, env=None):
 
     if not pkgs_to_install:
         ret["result"] = True
-        ret["comment"] = "Packages(s) '{}' satisfied by {}".format(
+        ret["comment"] = "Packages(s) '{0}' satisfied by {1}".format(
             ", ".join(pkg_list), ", ".join(pkgs_satisfied)
         )
 
@@ -152,18 +154,18 @@ def installed(name, pkgs=None, user=None, install_global=False, env=None):
         )
     except (CommandNotFoundError, CommandExecutionError) as err:
         ret["result"] = False
-        ret["comment"] = "Error installing '{}': {}".format(", ".join(pkg_list), err)
+        ret["comment"] = "Error installing '{0}': {1}".format(", ".join(pkg_list), err)
         return ret
 
     if call and isinstance(call, dict):
         ret["result"] = True
         ret["changes"] = {"old": [], "new": pkgs_to_install}
-        ret["comment"] = "Packages(s) '{}' successfully installed".format(
+        ret["comment"] = "Packages(s) '{0}' successfully installed".format(
             ", ".join(pkgs_to_install)
         )
     else:
         ret["result"] = False
-        ret["comment"] = "Could not install packages(s) '{}'".format(
+        ret["comment"] = "Could not install packages(s) '{0}'".format(
             ", ".join(pkg_list)
         )
 
@@ -181,24 +183,24 @@ def removed(name, user=None, env=None):
         installed_pkgs = __salt__["cabal.list"](user=user, installed=True, env=env)
     except (CommandNotFoundError, CommandExecutionError) as err:
         ret["result"] = False
-        ret["comment"] = "Error looking up '{}': {}".format(name, err)
+        ret["comment"] = "Error looking up '{0}': {1}".format(name, err)
 
     if name not in installed_pkgs:
         ret["result"] = True
-        ret["comment"] = "Package '{}' is not installed".format(name)
+        ret["comment"] = "Package '{0}' is not installed".format(name)
         return ret
 
     if __opts__["test"]:
         ret["result"] = None
-        ret["comment"] = "Package '{}' is set to be removed".format(name)
+        ret["comment"] = "Package '{0}' is set to be removed".format(name)
         return ret
 
     if __salt__["cabal.uninstall"](pkg=name, user=user, env=env):
         ret["result"] = True
         ret["changes"][name] = "Removed"
-        ret["comment"] = "Package '{}' was successfully removed".format(name)
+        ret["comment"] = "Package '{0}' was successfully removed".format(name)
     else:
         ret["result"] = False
-        ret["comment"] = "Error removing package '{}'".format(name)
+        ret["comment"] = "Error removing package '{0}'".format(name)
 
     return ret

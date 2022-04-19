@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     :codeauthor: Pedro Algarvio (pedro@algarvio.me)
 
@@ -7,7 +8,9 @@
 
     This utility allows parsing a file in chunks.
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import salt libs
 import salt.utils.files
 import salt.utils.stringutils
 from salt.exceptions import SaltException
@@ -19,7 +22,7 @@ class InvalidFileMode(SaltException):
     """
 
 
-class BufferedReader:
+class BufferedReader(object):
     """
     This object allows iterating through the contents of a file keeping
     X configurable bytes in memory which can be used to, for example,

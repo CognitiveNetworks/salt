@@ -120,20 +120,16 @@ class ConfigTestCase(TestCase):
         class SSHKeyFileSchema(schema.Schema):
             ssh_key_file = schema.StringItem(
                 title="SSH Private Key",
-                description=(
-                    "The path to an SSH private key which will be used "
-                    "to authenticate on the deployed VMs"
-                ),
+                description="The path to an SSH private key which will be used "
+                "to authenticate on the deployed VMs",
             )
 
         class SSHKeyNamesSchema(schema.Schema):
             ssh_key_names = schema.StringItem(
                 title="SSH Key Names",
-                description=(
-                    "The names of an SSH key being managed on "
-                    "DigitalOcean account which will be used to "
-                    "authenticate on the deployed VMs"
-                ),
+                description="The names of an SSH key being managed on "
+                "DigitalOcean account which will be used to "
+                "authenticate on the deployed VMs",
             )
 
         class Requirements(BaseRequirements):
@@ -142,10 +138,8 @@ class ConfigTestCase(TestCase):
 
             personal_access_token = schema.StringItem(
                 title="Personal Access Token",
-                description=(
-                    "This is the API access token which can be generated "
-                    "under the API/Application on your account"
-                ),
+                description="This is the API access token which can be generated "
+                "under the API/Application on your account",
                 required=True,
             )
 
@@ -172,26 +166,20 @@ class ConfigTestCase(TestCase):
                 },
                 "personal_access_token": {
                     "type": "string",
-                    "description": (
-                        "This is the API access token which can be "
-                        "generated under the API/Application on your account"
-                    ),
+                    "description": "This is the API access token which can be "
+                    "generated under the API/Application on your account",
                     "title": "Personal Access Token",
                 },
                 "ssh_key_file": {
                     "type": "string",
-                    "description": (
-                        "The path to an SSH private key which will "
-                        "be used to authenticate on the deployed VMs"
-                    ),
+                    "description": "The path to an SSH private key which will "
+                    "be used to authenticate on the deployed VMs",
                     "title": "SSH Private Key",
                 },
                 "ssh_key_names": {
                     "type": "string",
-                    "description": (
-                        "The names of an SSH key being managed on DigitalOcean "
-                        "account which will be used to authenticate on the deployed VMs"
-                    ),
+                    "description": "The names of an SSH key being managed on DigitalOcean "
+                    "account which will be used to authenticate on the deployed VMs",
                     "title": "SSH Key Names",
                 },
             },
@@ -213,28 +201,22 @@ class ConfigTestCase(TestCase):
 
             personal_access_token = schema.StringItem(
                 title="Personal Access Token",
-                description=(
-                    "This is the API access token which can be generated "
-                    "under the API/Application on your account"
-                ),
+                description="This is the API access token which can be generated "
+                "under the API/Application on your account",
                 required=True,
             )
 
             ssh_key_file = schema.StringItem(
                 title="SSH Private Key",
-                description=(
-                    "The path to an SSH private key which will be used "
-                    "to authenticate on the deployed VMs"
-                ),
+                description="The path to an SSH private key which will be used "
+                "to authenticate on the deployed VMs",
             )
 
             ssh_key_names = schema.StringItem(
                 title="SSH Key Names",
-                description=(
-                    "The names of an SSH key being managed on "
-                    "DigitalOcean account which will be used to "
-                    "authenticate on the deployed VMs"
-                ),
+                description="The names of an SSH key being managed on "
+                "DigitalOcean account which will be used to "
+                "authenticate on the deployed VMs",
             )
 
             requirements_definition = schema.AnyOfItem(
@@ -258,26 +240,20 @@ class ConfigTestCase(TestCase):
                 },
                 "personal_access_token": {
                     "type": "string",
-                    "description": (
-                        "This is the API access token which can be "
-                        "generated under the API/Application on your account"
-                    ),
+                    "description": "This is the API access token which can be "
+                    "generated under the API/Application on your account",
                     "title": "Personal Access Token",
                 },
                 "ssh_key_file": {
                     "type": "string",
-                    "description": (
-                        "The path to an SSH private key which will "
-                        "be used to authenticate on the deployed VMs"
-                    ),
+                    "description": "The path to an SSH private key which will "
+                    "be used to authenticate on the deployed VMs",
                     "title": "SSH Private Key",
                 },
                 "ssh_key_names": {
                     "type": "string",
-                    "description": (
-                        "The names of an SSH key being managed on DigitalOcean "
-                        "account which will be used to authenticate on the deployed VMs"
-                    ),
+                    "description": "The names of an SSH key being managed on DigitalOcean "
+                    "account which will be used to authenticate on the deployed VMs",
                     "title": "SSH Key Names",
                 },
             },
@@ -313,26 +289,20 @@ class ConfigTestCase(TestCase):
                 },
                 "personal_access_token": {
                     "type": "string",
-                    "description": (
-                        "This is the API access token which can be "
-                        "generated under the API/Application on your account"
-                    ),
+                    "description": "This is the API access token which can be "
+                    "generated under the API/Application on your account",
                     "title": "Personal Access Token",
                 },
                 "ssh_key_file": {
                     "type": "string",
-                    "description": (
-                        "The path to an SSH private key which will "
-                        "be used to authenticate on the deployed VMs"
-                    ),
+                    "description": "The path to an SSH private key which will "
+                    "be used to authenticate on the deployed VMs",
                     "title": "SSH Private Key",
                 },
                 "ssh_key_names": {
                     "type": "string",
-                    "description": (
-                        "The names of an SSH key being managed on DigitalOcean "
-                        "account which will be used to authenticate on the deployed VMs"
-                    ),
+                    "description": "The names of an SSH key being managed on DigitalOcean "
+                    "account which will be used to authenticate on the deployed VMs",
                     "title": "SSH Key Names",
                 },
             },
@@ -356,19 +326,15 @@ class ConfigTestCase(TestCase):
 
             ssh_key_file_2 = schema.StringItem(
                 title="SSH Private Key",
-                description=(
-                    "The path to an SSH private key which will be used "
-                    "to authenticate on the deployed VMs"
-                ),
+                description="The path to an SSH private key which will be used "
+                "to authenticate on the deployed VMs",
             )
 
             ssh_key_names_2 = schema.StringItem(
                 title="SSH Key Names",
-                description=(
-                    "The names of an SSH key being managed on "
-                    "DigitalOcean account which will be used to "
-                    "authenticate on the deployed VMs"
-                ),
+                description="The names of an SSH key being managed on "
+                "DigitalOcean account which will be used to "
+                "authenticate on the deployed VMs",
             )
 
             requirements_definition_2 = schema.AnyOfItem(
@@ -392,42 +358,32 @@ class ConfigTestCase(TestCase):
                 },
                 "personal_access_token": {
                     "type": "string",
-                    "description": (
-                        "This is the API access token which can be "
-                        "generated under the API/Application on your account"
-                    ),
+                    "description": "This is the API access token which can be "
+                    "generated under the API/Application on your account",
                     "title": "Personal Access Token",
                 },
                 "ssh_key_file": {
                     "type": "string",
-                    "description": (
-                        "The path to an SSH private key which will "
-                        "be used to authenticate on the deployed VMs"
-                    ),
+                    "description": "The path to an SSH private key which will "
+                    "be used to authenticate on the deployed VMs",
                     "title": "SSH Private Key",
                 },
                 "ssh_key_names": {
                     "type": "string",
-                    "description": (
-                        "The names of an SSH key being managed on DigitalOcean "
-                        "account which will be used to authenticate on the deployed VMs"
-                    ),
+                    "description": "The names of an SSH key being managed on DigitalOcean "
+                    "account which will be used to authenticate on the deployed VMs",
                     "title": "SSH Key Names",
                 },
                 "ssh_key_file_2": {
                     "type": "string",
-                    "description": (
-                        "The path to an SSH private key which will "
-                        "be used to authenticate on the deployed VMs"
-                    ),
+                    "description": "The path to an SSH private key which will "
+                    "be used to authenticate on the deployed VMs",
                     "title": "SSH Private Key",
                 },
                 "ssh_key_names_2": {
                     "type": "string",
-                    "description": (
-                        "The names of an SSH key being managed on DigitalOcean "
-                        "account which will be used to authenticate on the deployed VMs"
-                    ),
+                    "description": "The names of an SSH key being managed on DigitalOcean "
+                    "account which will be used to authenticate on the deployed VMs",
                     "title": "SSH Key Names",
                 },
             },
@@ -458,20 +414,16 @@ class ConfigTestCase(TestCase):
         class SSHKeyFileSchema(schema.Schema):
             ssh_key_file = schema.StringItem(
                 title="SSH Private Key",
-                description=(
-                    "The path to an SSH private key which will be used "
-                    "to authenticate on the deployed VMs"
-                ),
+                description="The path to an SSH private key which will be used "
+                "to authenticate on the deployed VMs",
             )
 
         class SSHKeyNamesSchema(schema.Schema):
             ssh_key_names = schema.StringItem(
                 title="SSH Key Names",
-                description=(
-                    "The names of an SSH key being managed on  "
-                    "Digial Ocean account which will be used to "
-                    "authenticate on the deployed VMs"
-                ),
+                description="The names of an SSH key being managed on  "
+                "Digial Ocean account which will be used to "
+                "authenticate on the deployed VMs",
             )
 
         class Requirements(BaseRequirements):
@@ -480,10 +432,8 @@ class ConfigTestCase(TestCase):
 
             personal_access_token = schema.StringItem(
                 title="Personal Access Token",
-                description=(
-                    "This is the API access token which can be generated "
-                    "under the API/Application on your account"
-                ),
+                description="This is the API access token which can be generated "
+                "under the API/Application on your account",
                 required=True,
             )
 
@@ -2158,9 +2108,7 @@ class ConfigTestCase(TestCase):
             "type": "object",
             "properties": {
                 "another_name": {
-                    "id": (
-                        "https://non-existing.saltstack.com/schemas/another_name.json#"
-                    ),
+                    "id": "https://non-existing.saltstack.com/schemas/another_name.json#",
                     "type": "object",
                     "properties": {
                         "item": {
@@ -2222,7 +2170,7 @@ class TestComplexComplexDefinitionsSchema(schema.DefinitionsSchema):
 
 
 class ComplexSchemaTestCase(TestCase):
-    """Test cases with definition schemas containing complex items"""
+    """ Test cases with definition schemas containing complex items"""
 
     obj = ComplexSchemaItem()
     complex_obj = ComplexComplexSchemaItem()

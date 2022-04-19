@@ -6,8 +6,6 @@ Requires the python-telegram-bot library
 """
 import logging
 
-import salt.utils.beacons
-
 try:
     import telegram
 
@@ -34,23 +32,26 @@ def validate(config):
     Validate the beacon configuration
     """
     if not isinstance(config, list):
-        return False, "Configuration for telegram_bot_msg beacon must be a list."
+        return False, ("Configuration for telegram_bot_msg beacon must be a list.")
 
-    config = salt.utils.beacons.list_to_dict(config)
+    _config = {}
+    list(map(_config.update, config))
 
     if not all(
-        config.get(required_config) for required_config in ["token", "accept_from"]
+        _config.get(required_config) for required_config in ["token", "accept_from"]
     ):
         return (
             False,
-            "Not all required configuration for telegram_bot_msg are set.",
+            ("Not all required configuration for telegram_bot_msg are set."),
         )
 
-    if not isinstance(config.get("accept_from"), list):
+    if not isinstance(_config.get("accept_from"), list):
         return (
             False,
-            "Configuration for telegram_bot_msg, "
-            "accept_from must be a list of usernames.",
+            (
+                "Configuration for telegram_bot_msg, "
+                "accept_from must be a list of usernames."
+            ),
         )
 
     return True, "Valid beacon configuration."
@@ -72,15 +73,16 @@ def beacon(config):
 
     """
 
-    config = salt.utils.beacons.list_to_dict(config)
+    _config = {}
+    list(map(_config.update, config))
 
     log.debug("telegram_bot_msg beacon starting")
     ret = []
     output = {}
     output["msgs"] = []
 
-    bot = telegram.Bot(config["token"])
-    updates = bot.get_updates(limit=100, timeout=0)
+    bot = telegram.Bot(_config["token"])
+    updates = bot.get_updates(limit=100, timeout=0, network_delay=10)
 
     log.debug("Num updates: %d", len(updates))
     if not updates:
@@ -94,7 +96,7 @@ def beacon(config):
         if update.update_id > latest_update_id:
             latest_update_id = update.update_id
 
-        if message.chat.username in config["accept_from"]:
+        if message.chat.username in _config["accept_from"]:
             output["msgs"].append(message.to_dict())
 
     # mark in the server that previous messages are processed

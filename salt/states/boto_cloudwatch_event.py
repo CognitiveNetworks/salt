@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Manage CloudTrail Objects
 =========================
@@ -51,11 +52,17 @@ config:
 
 """
 
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 import os
 
+# Import Salt libs
 import salt.utils.json
+
+# Import 3rd-party libs
+from salt.ext import six
 
 log = logging.getLogger(__name__)
 
@@ -130,7 +137,7 @@ def present(
 
     Name = Name if Name else name
 
-    if isinstance(Targets, str):
+    if isinstance(Targets, six.string_types):
         Targets = salt.utils.json.loads(Targets)
     if Targets is None:
         Targets = []
@@ -141,14 +148,14 @@ def present(
 
     if "error" in r:
         ret["result"] = False
-        ret["comment"] = "Failed to create event rule: {}.".format(
+        ret["comment"] = "Failed to create event rule: {0}.".format(
             r["error"]["message"]
         )
         return ret
 
     if not r.get("exists"):
         if __opts__["test"]:
-            ret["comment"] = "CloudWatch event rule {} is set to be created.".format(
+            ret["comment"] = "CloudWatch event rule {0} is set to be created.".format(
                 Name
             )
             ret["result"] = None
@@ -167,7 +174,7 @@ def present(
         )
         if not r.get("created"):
             ret["result"] = False
-            ret["comment"] = "Failed to create event rule: {}.".format(
+            ret["comment"] = "Failed to create event rule: {0}.".format(
                 r["error"]["message"]
             )
             return ret
@@ -176,14 +183,14 @@ def present(
         )
         if "error" in _describe:
             ret["result"] = False
-            ret["comment"] = "Failed to create event rule: {}.".format(
+            ret["comment"] = "Failed to create event rule: {0}.".format(
                 _describe["error"]["message"]
             )
             ret["changes"] = {}
             return ret
         ret["changes"]["old"] = {"rule": None}
         ret["changes"]["new"] = _describe
-        ret["comment"] = "CloudTrail {} created.".format(Name)
+        ret["comment"] = "CloudTrail {0} created.".format(Name)
 
         if bool(Targets):
             r = __salt__["boto_cloudwatch_event.put_targets"](
@@ -196,7 +203,7 @@ def present(
             )
             if "error" in r:
                 ret["result"] = False
-                ret["comment"] = "Failed to create event rule: {}.".format(
+                ret["comment"] = "Failed to create event rule: {0}.".format(
                     r["error"]["message"]
                 )
                 ret["changes"] = {}
@@ -205,7 +212,7 @@ def present(
         return ret
 
     ret["comment"] = os.linesep.join(
-        [ret["comment"], "CloudWatch event rule {} is present.".format(Name)]
+        [ret["comment"], "CloudWatch event rule {0} is present.".format(Name)]
     )
     ret["changes"] = {}
     # trail exists, ensure config matches
@@ -214,7 +221,7 @@ def present(
     )
     if "error" in _describe:
         ret["result"] = False
-        ret["comment"] = "Failed to update event rule: {}.".format(
+        ret["comment"] = "Failed to update event rule: {0}.".format(
             _describe["error"]["message"]
         )
         ret["changes"] = {}
@@ -226,7 +233,7 @@ def present(
     )
     if "error" in r:
         ret["result"] = False
-        ret["comment"] = "Failed to update event rule: {}.".format(
+        ret["comment"] = "Failed to update event rule: {0}.".format(
             r["error"]["message"]
         )
         ret["changes"] = {}
@@ -242,7 +249,7 @@ def present(
         "State": "State",
         "Targets": "Targets",
     }
-    for invar, outvar in rule_vars.items():
+    for invar, outvar in six.iteritems(rule_vars):
         if _describe[outvar] != locals()[invar]:
             need_update = True
             ret["changes"].setdefault("new", {})[invar] = locals()[invar]
@@ -250,7 +257,7 @@ def present(
 
     if need_update:
         if __opts__["test"]:
-            msg = "CloudWatch event rule {} set to be modified.".format(Name)
+            msg = "CloudWatch event rule {0} set to be modified.".format(Name)
             ret["comment"] = msg
             ret["result"] = None
             return ret
@@ -272,7 +279,7 @@ def present(
         )
         if not r.get("created"):
             ret["result"] = False
-            ret["comment"] = "Failed to update event rule: {}.".format(
+            ret["comment"] = "Failed to update event rule: {0}.".format(
                 r["error"]["message"]
             )
             ret["changes"] = {}
@@ -297,7 +304,7 @@ def present(
                 )
                 if "error" in r:
                     ret["result"] = False
-                    ret["comment"] = "Failed to update event rule: {}.".format(
+                    ret["comment"] = "Failed to update event rule: {0}.".format(
                         r["error"]["message"]
                     )
                     ret["changes"] = {}
@@ -313,7 +320,7 @@ def present(
                 )
                 if "error" in r:
                     ret["result"] = False
-                    ret["comment"] = "Failed to update event rule: {}.".format(
+                    ret["comment"] = "Failed to update event rule: {0}.".format(
                         r["error"]["message"]
                     )
                     ret["changes"] = {}
@@ -355,17 +362,17 @@ def absent(name, Name=None, region=None, key=None, keyid=None, profile=None):
     )
     if "error" in r:
         ret["result"] = False
-        ret["comment"] = "Failed to delete event rule: {}.".format(
+        ret["comment"] = "Failed to delete event rule: {0}.".format(
             r["error"]["message"]
         )
         return ret
 
     if r and not r["exists"]:
-        ret["comment"] = "CloudWatch event rule {} does not exist.".format(Name)
+        ret["comment"] = "CloudWatch event rule {0} does not exist.".format(Name)
         return ret
 
     if __opts__["test"]:
-        ret["comment"] = "CloudWatch event rule {} is set to be removed.".format(Name)
+        ret["comment"] = "CloudWatch event rule {0} is set to be removed.".format(Name)
         ret["result"] = None
         return ret
 
@@ -375,7 +382,7 @@ def absent(name, Name=None, region=None, key=None, keyid=None, profile=None):
     )
     if not r.get("targets"):
         ret["result"] = False
-        ret["comment"] = "Failed to delete event rule: {}.".format(
+        ret["comment"] = "Failed to delete event rule: {0}.".format(
             r["error"]["message"]
         )
         return ret
@@ -386,13 +393,13 @@ def absent(name, Name=None, region=None, key=None, keyid=None, profile=None):
         )
         if "error" in r:
             ret["result"] = False
-            ret["comment"] = "Failed to delete event rule: {}.".format(
+            ret["comment"] = "Failed to delete event rule: {0}.".format(
                 r["error"]["message"]
             )
             return ret
         if r.get("failures"):
             ret["result"] = False
-            ret["comment"] = "Failed to delete event rule: {}.".format(r["failures"])
+            ret["comment"] = "Failed to delete event rule: {0}.".format(r["failures"])
             return ret
 
     r = __salt__["boto_cloudwatch_event.delete"](
@@ -400,11 +407,11 @@ def absent(name, Name=None, region=None, key=None, keyid=None, profile=None):
     )
     if not r["deleted"]:
         ret["result"] = False
-        ret["comment"] = "Failed to delete event rule: {}.".format(
+        ret["comment"] = "Failed to delete event rule: {0}.".format(
             r["error"]["message"]
         )
         return ret
     ret["changes"]["old"] = {"rule": Name}
     ret["changes"]["new"] = {"rule": None}
-    ret["comment"] = "CloudWatch event rule {} deleted.".format(Name)
+    ret["comment"] = "CloudWatch event rule {0} deleted.".format(Name)
     return ret

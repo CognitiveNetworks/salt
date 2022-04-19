@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Connection module for Amazon S3 using boto3
 
@@ -49,9 +50,12 @@ Connection module for Amazon S3 using boto3
 # keep lint from choking on _get_conn and _cache_id
 # pylint: disable=E0602
 
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 
+# Import Salt libs
 import salt.utils.versions
 
 log = logging.getLogger(__name__)
@@ -85,12 +89,7 @@ def __init__(opts):  # pylint: disable=unused-argument
 
 
 def get_object_metadata(
-    name,
-    extra_args=None,
-    region=None,
-    key=None,
-    keyid=None,
-    profile=None,
+    name, extra_args=None, region=None, key=None, keyid=None, profile=None,
 ):
     """
     Get metadata about an S3 object.
@@ -126,13 +125,7 @@ def get_object_metadata(
 
 
 def upload_file(
-    source,
-    name,
-    extra_args=None,
-    region=None,
-    key=None,
-    keyid=None,
-    profile=None,
+    source, name, extra_args=None, region=None, key=None, keyid=None, profile=None,
 ):
     """
     Upload a local file as an S3 object.

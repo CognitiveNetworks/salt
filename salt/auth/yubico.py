@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """
 Provide authentication using YubiKey.
 
@@ -36,6 +38,8 @@ the API key will be updated on all the YubiCloud servers.
 
 """
 
+# Import Python Libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 

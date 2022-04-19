@@ -1,12 +1,18 @@
+# -*- coding: utf-8 -*-
 """
 Run munin plugins/checks from salt and format the output as data.
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import python libs
 import os
 import stat
 
 import salt.utils.files
 import salt.utils.stringutils
+
+# Import salt libs
+from salt.ext import six
 
 PLUGINDIR = "/etc/munin/plugins/"
 
@@ -41,7 +47,7 @@ def run(plugins):
     """
     all_plugins = list_plugins()
 
-    if isinstance(plugins, str):
+    if isinstance(plugins, six.string_types):
         plugins = plugins.split(",")
 
     data = {}
@@ -50,7 +56,7 @@ def run(plugins):
             continue
         data[plugin] = {}
         muninout = __salt__["cmd.run"](
-            "munin-run {}".format(plugin), python_shell=False
+            "munin-run {0}".format(plugin), python_shell=False
         )
         for line in muninout.split("\n"):
             if "value" in line:  # This skips multigraph lines, etc

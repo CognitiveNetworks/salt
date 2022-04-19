@@ -19,6 +19,7 @@ In the minion configuration file, the following block is required:
 """
 
 
+# import python std lib
 import logging
 
 # import third party

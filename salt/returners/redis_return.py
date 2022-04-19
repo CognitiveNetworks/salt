@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Return data to a redis server
 
@@ -76,7 +77,7 @@ cluster.startup_nodes:
 
     .. code-block:: yaml
 
-        redis.cluster.startup_nodes
+        cache.redis.cluster.startup_nodes
           - host: redis-member-1
             port: 6379
           - host: redis-member-2
@@ -92,13 +93,19 @@ cluster.skip_full_coverage_check: ``False``
 
 
 """
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 
+# Import Salt libs
 import salt.returners
 import salt.utils.jid
 import salt.utils.json
 import salt.utils.platform
+
+# Import 3rd-party libs
+from salt.ext import six
 
 try:
     import redis
@@ -211,9 +218,9 @@ def returner(ret):
     serv = _get_serv(ret)
     pipeline = serv.pipeline(transaction=False)
     minion, jid = ret["id"], ret["jid"]
-    pipeline.hset("ret:{}".format(jid), minion, salt.utils.json.dumps(ret))
-    pipeline.expire("ret:{}".format(jid), _get_ttl())
-    pipeline.set("{}:{}".format(minion, ret["fun"]), jid)
+    pipeline.hset("ret:{0}".format(jid), minion, salt.utils.json.dumps(ret))
+    pipeline.expire("ret:{0}".format(jid), _get_ttl())
+    pipeline.set("{0}:{1}".format(minion, ret["fun"]), jid)
     pipeline.sadd("minions", minion)
     pipeline.execute()
 
@@ -223,7 +230,7 @@ def save_load(jid, load, minions=None):
     Save the load to the specified jid
     """
     serv = _get_serv(ret=None)
-    serv.setex("load:{}".format(jid), _get_ttl(), salt.utils.json.dumps(load))
+    serv.setex("load:{0}".format(jid), _get_ttl(), salt.utils.json.dumps(load))
 
 
 def save_minions(jid, minions, syndic_id=None):  # pylint: disable=unused-argument
@@ -237,7 +244,7 @@ def get_load(jid):
     Return the load data that marks a specified jid
     """
     serv = _get_serv(ret=None)
-    data = serv.get("load:{}".format(jid))
+    data = serv.get("load:{0}".format(jid))
     if data:
         return salt.utils.json.loads(data)
     return {}
@@ -249,7 +256,7 @@ def get_jid(jid):
     """
     serv = _get_serv(ret=None)
     ret = {}
-    for minion, data in serv.hgetall("ret:{}".format(jid)).items():
+    for minion, data in six.iteritems(serv.hgetall("ret:{0}".format(jid))):
         if data:
             ret[minion] = salt.utils.json.loads(data)
     return ret
@@ -262,14 +269,14 @@ def get_fun(fun):
     serv = _get_serv(ret=None)
     ret = {}
     for minion in serv.smembers("minions"):
-        ind_str = "{}:{}".format(minion, fun)
+        ind_str = "{0}:{1}".format(minion, fun)
         try:
             jid = serv.get(ind_str)
         except Exception:  # pylint: disable=broad-except
             continue
         if not jid:
             continue
-        data = serv.get("{}:{}".format(minion, jid))
+        data = serv.get("{0}:{1}".format(minion, jid))
         if data:
             ret[minion] = salt.utils.json.loads(data)
     return ret

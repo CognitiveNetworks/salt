@@ -20,8 +20,7 @@ def message_client_pool():
         0,  # port
     )
     with patch(
-        "salt.transport.tcp.SaltMessageClient.__init__",
-        MagicMock(return_value=None),
+        "salt.transport.tcp.SaltMessageClient.__init__", MagicMock(return_value=None),
     ):
         message_client_pool = salt.transport.tcp.SaltMessageClientPool(
             opts, args=message_client_args

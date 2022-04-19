@@ -1,13 +1,20 @@
+# -*- coding: utf-8 -*-
+
+# Import python libs
+from __future__ import absolute_import
+
 import logging
 
 from salt.transport import MessageClientPool
+
+# Import Salt Testing libs
 from tests.support.unit import TestCase
 
 log = logging.getLogger(__name__)
 
 
 class MessageClientPoolTest(TestCase):
-    class MockClass:
+    class MockClass(object):
         def __init__(self, *args, **kwargs):
             self.args = args
             self.kwargs = kwargs

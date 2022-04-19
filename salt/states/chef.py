@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Execute Chef client runs
 =====================================================================
@@ -18,7 +19,9 @@ Run chef-client or chef-solo
       chef.solo:
         - environment: dev
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import python libs
 import re
 
 

@@ -1,11 +1,15 @@
+# -*- coding: utf-8 -*-
 """
 Common functions for managing mounts
 """
 
+# Import python libs
+from __future__ import absolute_import, unicode_literals
 
 import logging
 import os
 
+# Import Salt libs
 import salt.utils.files
 import salt.utils.stringutils
 import salt.utils.versions
@@ -21,7 +25,7 @@ def _read_file(path):
     try:
         with salt.utils.files.fopen(path, "rb") as contents:
             return salt.utils.yaml.safe_load(contents)
-    except OSError:
+    except (OSError, IOError):
         return {}
 
 
@@ -51,6 +55,6 @@ def write_cache(cache, opts):
         with salt.utils.files.fopen(cache_file, "wb+") as fp_:
             fp_.write(_cache)
         return True
-    except OSError:
+    except (IOError, OSError):
         log.error("Failed to cache mounts", exc_info_on_loglevel=logging.DEBUG)
         return False

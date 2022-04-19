@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     salt.utils.yamldumper
     ~~~~~~~~~~~~~~~~~~~~~
@@ -6,6 +7,7 @@
 # pylint: disable=W0232
 #         class has no __init__ method
 
+from __future__ import absolute_import, print_function, unicode_literals
 
 import collections
 
@@ -39,7 +41,7 @@ class IndentMixin(Dumper):
     """
 
     def increase_indent(self, flow=False, indentless=False):
-        return super().increase_indent(flow, False)
+        return super(IndentMixin, self).increase_indent(flow, False)
 
 
 class OrderedDumper(Dumper):

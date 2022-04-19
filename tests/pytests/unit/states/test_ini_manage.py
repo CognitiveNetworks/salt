@@ -60,10 +60,8 @@ def test_options_present_true_no_file(tmpdir, sections):
         "name": name,
         "changes": {},
         "result": None,
-        "comment": (
-            "Changed key hostname in section general.\n"
-            "Changed key port in section general.\n"
-        ),
+        "comment": "Changed key hostname in section general.\n"
+        "Changed key port in section general.\n",
     }
     with patch.dict(ini_manage.__opts__, {"test": True}), patch.dict(
         mod_ini_manage.__opts__, {"test": True}
@@ -84,11 +82,9 @@ def test_options_present_true_file(tmpdir, sections):
         "name": name,
         "changes": {},
         "result": None,
-        "comment": (
-            "Unchanged key hostname in section general.\n"
-            "Unchanged key port in section general.\n"
-            "Changed key user in section general.\n"
-        ),
+        "comment": "Unchanged key hostname in section general.\n"
+        "Unchanged key port in section general.\n"
+        "Changed key user in section general.\n",
     }
 
     ini_manage.options_present(name, sections)

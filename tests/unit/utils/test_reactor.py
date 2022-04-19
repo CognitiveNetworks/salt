@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+from __future__ import absolute_import, print_function, unicode_literals
+
 import codecs
 import glob
 import logging
@@ -449,9 +453,7 @@ class TestReactor(TestCase, AdaptedConfigurationTestCaseMixin):
                                     MagicMock(return_value=self.render_pipe),
                                 ):
                                     reactions = self.reactor.reactions(
-                                        tag,
-                                        REACTOR_DATA[rtype],
-                                        reactors,
+                                        tag, REACTOR_DATA[rtype], reactors,
                                     )
                                     log.debug(
                                         "test_reactions: %s reactions: %s",

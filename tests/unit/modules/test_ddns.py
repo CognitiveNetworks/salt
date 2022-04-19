@@ -1,11 +1,18 @@
+# -*- coding: utf-8 -*-
 """
     :codeauthor: Rupesh Tare <rupesht@saltstack.com>
 """
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import textwrap
 
 import salt.modules.ddns as ddns
+
+# Import Salt Libs
 import salt.utils.json
+
+# Import Salt Testing Libs
 from tests.support.mixins import LoaderModuleMockMixin
 from tests.support.mock import MagicMock, mock_open, patch
 from tests.support.unit import TestCase, skipIf
@@ -68,12 +75,12 @@ class DDNSTestCase(TestCase, LoaderModuleMockMixin):
         )
         mock_rdtype = 28  # rdtype of AAAA record
 
-        class MockRrset:
+        class MockRrset(object):
             def __init__(self):
                 self.items = [{"address": "localhost"}]
                 self.ttl = 2
 
-        class MockAnswer:
+        class MockAnswer(object):
             def __init__(self, *args, **kwargs):
                 self.answer = [MockRrset()]
 
@@ -102,7 +109,7 @@ class DDNSTestCase(TestCase, LoaderModuleMockMixin):
         """
         file_data = salt.utils.json.dumps({"A": "B"})
 
-        class MockAnswer:
+        class MockAnswer(object):
             def __init__(self, *args, **kwargs):
                 self.answer = [{"address": "localhost"}]
 

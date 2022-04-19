@@ -8,8 +8,6 @@ Beacon to monitor swap usage.
 import logging
 import re
 
-import salt.utils.beacons
-
 try:
     import psutil
 
@@ -35,12 +33,14 @@ def validate(config):
     """
     # Configuration for swapusage beacon should be a list of dicts
     if not isinstance(config, list):
-        return False, "Configuration for swapusage beacon must be a list."
+        return False, ("Configuration for swapusage beacon must be a list.")
     else:
-        config = salt.utils.beacons.list_to_dict(config)
+        _config = {}
+        list(map(_config.update, config))
 
-        if "percent" not in config:
-            return False, "Configuration for swapusage beacon requires percent."
+        if "percent" not in _config:
+            return False, ("Configuration for swapusage beacon requires percent.")
+
     return True, "Valid beacon configuration"
 
 
@@ -59,13 +59,14 @@ def beacon(config):
     """
     ret = []
 
-    config = salt.utils.beacons.list_to_dict(config)
+    _config = {}
+    list(map(_config.update, config))
 
     _current_usage = psutil.swap_memory()
 
     current_usage = _current_usage.percent
-    monitor_usage = config["percent"]
-    if isinstance(monitor_usage, str) and "%" in monitor_usage:
+    monitor_usage = _config["percent"]
+    if "%" in monitor_usage:
         monitor_usage = re.sub("%", "", monitor_usage)
     monitor_usage = float(monitor_usage)
     if current_usage >= monitor_usage:

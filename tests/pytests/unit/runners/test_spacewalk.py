@@ -11,9 +11,7 @@ def test_api_command_must_have_namespace():
     with patch.object(spacewalk, "_get_session", _get_session_mock):
         result = spacewalk.api("mocked.server", "badMethod")
         assert result == {
-            "badMethod ()": (
-                "Error: command must use the following format: 'namespace.method'"
-            )
+            "badMethod ()": "Error: command must use the following format: 'namespace.method'"
         }
 
 

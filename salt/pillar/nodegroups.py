@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Nodegroups Pillar
 =================
@@ -34,7 +35,12 @@ Configuring Nodegroups Pillar
 """
 
 # Import futures
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import 3rd-party libs
+from salt.ext import six
+
+# Import Salt libs
 from salt.utils.minions import CkMinions
 
 __version__ = "0.0.2"
@@ -54,7 +60,7 @@ def ext_pillar(minion_id, pillar, pillar_name=None):
     all_nodegroups = __opts__["nodegroups"]
     nodegroups_minion_is_in = []
     ckminions = None
-    for nodegroup_name in all_nodegroups.keys():
+    for nodegroup_name in six.iterkeys(all_nodegroups):
         ckminions = ckminions or CkMinions(__opts__)
         _res = ckminions.check_minions(all_nodegroups[nodegroup_name], "compound")
         match = _res["minions"]

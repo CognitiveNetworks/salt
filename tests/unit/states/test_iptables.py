@@ -1,9 +1,15 @@
+# -*- coding: utf-8 -*-
 """
     :codeauthor: Rahul Handay <rahulha@saltstack.com>
 """
 
+# Import Python Libs
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import Salt Libs
 import salt.states.iptables as iptables
+
+# Import Salt Testing Libs
 from tests.support.mixins import LoaderModuleMockMixin
 from tests.support.mock import MagicMock, patch
 from tests.support.unit import TestCase
@@ -11,7 +17,7 @@ from tests.support.unit import TestCase
 
 class IptablesTestCase(TestCase, LoaderModuleMockMixin):
     """
-    Validate the iptables state
+        Validate the iptables state
     """
 
     def setup_loader_modules(self):
@@ -19,7 +25,7 @@ class IptablesTestCase(TestCase, LoaderModuleMockMixin):
 
     def test_chain_present(self):
         """
-        Test to verify the chain is exist.
+            Test to verify the chain is exist.
         """
         ret = {"name": "salt", "changes": {}, "result": True, "comment": ""}
 
@@ -27,9 +33,8 @@ class IptablesTestCase(TestCase, LoaderModuleMockMixin):
         with patch.dict(iptables.__salt__, {"iptables.check_chain": mock}):
             ret.update(
                 {
-                    "comment": (
-                        "iptables salt chain is already exist in filter table for ipv4"
-                    )
+                    "comment": "iptables salt chain is already"
+                    " exist in filter table for ipv4"
                 }
             )
             self.assertDictEqual(iptables.chain_present("salt"), ret)
@@ -37,10 +42,8 @@ class IptablesTestCase(TestCase, LoaderModuleMockMixin):
             with patch.dict(iptables.__opts__, {"test": True}):
                 ret.update(
                     {
-                        "comment": (
-                            "iptables salt chain in filter"
-                            " table needs to be set for ipv4"
-                        ),
+                        "comment": "iptables salt chain in filter"
+                        " table needs to be set for ipv4",
                         "result": None,
                     }
                 )
@@ -52,10 +55,8 @@ class IptablesTestCase(TestCase, LoaderModuleMockMixin):
                     ret.update(
                         {
                             "result": True,
-                            "comment": (
-                                "iptables salt chain in filter"
-                                " table create success for ipv4"
-                            ),
+                            "comment": "iptables salt chain in filter"
+                            " table create success for ipv4",
                             "changes": {"locale": "salt"},
                         }
                     )
@@ -65,16 +66,15 @@ class IptablesTestCase(TestCase, LoaderModuleMockMixin):
                         {
                             "changes": {},
                             "result": False,
-                            "comment": (
-                                "Failed to create salt chain in filter table:  for ipv4"
-                            ),
+                            "comment": "Failed to create salt chain"
+                            " in filter table:  for ipv4",
                         }
                     )
                     self.assertDictEqual(iptables.chain_present("salt"), ret)
 
     def test_chain_absent(self):
         """
-        Test to verify the chain is absent.
+            Test to verify the chain is absent.
         """
         ret = {"name": "salt", "changes": {}, "result": True, "comment": ""}
 
@@ -82,9 +82,8 @@ class IptablesTestCase(TestCase, LoaderModuleMockMixin):
         with patch.dict(iptables.__salt__, {"iptables.check_chain": mock}):
             ret.update(
                 {
-                    "comment": (
-                        "iptables salt chain is already absent in filter table for ipv4"
-                    )
+                    "comment": "iptables salt chain is already"
+                    " absent in filter table for ipv4"
                 }
             )
             self.assertDictEqual(iptables.chain_absent("salt"), ret)
@@ -92,10 +91,8 @@ class IptablesTestCase(TestCase, LoaderModuleMockMixin):
             with patch.dict(iptables.__opts__, {"test": True}):
                 ret.update(
                     {
-                        "comment": (
-                            "iptables salt chain in filter"
-                            " table needs to be removed ipv4"
-                        ),
+                        "comment": "iptables salt chain in filter"
+                        " table needs to be removed ipv4",
                         "result": None,
                     }
                 )
@@ -109,10 +106,8 @@ class IptablesTestCase(TestCase, LoaderModuleMockMixin):
                         ret.update(
                             {
                                 "changes": {"locale": "salt"},
-                                "comment": (
-                                    "iptables salt chain in filter"
-                                    " table delete success for ipv4"
-                                ),
+                                "comment": "iptables salt chain in filter"
+                                " table delete success for ipv4",
                                 "result": True,
                             }
                         )
@@ -122,16 +117,15 @@ class IptablesTestCase(TestCase, LoaderModuleMockMixin):
                         {
                             "changes": {},
                             "result": False,
-                            "comment": (
-                                "Failed to flush salt chain in filter table: a for ipv4"
-                            ),
+                            "comment": "Failed to flush salt chain"
+                            " in filter table: a for ipv4",
                         }
                     )
                     self.assertDictEqual(iptables.chain_absent("salt"), ret)
 
     def test_append(self):
         """
-        Test to append a rule to a chain
+            Test to append a rule to a chain
         """
         ret = {"name": "salt", "changes": {}, "result": None, "comment": ""}
 
@@ -141,13 +135,12 @@ class IptablesTestCase(TestCase, LoaderModuleMockMixin):
         with patch.object(iptables, "_STATE_INTERNAL_KEYWORDS", mock):
             mock = MagicMock(return_value="a")
             with patch.dict(iptables.__salt__, {"iptables.build_rule": mock}):
-                mock = MagicMock(side_effect=[True, False, False, False, False, True])
+                mock = MagicMock(side_effect=[True, False, False, False])
                 with patch.dict(iptables.__salt__, {"iptables.check": mock}):
                     ret.update(
                         {
-                            "comment": (
-                                "iptables rule for salt already set (a) for ipv4"
-                            ),
+                            "comment": "iptables rule for salt"
+                            " already set (a) for ipv4",
                             "result": True,
                         }
                     )
@@ -159,10 +152,8 @@ class IptablesTestCase(TestCase, LoaderModuleMockMixin):
                         ret.update(
                             {
                                 "result": None,
-                                "comment": (
-                                    "iptables rule for salt"
-                                    " needs to be set (a) for ipv4"
-                                ),
+                                "comment": "iptables rule for salt"
+                                " needs to be set (a) for ipv4",
                             }
                         )
                         self.assertDictEqual(
@@ -170,15 +161,14 @@ class IptablesTestCase(TestCase, LoaderModuleMockMixin):
                         )
 
                     with patch.dict(iptables.__opts__, {"test": False}):
-                        mock = MagicMock(side_effect=[True, False, True, True])
+                        mock = MagicMock(side_effect=[True, False])
                         with patch.dict(iptables.__salt__, {"iptables.append": mock}):
                             ret.update(
                                 {
                                     "changes": {"locale": "salt"},
                                     "result": True,
-                                    "comment": (
-                                        "Set iptables rule for salt to: a for ipv4"
-                                    ),
+                                    "comment": "Set iptables rule"
+                                    " for salt to: a for ipv4",
                                 }
                             )
                             self.assertDictEqual(
@@ -189,79 +179,18 @@ class IptablesTestCase(TestCase, LoaderModuleMockMixin):
                                 {
                                     "changes": {},
                                     "result": False,
-                                    "comment": (
-                                        "Failed to set iptables"
-                                        " rule for salt.\nAttempted rule was"
-                                        " a for ipv4"
-                                    ),
+                                    "comment": "Failed to set iptables"
+                                    " rule for salt.\nAttempted rule was"
+                                    " a for ipv4",
                                 }
                             )
                             self.assertDictEqual(
                                 iptables.append("salt", table="", chain=""), ret
                             )
 
-                            mock_save = MagicMock(
-                                side_effect=['Wrote 1 lines to "/tmp/iptables"', ""]
-                            )
-                            with patch.dict(
-                                iptables.__salt__, {"iptables.save": mock_save}
-                            ):
-                                mock_get_saved_rules = MagicMock(side_effect=[""])
-                                with patch.dict(
-                                    iptables.__salt__,
-                                    {"iptables.get_saved_rules": mock_get_saved_rules},
-                                ):
-                                    mock = MagicMock(side_effect=[""])
-                                    with patch.dict(
-                                        iptables.__salt__, {"iptables.get_rules": mock}
-                                    ):
-                                        ret.update(
-                                            {
-                                                "changes": {"locale": "salt"},
-                                                "result": True,
-                                                "comment": "Set and saved iptables rule"
-                                                ' salt for ipv4\na\nWrote 1 lines to "/tmp/iptables"',
-                                            }
-                                        )
-                                        self.assertDictEqual(
-                                            iptables.append(
-                                                "salt",
-                                                table="",
-                                                chain="",
-                                                save="/tmp/iptables",
-                                            ),
-                                            ret,
-                                        )
-                                        ret.update(
-                                            {
-                                                "changes": {},
-                                                "result": True,
-                                                "comment": "iptables rule for salt already set (a) for ipv4",
-                                            }
-                                        )
-                                        self.assertDictEqual(
-                                            iptables.append(
-                                                "salt",
-                                                table="",
-                                                chain="",
-                                                save="/tmp/iptables",
-                                            ),
-                                            ret,
-                                        )
-                                        self.assertEqual(
-                                            mock_get_saved_rules.mock_calls[0][2][
-                                                "conf_file"
-                                            ],
-                                            "/tmp/iptables",
-                                        )
-                                        self.assertEqual(
-                                            mock_save.mock_calls[0][2]["filename"],
-                                            "/tmp/iptables",
-                                        )
-
     def test_insert(self):
         """
-        Test to insert a rule into a chain
+            Test to insert a rule into a chain
         """
         ret = {"name": "salt", "changes": {}, "result": None, "comment": ""}
 
@@ -271,13 +200,12 @@ class IptablesTestCase(TestCase, LoaderModuleMockMixin):
         with patch.object(iptables, "_STATE_INTERNAL_KEYWORDS", mock):
             mock = MagicMock(return_value="a")
             with patch.dict(iptables.__salt__, {"iptables.build_rule": mock}):
-                mock = MagicMock(side_effect=[True, False, False, False, False, True])
+                mock = MagicMock(side_effect=[True, False, False, False])
                 with patch.dict(iptables.__salt__, {"iptables.check": mock}):
                     ret.update(
                         {
-                            "comment": (
-                                "iptables rule for salt already set for ipv4 (a)"
-                            ),
+                            "comment": "iptables rule for salt"
+                            " already set for ipv4 (a)",
                             "result": True,
                         }
                     )
@@ -289,10 +217,8 @@ class IptablesTestCase(TestCase, LoaderModuleMockMixin):
                         ret.update(
                             {
                                 "result": None,
-                                "comment": (
-                                    "iptables rule for salt"
-                                    " needs to be set for ipv4 (a)"
-                                ),
+                                "comment": "iptables rule for salt"
+                                " needs to be set for ipv4 (a)",
                             }
                         )
                         self.assertDictEqual(
@@ -300,15 +226,14 @@ class IptablesTestCase(TestCase, LoaderModuleMockMixin):
                         )
 
                     with patch.dict(iptables.__opts__, {"test": False}):
-                        mock = MagicMock(side_effect=[False, True, False, True])
+                        mock = MagicMock(side_effect=[False, True])
                         with patch.dict(iptables.__salt__, {"iptables.insert": mock}):
                             ret.update(
                                 {
                                     "changes": {"locale": "salt"},
                                     "result": True,
-                                    "comment": (
-                                        "Set iptables rule for salt to: a for ipv4"
-                                    ),
+                                    "comment": "Set iptables rule"
+                                    " for salt to: a for ipv4",
                                 }
                             )
                             self.assertDictEqual(
@@ -322,10 +247,8 @@ class IptablesTestCase(TestCase, LoaderModuleMockMixin):
                                 {
                                     "changes": {},
                                     "result": False,
-                                    "comment": (
-                                        "Failed to set iptables"
-                                        " rule for salt.\nAttempted rule was a"
-                                    ),
+                                    "comment": "Failed to set iptables"
+                                    " rule for salt.\nAttempted rule was a",
                                 }
                             )
                             self.assertDictEqual(
@@ -335,70 +258,9 @@ class IptablesTestCase(TestCase, LoaderModuleMockMixin):
                                 ret,
                             )
 
-                            mock_save = MagicMock(
-                                side_effect=['Wrote 1 lines to "/tmp/iptables"', ""]
-                            )
-                            with patch.dict(
-                                iptables.__salt__, {"iptables.save": mock_save}
-                            ):
-                                mock_get_saved_rules = MagicMock(side_effect=[""])
-                                with patch.dict(
-                                    iptables.__salt__,
-                                    {"iptables.get_saved_rules": mock_get_saved_rules},
-                                ):
-                                    mock = MagicMock(side_effect=[""])
-                                    with patch.dict(
-                                        iptables.__salt__, {"iptables.get_rules": mock}
-                                    ):
-                                        ret.update(
-                                            {
-                                                "changes": {"locale": "salt"},
-                                                "result": True,
-                                                "comment": "Set and saved iptables rule"
-                                                ' salt for ipv4\na\nWrote 1 lines to "/tmp/iptables"',
-                                            }
-                                        )
-                                        self.assertDictEqual(
-                                            iptables.insert(
-                                                "salt",
-                                                table="",
-                                                chain="",
-                                                position="",
-                                                save="/tmp/iptables",
-                                            ),
-                                            ret,
-                                        )
-                                        ret.update(
-                                            {
-                                                "changes": {},
-                                                "result": True,
-                                                "comment": "iptables rule for salt already set for ipv4 (a)",
-                                            }
-                                        )
-                                        self.assertDictEqual(
-                                            iptables.insert(
-                                                "salt",
-                                                table="",
-                                                chain="",
-                                                position="",
-                                                save="/tmp/iptables",
-                                            ),
-                                            ret,
-                                        )
-                                        self.assertEqual(
-                                            mock_get_saved_rules.mock_calls[0][2][
-                                                "conf_file"
-                                            ],
-                                            "/tmp/iptables",
-                                        )
-                                        self.assertEqual(
-                                            mock_save.mock_calls[0][2]["filename"],
-                                            "/tmp/iptables",
-                                        )
-
     def test_delete(self):
         """
-        Test to delete a rule to a chain
+            Test to delete a rule to a chain
         """
         ret = {"name": "salt", "changes": {}, "result": None, "comment": ""}
 
@@ -408,13 +270,12 @@ class IptablesTestCase(TestCase, LoaderModuleMockMixin):
         with patch.object(iptables, "_STATE_INTERNAL_KEYWORDS", mock):
             mock = MagicMock(return_value="a")
             with patch.dict(iptables.__salt__, {"iptables.build_rule": mock}):
-                mock = MagicMock(side_effect=[False, True, True, True, True, False])
+                mock = MagicMock(side_effect=[False, True, True, True])
                 with patch.dict(iptables.__salt__, {"iptables.check": mock}):
                     ret.update(
                         {
-                            "comment": (
-                                "iptables rule for salt already absent for ipv4 (a)"
-                            ),
+                            "comment": "iptables rule for salt"
+                            " already absent for ipv4 (a)",
                             "result": True,
                         }
                     )
@@ -426,10 +287,8 @@ class IptablesTestCase(TestCase, LoaderModuleMockMixin):
                         ret.update(
                             {
                                 "result": None,
-                                "comment": (
-                                    "iptables rule for salt needs"
-                                    " to be deleted for ipv4 (a)"
-                                ),
+                                "comment": "iptables rule for salt needs"
+                                " to be deleted for ipv4 (a)",
                             }
                         )
                         self.assertDictEqual(
@@ -437,13 +296,13 @@ class IptablesTestCase(TestCase, LoaderModuleMockMixin):
                         )
 
                     with patch.dict(iptables.__opts__, {"test": False}):
-                        mock = MagicMock(side_effect=[False, True, False, False])
+                        mock = MagicMock(side_effect=[False, True])
                         with patch.dict(iptables.__salt__, {"iptables.delete": mock}):
                             ret.update(
                                 {
                                     "result": True,
                                     "changes": {"locale": "salt"},
-                                    "comment": "Delete iptables rule for salt a",
+                                    "comment": "Delete iptables rule" " for salt a",
                                 }
                             )
                             self.assertDictEqual(
@@ -457,10 +316,8 @@ class IptablesTestCase(TestCase, LoaderModuleMockMixin):
                                 {
                                     "result": False,
                                     "changes": {},
-                                    "comment": (
-                                        "Failed to delete iptables"
-                                        " rule for salt.\nAttempted rule was a"
-                                    ),
+                                    "comment": "Failed to delete iptables"
+                                    " rule for salt.\nAttempted rule was a",
                                 }
                             )
                             self.assertDictEqual(
@@ -470,61 +327,9 @@ class IptablesTestCase(TestCase, LoaderModuleMockMixin):
                                 ret,
                             )
 
-                            mock_save = MagicMock(
-                                side_effect=['Wrote 1 lines to "/tmp/iptables"', ""]
-                            )
-                            with patch.dict(
-                                iptables.__salt__, {"iptables.save": mock_save}
-                            ):
-                                mock = MagicMock(side_effect=[True, False])
-                                with patch.dict(
-                                    iptables.__salt__, {"iptables.check": mock}
-                                ):
-                                    mock = MagicMock(side_effect=[""])
-                                    with patch.dict(
-                                        iptables.__salt__, {"iptables.get_rules": mock}
-                                    ):
-                                        ret.update(
-                                            {
-                                                "changes": {"locale": "salt"},
-                                                "result": True,
-                                                "comment": "Deleted and saved iptables rule"
-                                                ' salt for ipv4\na\nWrote 1 lines to "/tmp/iptables"',
-                                            }
-                                        )
-                                        self.assertDictEqual(
-                                            iptables.delete(
-                                                "salt",
-                                                table="",
-                                                chain="",
-                                                save="/tmp/iptables",
-                                            ),
-                                            ret,
-                                        )
-                                        ret.update(
-                                            {
-                                                "changes": {},
-                                                "result": True,
-                                                "comment": "iptables rule for salt already absent for ipv4 (a)",
-                                            }
-                                        )
-                                        self.assertDictEqual(
-                                            iptables.delete(
-                                                "salt",
-                                                table="",
-                                                chain="",
-                                                save="/tmp/iptables",
-                                            ),
-                                            ret,
-                                        )
-                                        self.assertEqual(
-                                            mock_save.mock_calls[0][2]["filename"],
-                                            "/tmp/iptables",
-                                        )
-
     def test_set_policy(self):
         """
-        Test to sets the default policy for iptables firewall tables
+            Test to sets the default policy for iptables firewall tables
         """
         ret = {"name": "salt", "changes": {}, "result": True, "comment": ""}
 
@@ -534,10 +339,8 @@ class IptablesTestCase(TestCase, LoaderModuleMockMixin):
             with patch.dict(iptables.__salt__, {"iptables.get_policy": mock}):
                 ret.update(
                     {
-                        "comment": (
-                            "iptables default policy for chain"
-                            "  on table  for ipv4 already set to stack"
-                        )
+                        "comment": "iptables default policy for chain"
+                        "  on table  for ipv4 already set to stack"
                     }
                 )
                 self.assertDictEqual(
@@ -547,11 +350,9 @@ class IptablesTestCase(TestCase, LoaderModuleMockMixin):
                 with patch.dict(iptables.__opts__, {"test": True}):
                     ret.update(
                         {
-                            "comment": (
-                                "iptables default policy for chain"
-                                "  on table  for ipv4 needs to be set"
-                                " to sal"
-                            ),
+                            "comment": "iptables default policy for chain"
+                            "  on table  for ipv4 needs to be set"
+                            " to sal",
                             "result": None,
                         }
                     )
@@ -566,7 +367,8 @@ class IptablesTestCase(TestCase, LoaderModuleMockMixin):
                         ret.update(
                             {
                                 "changes": {"locale": "salt"},
-                                "comment": "Set default policy for  to sal family ipv4",
+                                "comment": "Set default policy for"
+                                "  to sal family ipv4",
                                 "result": True,
                             }
                         )
@@ -579,7 +381,7 @@ class IptablesTestCase(TestCase, LoaderModuleMockMixin):
 
                         ret.update(
                             {
-                                "comment": "Failed to set iptables default policy",
+                                "comment": "Failed to set iptables" " default policy",
                                 "result": False,
                                 "changes": {},
                             }
@@ -593,7 +395,7 @@ class IptablesTestCase(TestCase, LoaderModuleMockMixin):
 
     def test_flush(self):
         """
-        Test to flush current iptables state
+            Test to flush current iptables state
         """
         ret = {"name": "salt", "changes": {}, "result": None, "comment": ""}
 
@@ -602,10 +404,8 @@ class IptablesTestCase(TestCase, LoaderModuleMockMixin):
             with patch.dict(iptables.__opts__, {"test": True}):
                 ret.update(
                     {
-                        "comment": (
-                            "iptables rules in salt table filter"
-                            " chain ipv4 family needs to be flushed"
-                        )
+                        "comment": "iptables rules in salt table filter"
+                        " chain ipv4 family needs to be flushed"
                     }
                 )
                 self.assertDictEqual(iptables.flush("salt"), ret)
@@ -616,9 +416,8 @@ class IptablesTestCase(TestCase, LoaderModuleMockMixin):
                     ret.update(
                         {
                             "changes": {"locale": "salt"},
-                            "comment": (
-                                "Flush iptables rules in  table  chain ipv4 family"
-                            ),
+                            "comment": "Flush iptables rules in  "
+                            "table  chain ipv4 family",
                             "result": True,
                         }
                     )
@@ -639,7 +438,7 @@ class IptablesTestCase(TestCase, LoaderModuleMockMixin):
 
     def test_mod_aggregate(self):
         """
-        Test to mod_aggregate function
+            Test to mod_aggregate function
         """
         self.assertDictEqual(
             iptables.mod_aggregate({"fun": "salt"}, [], []), {"fun": "salt"}

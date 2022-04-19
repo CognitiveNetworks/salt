@@ -1,10 +1,14 @@
+# -*- coding: utf-8 -*-
 """
 Monit service module. This module will create a monit type
 service watcher.
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import python libs
 import re
 
+# Import salt libs
 import salt.utils.path
 
 # Function alias to make sure not to shadow built-in's
@@ -20,8 +24,7 @@ def __virtual__():
         return True
     return (
         False,
-        "The monit execution module cannot be loaded: the monit binary is not in the"
-        " path.",
+        "The monit execution module cannot be loaded: the monit binary is not in the path.",
     )
 
 
@@ -34,7 +37,7 @@ def start(name):
 
         salt '*' monit.start <service name>
     """
-    cmd = "monit start {}".format(name)
+    cmd = "monit start {0}".format(name)
 
     return not __salt__["cmd.retcode"](cmd, python_shell=False)
 
@@ -49,7 +52,7 @@ def stop(name):
 
         salt '*' monit.stop <service name>
     """
-    cmd = "monit stop {}".format(name)
+    cmd = "monit stop {0}".format(name)
 
     return not __salt__["cmd.retcode"](cmd, python_shell=False)
 
@@ -64,7 +67,7 @@ def restart(name):
 
         salt '*' monit.restart <service name>
     """
-    cmd = "monit restart {}".format(name)
+    cmd = "monit restart {0}".format(name)
 
     return not __salt__["cmd.retcode"](cmd, python_shell=False)
 
@@ -79,7 +82,7 @@ def unmonitor(name):
 
         salt '*' monit.unmonitor <service name>
     """
-    cmd = "monit unmonitor {}".format(name)
+    cmd = "monit unmonitor {0}".format(name)
 
     return not __salt__["cmd.retcode"](cmd, python_shell=False)
 
@@ -94,7 +97,7 @@ def monitor(name):
 
         salt '*' monit.monitor <service name>
     """
-    cmd = "monit monitor {}".format(name)
+    cmd = "monit monitor {0}".format(name)
 
     return not __salt__["cmd.retcode"](cmd, python_shell=False)
 

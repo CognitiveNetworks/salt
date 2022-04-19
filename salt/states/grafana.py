@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Manage Grafana Dashboards
 
@@ -165,11 +166,17 @@ add rows if they do not exist in existing dashboards, and to update rows if
 they exist in dashboards. The module will not manage rows that are not defined,
 allowing users to manage their own custom rows.
 """
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import copy
 
+# Import Salt libs
 import salt.utils.json
 from salt.exceptions import SaltInvocationError
+
+# Import 3rd-party
+from salt.ext.six import string_types
 from salt.utils.dictdiffer import DictDiffer
 
 
@@ -186,10 +193,10 @@ def _parse_profile(profile):
     """
     From a pillar key, or a dictionary, return index and host keys.
     """
-    if isinstance(profile, str):
+    if isinstance(profile, string_types):
         _profile = __salt__["config.option"](profile)
         if not _profile:
-            msg = "Pillar key for profile {} not found.".format(profile)
+            msg = "Pillar key for profile {0} not found.".format(profile)
             raise SaltInvocationError(msg)
     else:
         _profile = profile
@@ -254,7 +261,7 @@ def dashboard_present(
         raise SaltInvocationError("profile is a required argument.")
     if dashboard and dashboard_from_pillar:
         raise SaltInvocationError(
-            "dashboard and dashboard_from_pillar are mutually exclusive arguments."
+            "dashboard and dashboard_from_pillar are" " mutually exclusive arguments."
         )
     hosts, index = _parse_profile(profile)
     if not index:
@@ -292,7 +299,7 @@ def dashboard_present(
                 " dashboard template was provided."
             )
         if __opts__["test"]:
-            ret["comment"] = "Dashboard {} is set to be created.".format(name)
+            ret["comment"] = "Dashboard {0} is set to be created.".format(name)
             ret["result"] = None
             return ret
         _dashboard = dashboard
@@ -330,12 +337,14 @@ def dashboard_present(
             update_rows.append(title)
     if not update_rows:
         ret["result"] = True
-        ret["comment"] = "Dashboard {} is up to date".format(name)
+        ret["comment"] = "Dashboard {0} is up to date".format(name)
         return ret
     if __opts__["test"]:
-        msg = "Dashboard {} is set to be updated.".format(name)
+        msg = "Dashboard {0} is set to be updated.".format(name)
         if update_rows:
-            msg = "{} The following rows set to be updated: {}".format(msg, update_rows)
+            msg = "{0} The following rows set to be updated: {1}".format(
+                msg, update_rows
+            )
         ret["comment"] = msg
         return ret
     body = {
@@ -350,13 +359,13 @@ def dashboard_present(
     if updated:
         ret["result"] = True
         ret["changes"]["changed"] = name
-        msg = "Updated dashboard {}.".format(name)
+        msg = "Updated dashboard {0}.".format(name)
         if update_rows:
-            msg = "{} The following rows were updated: {}".format(msg, update_rows)
+            msg = "{0} The following rows were updated: {1}".format(msg, update_rows)
         ret["comment"] = msg
     else:
         ret["result"] = False
-        msg = "Failed to update dashboard {}.".format(name)
+        msg = "Failed to update dashboard {0}.".format(name)
         ret["comment"] = msg
 
     return ret
@@ -385,7 +394,7 @@ def dashboard_absent(name, hosts=None, profile="grafana"):
 
     if exists:
         if __opts__["test"]:
-            ret["comment"] = "Dashboard {} is set to be removed.".format(name)
+            ret["comment"] = "Dashboard {0} is set to be removed.".format(name)
             return ret
         deleted = __salt__["elasticsearch.delete"](
             index=index, doc_type="dashboard", id=name, hosts=hosts
@@ -396,9 +405,9 @@ def dashboard_absent(name, hosts=None, profile="grafana"):
             ret["changes"]["new"] = None
         else:
             ret["result"] = False
-            ret["comment"] = "Failed to delete {} dashboard.".format(name)
+            ret["comment"] = "Failed to delete {0} dashboard.".format(name)
     else:
         ret["result"] = True
-        ret["comment"] = "Dashboard {} does not exist.".format(name)
+        ret["comment"] = "Dashboard {0} does not exist.".format(name)
 
     return ret

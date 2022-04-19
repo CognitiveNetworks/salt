@@ -19,8 +19,6 @@ Beacon that fires events on vm state changes
 """
 import logging
 
-import salt.utils.beacons
-
 __virtualname__ = "vmadm"
 
 VMADM_STATE = {
@@ -68,17 +66,17 @@ def beacon(config):
 
     # NOTE: lookup current images
     current_vms = __salt__["vmadm.list"](
-        keyed=True,
-        order="uuid,state,alias,hostname,dns_domain",
+        keyed=True, order="uuid,state,alias,hostname,dns_domain",
     )
 
     # NOTE: apply configuration
     if VMADM_STATE["first_run"]:
         log.info("Applying configuration for vmadm beacon")
 
-        config = salt.utils.beacons.list_to_dict(config)
+        _config = {}
+        list(map(_config.update, config))
 
-        if "startup_create_event" not in config or not config["startup_create_event"]:
+        if "startup_create_event" not in _config or not _config["startup_create_event"]:
             VMADM_STATE["vms"] = current_vms
 
     # NOTE: create events

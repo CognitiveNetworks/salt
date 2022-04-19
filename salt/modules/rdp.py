@@ -1,10 +1,14 @@
+# -*- coding: utf-8 -*-
 """
 Manage RDP Service on Windows servers
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import python libs
 import logging
 import re
 
+# Import Salt libs
 import salt.utils.platform
 from salt.utils.decorators import depends
 
@@ -51,7 +55,7 @@ def _psrdp(cmd):
         "-Authentication 6 -ErrorAction Stop"
     )
     return __salt__["cmd.run"](
-        "{} ; {}".format(rdp, cmd), shell="powershell", python_shell=True
+        "{0} ; {1}".format(rdp, cmd), shell="powershell", python_shell=True
     )
 
 

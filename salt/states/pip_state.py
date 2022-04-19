@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Installation of Python Packages Using pip
 =========================================
@@ -18,12 +19,18 @@ requisite to a pkg.installed state for the package which provides pip
           - pkg: python-pip
 """
 
+# Import python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 import re
 import sys
 import types
 
+# Import 3rd-party libs
+import salt.ext.six as six
+
+# Import salt libs
 import salt.utils.data
 import salt.utils.versions
 from salt.exceptions import CommandExecutionError, CommandNotFoundError
@@ -69,11 +76,7 @@ def pip_has_internal_exceptions_mod(ver):
     """
     True when the pip version has the `pip._internal.exceptions` module
     """
-    return salt.utils.versions.compare(
-        ver1=ver,
-        oper=">=",
-        ver2="10.0",
-    )
+    return salt.utils.versions.compare(ver1=ver, oper=">=", ver2="10.0",)
 
 
 def pip_has_exceptions_mod(ver):
@@ -198,7 +201,7 @@ def _check_pkg_version_format(pkg):
                 for vcs in supported_vcs:
                     if pkg.startswith(vcs):
                         from_vcs = True
-                        install_req = _from_line(pkg.split("{}+".format(vcs))[-1])
+                        install_req = _from_line(pkg.split("{0}+".format(vcs))[-1])
                         break
             else:
                 install_req = _from_line(pkg)
@@ -206,11 +209,11 @@ def _check_pkg_version_format(pkg):
         ret["result"] = False
         if not from_vcs and "=" in pkg and "==" not in pkg:
             ret["comment"] = (
-                "Invalid version specification in package {}. '=' is "
+                "Invalid version specification in package {0}. '=' is "
                 "not supported, use '==' instead.".format(pkg)
             )
             return ret
-        ret["comment"] = "pip raised an exception while parsing '{}': {}".format(
+        ret["comment"] = "pip raised an exception while parsing '{0}': {1}".format(
             pkg, exc
         )
         return ret
@@ -288,7 +291,7 @@ def _check_if_installed(
                 and _fulfills_version_spec(pip_list[prefix], version_spec)
             ) or (not any(version_spec)):
                 ret["result"] = True
-                ret["comment"] = "Python package {} was already installed".format(
+                ret["comment"] = "Python package {0} was already " "installed".format(
                     state_pkg_name
                 )
                 return ret
@@ -317,17 +320,17 @@ def _check_if_installed(
                 extra_index_url=extra_index_url,
             )
             desired_version = ""
-            if any(version_spec) and available_versions:
+            if any(version_spec):
                 for version in reversed(available_versions):
                     if _fulfills_version_spec(version, version_spec):
                         desired_version = version
                         break
-            elif available_versions:
+            else:
                 desired_version = available_versions[-1]
             if not desired_version:
                 ret["result"] = True
                 ret["comment"] = (
-                    "Python package {} was already "
+                    "Python package {0} was already "
                     "installed and\nthe available upgrade "
                     "doesn't fulfills the version "
                     "requirements".format(prefix)
@@ -335,7 +338,7 @@ def _check_if_installed(
                 return ret
             if _pep440_version_cmp(pip_list[prefix], desired_version) == 0:
                 ret["result"] = True
-                ret["comment"] = "Python package {} was already installed".format(
+                ret["comment"] = "Python package {0} was already " "installed".format(
                     state_pkg_name
                 )
                 return ret
@@ -355,7 +358,11 @@ def _pep440_version_cmp(pkg1, pkg2, ignore_epoch=False):
             "The pkg_resources packages was not loaded. Please install setuptools."
         )
         return None
-    normalize = lambda x: str(x).split("!", 1)[-1] if ignore_epoch else str(x)
+    normalize = (
+        lambda x: six.text_type(x).split("!", 1)[-1]
+        if ignore_epoch
+        else six.text_type(x)
+    )
     pkg1 = normalize(pkg1)
     pkg2 = normalize(pkg2)
 
@@ -721,8 +728,8 @@ def installed(
     # pkgs = ','.join([prepro(pkg) for pkg in pkgs])
     prepro = (
         lambda pkg: pkg
-        if isinstance(pkg, str)
-        else " ".join((pkg.items()[0][0], pkg.items()[0][1]))
+        if isinstance(pkg, six.string_types)
+        else " ".join((six.iteritems(pkg)[0][0], six.iteritems(pkg)[0][1]))
     )
     pkgs = [prepro(pkg) for pkg in pkgs]
 
@@ -732,7 +739,7 @@ def installed(
         cur_version = __salt__["pip.version"](bin_env)
     except (CommandNotFoundError, CommandExecutionError) as err:
         ret["result"] = None
-        ret["comment"] = "Error installing '{}': {}".format(name, err)
+        ret["comment"] = "Error installing '{0}': {1}".format(name, err)
         return ret
     # Check that the pip binary supports the 'use_wheel' option
     if use_wheel:
@@ -748,9 +755,9 @@ def installed(
             ret["result"] = False
             ret["comment"] = (
                 "The 'use_wheel' option is only supported in "
-                "pip between {} and {}. The version of pip detected "
-                "was {}.".format(min_version, max_version, cur_version)
-            )
+                "pip between {0} and {1}. The version of pip detected "
+                "was {2}."
+            ).format(min_version, max_version, cur_version)
             return ret
 
     # Check that the pip binary supports the 'no_use_wheel' option
@@ -767,9 +774,9 @@ def installed(
             ret["result"] = False
             ret["comment"] = (
                 "The 'no_use_wheel' option is only supported in "
-                "pip between {} and {}. The version of pip detected "
-                "was {}.".format(min_version, max_version, cur_version)
-            )
+                "pip between {0} and {1}. The version of pip detected "
+                "was {2}."
+            ).format(min_version, max_version, cur_version)
             return ret
 
     # Check that the pip binary supports the 'no_binary' option
@@ -782,9 +789,9 @@ def installed(
             ret["result"] = False
             ret["comment"] = (
                 "The 'no_binary' option is only supported in "
-                "pip {} and newer. The version of pip detected "
-                "was {}.".format(min_version, cur_version)
-            )
+                "pip {0} and newer. The version of pip detected "
+                "was {1}."
+            ).format(min_version, cur_version)
             return ret
 
     # Get the packages parsed name and version from the pip library.
@@ -818,12 +825,12 @@ def installed(
                 # TODO: Check requirements file against currently-installed
                 # packages to provide more accurate state output.
                 comments.append(
-                    "Requirements file '{}' will be processed.".format(requirements)
+                    "Requirements file '{0}' will be " "processed.".format(requirements)
                 )
             if editable:
                 comments.append(
                     "Package will be installed in editable mode (i.e. "
-                    'setuptools "develop mode") from {}.'.format(editable)
+                    'setuptools "develop mode") from {0}.'.format(editable)
                 )
             ret["comment"] = " ".join(comments)
             return ret
@@ -918,7 +925,7 @@ def installed(
 
     # Call to install the package. Actual installation takes place here
     pip_install_call = __salt__["pip.install"](
-        pkgs="{}".format(pkgs_str) if pkgs_str else "",
+        pkgs="{0}".format(pkgs_str) if pkgs_str else "",
         requirements=requirements,
         bin_env=bin_env,
         use_wheel=use_wheel,
@@ -987,18 +994,16 @@ def installed(
                         ret["changes"]["requirements"] = True
                 if ret["changes"].get("requirements"):
                     comments.append(
-                        "Successfully processed requirements file {}.".format(
-                            requirements
-                        )
+                        "Successfully processed requirements file "
+                        "{0}.".format(requirements)
                     )
                 else:
                     comments.append("Requirements were already installed.")
 
             if editable:
                 comments.append(
-                    "Package successfully installed from VCS checkout {}.".format(
-                        editable
-                    )
+                    "Package successfully installed from VCS "
+                    "checkout {0}.".format(editable)
                 )
                 ret["changes"]["editable"] = True
             ret["comment"] = " ".join(comments)
@@ -1035,7 +1040,7 @@ def installed(
                     # installing it report it
                     if not pipsearch:
                         pkg_404_comms.append(
-                            "There was no error installing package '{}' "
+                            "There was no error installing package '{0}' "
                             "although it does not show when calling "
                             "'pip.freeze'.".format(pkg)
                         )
@@ -1045,10 +1050,10 @@ def installed(
                             and prefix.lower() not in already_installed_packages
                         ):
                             ver = pipsearch[prefix]
-                            ret["changes"]["{}=={}".format(prefix, ver)] = "Installed"
+                            ret["changes"]["{0}=={1}".format(prefix, ver)] = "Installed"
                 # Case for packages that are an URL
                 else:
-                    ret["changes"]["{}==???".format(state_name)] = "Installed"
+                    ret["changes"]["{0}==???".format(state_name)] = "Installed"
 
             # Set comments
             aicomms = "\n".join(already_installed_comments)
@@ -1064,28 +1069,30 @@ def installed(
     elif pip_install_call:
         ret["result"] = False
         if "stdout" in pip_install_call:
-            error = "Error: {} {}".format(
+            error = "Error: {0} {1}".format(
                 pip_install_call["stdout"], pip_install_call["stderr"]
             )
         else:
-            error = "Error: {}".format(pip_install_call["comment"])
+            error = "Error: {0}".format(pip_install_call["comment"])
 
         if requirements or editable:
             comments = []
             if requirements:
                 comments.append(
-                    'Unable to process requirements file "{}"'.format(requirements)
+                    "Unable to process requirements file " '"{0}".'.format(requirements)
                 )
             if editable:
                 comments.append(
-                    "Unable to install from VCS checkout {}.".format(editable)
+                    "Unable to install from VCS checkout" "{0}.".format(editable)
                 )
             comments.append(error)
             ret["comment"] = " ".join(comments)
         else:
             pkgs_str = ", ".join([state_name for _, state_name in target_pkgs])
             aicomms = "\n".join(already_installed_comments)
-            error_comm = "Failed to install packages: {}. {}".format(pkgs_str, error)
+            error_comm = "Failed to install packages: {0}. " "{1}".format(
+                pkgs_str, error
+            )
             ret["comment"] = aicomms + ("\n" if aicomms else "") + error_comm
     else:
         ret["result"] = False
@@ -1123,7 +1130,7 @@ def removed(
         pip_list = __salt__["pip.list"](bin_env=bin_env, user=user, cwd=cwd)
     except (CommandExecutionError, CommandNotFoundError) as err:
         ret["result"] = False
-        ret["comment"] = "Error uninstalling '{}': {}".format(name, err)
+        ret["comment"] = "Error uninstalling '{0}': {1}".format(name, err)
         return ret
 
     if name not in pip_list:
@@ -1133,7 +1140,7 @@ def removed(
 
     if __opts__["test"]:
         ret["result"] = None
-        ret["comment"] = "Package {} is set to be removed".format(name)
+        ret["comment"] = "Package {0} is set to be removed".format(name)
         return ret
 
     if __salt__["pip.uninstall"](
@@ -1177,7 +1184,7 @@ def uptodate(name, bin_env=None, user=None, cwd=None, use_vt=False):
     try:
         packages = __salt__["pip.list_upgrades"](bin_env=bin_env, user=user, cwd=cwd)
     except Exception as e:  # pylint: disable=broad-except
-        ret["comment"] = str(e)
+        ret["comment"] = six.text_type(e)
         return ret
 
     if not packages:

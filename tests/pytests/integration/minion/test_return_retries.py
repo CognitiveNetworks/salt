@@ -12,12 +12,12 @@ def salt_minion_retry(salt_master_factory, salt_minion_id):
         "return_retry_timer": 5,
         "return_retry_tries": 30,
     }
-    factory = salt_master_factory.salt_minion_daemon(
+    factory = salt_master_factory.get_salt_minion_daemon(
         random_string("retry-minion-"),
-        overrides=config_overrides,
+        config_overrides=config_overrides,
         extra_cli_arguments_after_first_start_failure=["--log-level=debug"],
     )
-    factory.after_terminate(
+    factory.register_after_terminate_callback(
         pytest.helpers.remove_stale_minion_key, salt_master_factory, factory.id
     )
 

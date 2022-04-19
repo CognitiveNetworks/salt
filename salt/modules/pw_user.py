@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Manage users with the pw command
 
@@ -32,14 +33,20 @@ Manage users with the pw command
 # % pw usershow -n someuser
 # someuser:*:1001:1001::0:0:SomeUser Name:/home/someuser:/bin/sh
 
+# Import python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import copy
 import logging
 
+# Import salt libs
 import salt.utils.args
 import salt.utils.data
 import salt.utils.user
 from salt.exceptions import CommandExecutionError
+
+# Import 3rd party libs
+from salt.ext import six
 
 try:
     import pwd
@@ -63,8 +70,7 @@ def __virtual__():
         return __virtualname__
     return (
         False,
-        "The pw_user execution module cannot be loaded: the pwd python module is not"
-        " available or the system is not FreeBSD.",
+        "The pw_user execution module cannot be loaded: the pwd python module is not available or the system is not FreeBSD.",
     )
 
 
@@ -75,7 +81,7 @@ def _get_gecos(name):
     try:
         gecos_field = pwd.getpwnam(name).pw_gecos.split(",", 3)
     except KeyError:
-        raise CommandExecutionError("User '{}' does not exist".format(name))
+        raise CommandExecutionError("User '{0}' does not exist".format(name))
     if not gecos_field:
         return {}
     else:
@@ -95,7 +101,7 @@ def _build_gecos(gecos_dict):
     Accepts a dictionary entry containing GECOS field names and their values,
     and returns a full GECOS comment string, to be used with pw usermod.
     """
-    return "{},{},{},{}".format(
+    return "{0},{1},{2},{3}".format(
         gecos_dict.get("fullname", ""),
         gecos_dict.get("roomnumber", ""),
         gecos_dict.get("workphone", ""),
@@ -107,8 +113,8 @@ def _update_gecos(name, key, value):
     """
     Common code to change a user's GECOS information
     """
-    if not isinstance(value, str):
-        value = str(value)
+    if not isinstance(value, six.string_types):
+        value = six.text_type(value)
     pre_info = _get_gecos(name)
     if not pre_info:
         return False
@@ -153,7 +159,7 @@ def add(
     if kwargs:
         log.warning("Invalid kwargs passed to user.add")
 
-    if isinstance(groups, str):
+    if isinstance(groups, six.string_types):
         groups = groups.split(",")
     cmd = ["pw", "useradd"]
     if uid:
@@ -197,7 +203,7 @@ def delete(name, remove=False, force=False):
     """
     if salt.utils.data.is_true(force):
         log.error(
-            "pw userdel does not support force-deleting user while user is logged in"
+            "pw userdel does not support force-deleting user while " "user is logged in"
         )
     cmd = ["pw", "userdel"]
     if remove:
@@ -238,7 +244,7 @@ def chuid(name, uid):
     """
     pre_info = info(name)
     if not pre_info:
-        raise CommandExecutionError("User '{}' does not exist".format(name))
+        raise CommandExecutionError("User '{0}' does not exist".format(name))
     if uid == pre_info["uid"]:
         return True
     cmd = ["pw", "usermod", "-u", uid, "-n", name]
@@ -258,7 +264,7 @@ def chgid(name, gid):
     """
     pre_info = info(name)
     if not pre_info:
-        raise CommandExecutionError("User '{}' does not exist".format(name))
+        raise CommandExecutionError("User '{0}' does not exist".format(name))
     if gid == pre_info["gid"]:
         return True
     cmd = ["pw", "usermod", "-g", gid, "-n", name]
@@ -278,7 +284,7 @@ def chshell(name, shell):
     """
     pre_info = info(name)
     if not pre_info:
-        raise CommandExecutionError("User '{}' does not exist".format(name))
+        raise CommandExecutionError("User '{0}' does not exist".format(name))
     if shell == pre_info["shell"]:
         return True
     cmd = ["pw", "usermod", "-s", shell, "-n", name]
@@ -309,7 +315,7 @@ def chhome(name, home, persist=False):
     """
     pre_info = info(name)
     if not pre_info:
-        raise CommandExecutionError("User '{}' does not exist".format(name))
+        raise CommandExecutionError("User '{0}' does not exist".format(name))
     if home == pre_info["home"]:
         return True
     cmd = ["pw", "usermod", name, "-d", home]
@@ -341,7 +347,7 @@ def chgroups(name, groups, append=False):
 
         salt '*' user.chgroups foo wheel,root True
     """
-    if isinstance(groups, str):
+    if isinstance(groups, six.string_types):
         groups = groups.split(",")
     ugrps = set(list_groups(name))
     if ugrps == set(groups):
@@ -419,7 +425,7 @@ def chloginclass(name, loginclass, root=None):
     if loginclass == get_loginclass(name):
         return True
 
-    cmd = ["pw", "usermod", "-L", "{}".format(loginclass), "-n", "{}".format(name)]
+    cmd = ["pw", "usermod", "-L", "{0}".format(loginclass), "-n", "{0}".format(name)]
 
     __salt__["cmd.run"](cmd, python_shell=False)
 
@@ -518,10 +524,10 @@ def rename(name, new_name):
     """
     current_info = info(name)
     if not current_info:
-        raise CommandExecutionError("User '{}' does not exist".format(name))
+        raise CommandExecutionError("User '{0}' does not exist".format(name))
     new_info = info(new_name)
     if new_info:
-        raise CommandExecutionError("User '{}' already exists".format(new_name))
+        raise CommandExecutionError("User '{0}' already exists".format(new_name))
     cmd = ["pw", "usermod", "-l", new_name, "-n", name]
     __salt__["cmd.run"](cmd)
     post_info = info(new_name)

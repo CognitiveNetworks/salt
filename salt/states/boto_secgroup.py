@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Manage Security Groups
 ======================
@@ -102,12 +103,16 @@ passed in as a dict, or as a string to pull from pillars or minion config:
     will be used as the default region.
 
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import Python libs
 import logging
 import pprint
 
+# Import salt libs
 import salt.utils.dictupdate as dictupdate
 from salt.exceptions import SaltInvocationError
+from salt.ext import six
 
 log = logging.getLogger(__name__)
 
@@ -283,7 +288,7 @@ def _security_group_present(
     )
     if not exists:
         if __opts__["test"]:
-            ret["comment"] = "Security group {} is set to be created.".format(name)
+            ret["comment"] = "Security group {0} is set to be created.".format(name)
             ret["result"] = None
             return ret
         created = __salt__["boto_secgroup.create"](
@@ -309,12 +314,12 @@ def _security_group_present(
                 vpc_name=vpc_name,
             )
             ret["changes"]["new"] = {"secgroup": sg}
-            ret["comment"] = "Security group {} created.".format(name)
+            ret["comment"] = "Security group {0} created.".format(name)
         else:
             ret["result"] = False
-            ret["comment"] = "Failed to create {} security group.".format(name)
+            ret["comment"] = "Failed to create {0} security group.".format(name)
     else:
-        ret["comment"] = "Security group {} present.".format(name)
+        ret["comment"] = "Security group {0} present.".format(name)
     return ret
 
 
@@ -331,17 +336,17 @@ def _split_rules(rules):
         cidr_ip = rule.get("cidr_ip")
         group_name = rule.get("source_group_name")
         group_id = rule.get("source_group_group_id")
-        if cidr_ip and not isinstance(cidr_ip, str):
+        if cidr_ip and not isinstance(cidr_ip, six.string_types):
             for ip in cidr_ip:
                 _rule = rule.copy()
                 _rule["cidr_ip"] = ip
                 split.append(_rule)
-        elif group_name and not isinstance(group_name, str):
+        elif group_name and not isinstance(group_name, six.string_types):
             for name in group_name:
                 _rule = rule.copy()
                 _rule["source_group_name"] = name
                 split.append(_rule)
-        elif group_id and not isinstance(group_id, str):
+        elif group_id and not isinstance(group_id, six.string_types):
             for _id in group_id:
                 _rule = rule.copy()
                 _rule["source_group_group_id"] = _id
@@ -370,8 +375,8 @@ def _check_rule(rule, _rule):
 
     if (
         rule["ip_protocol"] == _rule["ip_protocol"]
-        and str(rule["from_port"]) == str(_rule["from_port"])
-        and str(rule["to_port"]) == str(_rule["to_port"])
+        and six.text_type(rule["from_port"]) == six.text_type(_rule["from_port"])
+        and six.text_type(rule["to_port"]) == six.text_type(_rule["to_port"])
     ):
         _cidr_ip = _rule.get("cidr_ip")
         if _cidr_ip and _cidr_ip == rule.get("cidr_ip"):
@@ -400,7 +405,7 @@ def _get_rule_changes(rules, _rules):
     # 2. determine if rule exists in existing security group rules
     for rule in rules:
         try:
-            ip_protocol = str(rule.get("ip_protocol"))
+            ip_protocol = six.text_type(rule.get("ip_protocol"))
         except KeyError:
             raise SaltInvocationError(
                 "ip_protocol, to_port, and from_port are"
@@ -422,10 +427,10 @@ def _get_rule_changes(rules, _rules):
             -1,
         ]
         if ip_protocol not in supported_protocols and (
-            not "{}".format(ip_protocol).isdigit() or int(ip_protocol) > 255
+            not "{0}".format(ip_protocol).isdigit() or int(ip_protocol) > 255
         ):
             raise SaltInvocationError(
-                "Invalid ip_protocol {} specified in security group rule.".format(
+                "Invalid ip_protocol {0} specified in security group rule.".format(
                     ip_protocol
                 )
             )
@@ -511,7 +516,7 @@ def _rules_present(
     if not sg:
         ret[
             "comment"
-        ] = "{} security group configuration could not be retrieved.".format(name)
+        ] = "{0} security group configuration could not be retrieved.".format(name)
         ret["result"] = False
         return ret
     rules = _split_rules(rules)
@@ -536,7 +541,7 @@ def _rules_present(
                 )
                 if not _group_id:
                     raise SaltInvocationError(
-                        "source_group_name {} does not map to a valid "
+                        "source_group_name {0} does not map to a valid "
                         "source group id.".format(_source_group_name)
                     )
                 rule["source_group_name"] = None
@@ -549,9 +554,9 @@ def _rules_present(
     to_delete = to_delete if delete_ingress_rules else []
     if to_create or to_delete:
         if __opts__["test"]:
-            msg = """Security group {} set to have rules modified.
-            To be created: {}
-            To be deleted: {}""".format(
+            msg = """Security group {0} set to have rules modified.
+            To be created: {1}
+            To be deleted: {2}""".format(
                 name, pprint.pformat(to_create), pprint.pformat(to_delete)
             )
             ret["comment"] = msg
@@ -573,9 +578,9 @@ def _rules_present(
                 if not _deleted:
                     deleted = False
             if deleted:
-                ret["comment"] = "Removed rules on {} security group.".format(name)
+                ret["comment"] = "Removed rules on {0} security group.".format(name)
             else:
-                ret["comment"] = "Failed to remove rules on {} security group.".format(
+                ret["comment"] = "Failed to remove rules on {0} security group.".format(
                     name
                 )
                 ret["result"] = False
@@ -598,14 +603,14 @@ def _rules_present(
                 ret["comment"] = " ".join(
                     [
                         ret["comment"],
-                        "Created rules on {} security group.".format(name),
+                        "Created rules on {0} security group.".format(name),
                     ]
                 )
             else:
                 ret["comment"] = " ".join(
                     [
                         ret["comment"],
-                        "Failed to create rules on {} security group.".format(name),
+                        "Failed to create rules on {0} security group.".format(name),
                     ]
                 )
                 ret["result"] = False
@@ -656,7 +661,7 @@ def _rules_egress_present(
     if not sg:
         ret[
             "comment"
-        ] = "{} security group configuration could not be retrieved.".format(name)
+        ] = "{0} security group configuration could not be retrieved.".format(name)
         ret["result"] = False
         return ret
     rules_egress = _split_rules(rules_egress)
@@ -681,7 +686,7 @@ def _rules_egress_present(
                 )
                 if not _group_id:
                     raise SaltInvocationError(
-                        "source_group_name {} does not map to a valid "
+                        "source_group_name {0} does not map to a valid "
                         "source group id.".format(_source_group_name)
                     )
                 rule["source_group_name"] = None
@@ -694,9 +699,9 @@ def _rules_egress_present(
     to_delete = to_delete if delete_egress_rules else []
     if to_create or to_delete:
         if __opts__["test"]:
-            msg = """Security group {} set to have rules modified.
-            To be created: {}
-            To be deleted: {}""".format(
+            msg = """Security group {0} set to have rules modified.
+            To be created: {1}
+            To be deleted: {2}""".format(
                 name, pprint.pformat(to_create), pprint.pformat(to_delete)
             )
             ret["comment"] = msg
@@ -722,14 +727,14 @@ def _rules_egress_present(
                 ret["comment"] = " ".join(
                     [
                         ret["comment"],
-                        "Removed egress rule on {} security group.".format(name),
+                        "Removed egress rule on {0} security group.".format(name),
                     ]
                 )
             else:
                 ret["comment"] = " ".join(
                     [
                         ret["comment"],
-                        "Failed to remove egress rule on {} security group.".format(
+                        "Failed to remove egress rule on {0} security group.".format(
                             name
                         ),
                     ]
@@ -755,14 +760,14 @@ def _rules_egress_present(
                 ret["comment"] = " ".join(
                     [
                         ret["comment"],
-                        "Created egress rules on {} security group.".format(name),
+                        "Created egress rules on {0} security group.".format(name),
                     ]
                 )
             else:
                 ret["comment"] = " ".join(
                     [
                         ret["comment"],
-                        "Failed to create egress rules on {} security group.".format(
+                        "Failed to create egress rules on {0} security group.".format(
                             name
                         ),
                     ]
@@ -831,7 +836,7 @@ def absent(
 
     if sg:
         if __opts__["test"]:
-            ret["comment"] = "Security group {} is set to be removed.".format(name)
+            ret["comment"] = "Security group {0} is set to be removed.".format(name)
             ret["result"] = None
             return ret
         deleted = __salt__["boto_secgroup.delete"](
@@ -847,12 +852,12 @@ def absent(
         if deleted:
             ret["changes"]["old"] = {"secgroup": sg}
             ret["changes"]["new"] = {"secgroup": None}
-            ret["comment"] = "Security group {} deleted.".format(name)
+            ret["comment"] = "Security group {0} deleted.".format(name)
         else:
             ret["result"] = False
-            ret["comment"] = "Failed to delete {} security group.".format(name)
+            ret["comment"] = "Failed to delete {0} security group.".format(name)
     else:
-        ret["comment"] = "{} security group does not exist.".format(name)
+        ret["comment"] = "{0} security group does not exist.".format(name)
     return ret
 
 
@@ -884,7 +889,7 @@ def _tags_present(
         if not sg:
             ret[
                 "comment"
-            ] = "{} security group configuration could not be retrieved.".format(name)
+            ] = "{0} security group configuration could not be retrieved.".format(name)
             ret["result"] = False
             return ret
         tags_to_add = tags
@@ -901,7 +906,7 @@ def _tags_present(
                     tags_to_add.pop(existing_tag)
         if tags_to_remove:
             if __opts__["test"]:
-                msg = "The following tag{} set to be removed: {}.".format(
+                msg = "The following tag{0} set to be removed: {1}.".format(
                     ("s are" if len(tags_to_remove) > 1 else " is"),
                     ", ".join(tags_to_remove),
                 )
@@ -924,7 +929,7 @@ def _tags_present(
                     ret["comment"] = " ".join(
                         [
                             ret["comment"],
-                            "Error attempting to delete tags {}.".format(
+                            "Error attempting to delete tags {0}.".format(
                                 tags_to_remove
                             ),
                         ]
@@ -939,14 +944,14 @@ def _tags_present(
         if tags_to_add or tags_to_update:
             if __opts__["test"]:
                 if tags_to_add:
-                    msg = "The following tag{} set to be added: {}.".format(
+                    msg = "The following tag{0} set to be added: {1}.".format(
                         ("s are" if len(tags_to_add.keys()) > 1 else " is"),
                         ", ".join(tags_to_add.keys()),
                     )
                     ret["comment"] = " ".join([ret["comment"], msg])
                     ret["result"] = None
                 if tags_to_update:
-                    msg = "The following tag {} set to be updated: {}.".format(
+                    msg = "The following tag {0} set to be updated: {1}.".format(
                         (
                             "values are"
                             if len(tags_to_update.keys()) > 1

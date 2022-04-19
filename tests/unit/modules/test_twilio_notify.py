@@ -1,9 +1,15 @@
+# -*- coding: utf-8 -*-
 """
     :codeauthor: Jayesh Kariya <jayeshk@saltstack.com>
 """
 
+# Import Python Libs
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import Salt Libs
 import salt.modules.twilio_notify as twilio_notify
+
+# Import Salt Testing Libs
 from tests.support.mixins import LoaderModuleMockMixin
 from tests.support.mock import MagicMock, patch
 from tests.support.unit import TestCase, skipIf
@@ -32,10 +38,10 @@ class MockTwilioRestException(Exception):
         self.code = "error code"
         self.msg = "Exception error"
         self.status = "Not send"
-        super().__init__(self.msg)
+        super(MockTwilioRestException, self).__init__(self.msg)
 
 
-class MockMessages:
+class MockMessages(object):
     """
     Mock SMS class
     """
@@ -67,7 +73,7 @@ class MockMessages:
         return msg
 
 
-class MockSMS:
+class MockSMS(object):
     """
     Mock SMS class
     """
@@ -76,7 +82,7 @@ class MockSMS:
         self.messages = MockMessages()
 
 
-class MockTwilioRestClient:
+class MockTwilioRestClient(object):
     """
     Mock TwilioRestClient class
     """

@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
 """
     :codeauthor: Wayne Werner <wwerner@saltstack.com>
 """
 
 # Import the future
+from __future__ import absolute_import, print_function, unicode_literals
 
 import os
 import tempfile
@@ -64,7 +66,8 @@ class TLSModuleTest(ModuleCase, LoaderModuleMockMixin):
 
     def test_creating_csr_should_fail_with_no_ca(self):
         expected_message = (
-            'Certificate for CA named "bad_ca" does not exist, please create it first.'
+            'Certificate for CA named "bad_ca" does not exist,'
+            " please create it first."
         )
         self.assertEqual(tls.create_csr(ca_name="bad_ca"), expected_message)
 
@@ -73,23 +76,17 @@ class TLSModuleTest(ModuleCase, LoaderModuleMockMixin):
         empty_crl_filename = os.path.join(self.tempdir, "empty.crl")
         tls.create_ca(self.ca_name)
         tls.create_csr(
-            ca_name=self.ca_name,
-            CN="testing.localhost",
+            ca_name=self.ca_name, CN="testing.localhost",
         )
         tls.create_ca_signed_cert(
-            ca_name=self.ca_name,
-            CN="testing.localhost",
+            ca_name=self.ca_name, CN="testing.localhost",
         )
         tls.create_empty_crl(
-            ca_name=self.ca_name,
-            crl_file=empty_crl_filename,
+            ca_name=self.ca_name, crl_file=empty_crl_filename,
         )
         ret = tls.validate(
             cert=os.path.join(
-                self.tempdir,
-                self.ca_name,
-                "certs",
-                "testing.localhost.crt",
+                self.tempdir, self.ca_name, "certs", "testing.localhost.crt",
             ),
             ca_name=self.ca_name,
             crl_file=empty_crl_filename,
@@ -101,16 +98,13 @@ class TLSModuleTest(ModuleCase, LoaderModuleMockMixin):
         revoked_crl_filename = os.path.join(self.tempdir, "revoked.crl")
         tls.create_ca(self.ca_name)
         tls.create_csr(
-            ca_name=self.ca_name,
-            CN="testing.bad.localhost",
+            ca_name=self.ca_name, CN="testing.bad.localhost",
         )
         tls.create_ca_signed_cert(
-            ca_name=self.ca_name,
-            CN="testing.bad.localhost",
+            ca_name=self.ca_name, CN="testing.bad.localhost",
         )
         tls.create_empty_crl(
-            ca_name=self.ca_name,
-            crl_file=revoked_crl_filename,
+            ca_name=self.ca_name, crl_file=revoked_crl_filename,
         )
         tls.revoke_cert(
             ca_name=self.ca_name,
@@ -120,10 +114,7 @@ class TLSModuleTest(ModuleCase, LoaderModuleMockMixin):
         self.assertFalse(
             tls.validate(
                 cert=os.path.join(
-                    self.tempdir,
-                    self.ca_name,
-                    "certs",
-                    "testing.bad.localhost.crt",
+                    self.tempdir, self.ca_name, "certs", "testing.bad.localhost.crt",
                 ),
                 ca_name=self.ca_name,
                 crl_file=revoked_crl_filename,
@@ -134,16 +125,13 @@ class TLSModuleTest(ModuleCase, LoaderModuleMockMixin):
         revoked_crl_filename = None
         tls.create_ca(self.ca_name)
         tls.create_csr(
-            ca_name=self.ca_name,
-            CN="testing.bad.localhost",
+            ca_name=self.ca_name, CN="testing.bad.localhost",
         )
         tls.create_ca_signed_cert(
-            ca_name=self.ca_name,
-            CN="testing.bad.localhost",
+            ca_name=self.ca_name, CN="testing.bad.localhost",
         )
         tls.create_empty_crl(
-            ca_name=self.ca_name,
-            crl_file=revoked_crl_filename,
+            ca_name=self.ca_name, crl_file=revoked_crl_filename,
         )
         tls.revoke_cert(
             ca_name=self.ca_name,
@@ -153,10 +141,7 @@ class TLSModuleTest(ModuleCase, LoaderModuleMockMixin):
         self.assertFalse(
             tls.validate(
                 cert=os.path.join(
-                    self.tempdir,
-                    self.ca_name,
-                    "certs",
-                    "testing.bad.localhost.crt",
+                    self.tempdir, self.ca_name, "certs", "testing.bad.localhost.crt",
                 ),
                 ca_name=self.ca_name,
                 crl_file=revoked_crl_filename,

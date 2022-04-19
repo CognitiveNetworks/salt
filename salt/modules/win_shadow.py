@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Manage the shadow file
 
@@ -7,7 +8,10 @@ Manage the shadow file
     *'shadow.info' is not available*), see :ref:`here
     <module-provider-override>`.
 """
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import Salt libs
 import salt.utils.platform
 
 # Define the module's virtual name

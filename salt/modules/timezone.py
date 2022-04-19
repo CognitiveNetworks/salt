@@ -117,7 +117,8 @@ def _get_zone_etc_localtime():
             if "FreeBSD" in __grains__["os_family"]:
                 return get_zonecode()
             log.warning(
-                "%s is not a symbolic link. Attempting to match it to zoneinfo files.",
+                "%s is not a symbolic link. Attempting to match "
+                "it to zoneinfo files.",
                 tzfile,
             )
             # Regular file. Try to match the hash.
@@ -187,10 +188,11 @@ def get_zone():
             except AttributeError:
                 pass
 
-        raise CommandExecutionError(
+        msg = (
             "Failed to parse timedatectl output: {}\n"
-            "Please file an issue with SaltStack".format(ret["stdout"])
-        )
+            "Please file an issue with SaltStack"
+        ).format(ret["stdout"])
+        raise CommandExecutionError(msg)
 
     else:
         if __grains__["os"].lower() == "centos":
@@ -408,10 +410,11 @@ def get_hwclock():
                 except IndexError:
                     pass
 
-        raise CommandExecutionError(
+        msg = (
             "Failed to parse timedatectl output: {}\n"
-            "Please file an issue with SaltStack".format(ret["stdout"])
-        )
+            "Please file an issue with SaltStack"
+        ).format(ret["stdout"])
+        raise CommandExecutionError(msg)
 
     else:
         os_family = __grains__["os_family"]

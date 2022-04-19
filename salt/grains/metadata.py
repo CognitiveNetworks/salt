@@ -14,9 +14,11 @@ metadata server set `metadata_server_grains: True` in the minion config.
 
 """
 
+# Import python libs
 import os
 import socket
 
+# Import salt libs
 import salt.utils.data
 import salt.utils.http as http
 import salt.utils.json

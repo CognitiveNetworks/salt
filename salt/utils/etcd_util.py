@@ -133,7 +133,7 @@ class EtcdClient:
             self.client = etcd.Client(host, port, **xargs)
         else:
             raise CommandExecutionError(
-                "(unable to import etcd, module most likely not installed)"
+                "(unable to import etcd, " "module most likely not installed)"
             )
 
     def watch(self, key, recurse=False, timeout=0, index=None):
@@ -158,8 +158,7 @@ class EtcdClient:
         except (etcd.EtcdConnectionFailed, MaxRetryError):
             # This gets raised when we can't contact etcd at all
             log.error(
-                "etcd: failed to perform 'watch' operation on key %s due to connection"
-                " error",
+                "etcd: failed to perform 'watch' operation on key %s due to connection error",
                 key,
             )
             return {}
@@ -186,8 +185,7 @@ class EtcdClient:
             return None
         except etcd.EtcdConnectionFailed:
             log.error(
-                "etcd: failed to perform 'get' operation on key %s due to connection"
-                " error",
+                "etcd: failed to perform 'get' operation on key %s due to connection error",
                 key,
             )
             return None
@@ -239,8 +237,7 @@ class EtcdClient:
             # python-etcd doesn't fully support python 2.6 and ends up throwing this for *any* exception because
             # it uses the newer {} format syntax
             log.error(
-                "etcd: error. python-etcd does not fully support python 2.6, no error"
-                " information available"
+                "etcd: error. python-etcd does not fully support python 2.6, no error information available"
             )
             raise
         except Exception as err:  # pylint: disable=broad-except
@@ -337,8 +334,7 @@ class EtcdClient:
             return {}
         except etcd.EtcdConnectionFailed:
             log.error(
-                "etcd: failed to perform 'ls' operation on path %s due to connection"
-                " error",
+                "etcd: failed to perform 'ls' operation on path %s due to connection error",
                 path,
             )
             return None
@@ -391,8 +387,7 @@ class EtcdClient:
             return None
         except etcd.EtcdConnectionFailed:
             log.error(
-                "etcd: failed to perform 'tree' operation on path %s due to connection"
-                " error",
+                "etcd: failed to perform 'tree' operation on path %s due to connection error",
                 path,
             )
             return None

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Manage chassis via Salt Proxies.
 
@@ -153,6 +154,8 @@ pillar stated above:
 
 """
 
+# Import python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 import os
@@ -160,6 +163,7 @@ import os
 from salt.exceptions import CommandExecutionError
 
 # Import Salt lobs
+from salt.ext import six
 
 # Get logging started
 log = logging.getLogger(__name__)
@@ -242,7 +246,10 @@ def blade_idrac(
             idrac_dhcp = 1
         else:
             idrac_dhcp = 0
-        if str(module_network["Network"]["DHCP Enabled"]) == "0" and idrac_dhcp == 1:
+        if (
+            six.text_type(module_network["Network"]["DHCP Enabled"]) == "0"
+            and idrac_dhcp == 1
+        ):
             ch = {"Old": module_network["Network"]["DHCP Enabled"], "New": idrac_dhcp}
             ret["changes"]["DRAC DHCP"] = ch
 
@@ -418,7 +425,7 @@ def chassis(
     inventory = __salt__[chassis_cmd]("inventory")
 
     if idrac_launch:
-        idrac_launch = str(idrac_launch)
+        idrac_launch = six.text_type(idrac_launch)
 
     current_name = __salt__[chassis_cmd]("get_chassis_name")
     if chassis_name != current_name:
@@ -492,7 +499,7 @@ def chassis(
                     target_power_states[key] = "powerup"
                 if current_power_states[key] != -1 and current_power_states[key]:
                     target_power_states[key] = "powercycle"
-        for k, v in target_power_states.items():
+        for k, v in six.iteritems(target_power_states):
             old = {k: current_power_states[k]}
             new = {k: v}
             if ret["changes"].get("Blade Power States") is None:
@@ -551,7 +558,7 @@ def chassis(
             slot_names = True
 
     powerchange_all_ok = True
-    for k, v in target_power_states.items():
+    for k, v in six.iteritems(target_power_states):
         powerchange_ok = __salt__[chassis_cmd]("server_power", v, module=k)
         if not powerchange_ok:
             powerchange_all_ok = False
@@ -701,9 +708,9 @@ def switch(
 
     if any([password_ret, snmp_ret, net_ret, dhcp_ret]) is False:
         ret["result"] = False
-        ret["comment"] = "There was an error setting the switch {}.".format(name)
+        ret["comment"] = "There was an error setting the switch {0}.".format(name)
 
-    ret["comment"] = "Dell chassis switch {} was updated.".format(name)
+    ret["comment"] = "Dell chassis switch {0} was updated.".format(name)
     return ret
 
 
@@ -756,7 +763,7 @@ def firmware_update(hosts=None, directory=""):
             ret["changes"].update(
                 {
                     "host": {
-                        "comment": "Firmware update submitted for {}".format(host),
+                        "comment": "Firmware update submitted for {0}".format(host),
                         "success": True,
                     }
                 }
@@ -766,9 +773,9 @@ def firmware_update(hosts=None, directory=""):
             ret["changes"].update(
                 {
                     "host": {
-                        "comment": "FAILED to update firmware for {}".format(host),
+                        "comment": "FAILED to update firmware for {0}".format(host),
                         "success": False,
-                        "reason": str(err),
+                        "reason": six.text_type(err),
                     }
                 }
             )

@@ -1262,10 +1262,8 @@ def _routes_present(
                     profile=profile,
                 )
                 if "error" in r:
-                    msg = (
-                        "Error looking up id for VPC peering connection {}: {}".format(
-                            i.get("vpc_peering_connection_name"), r["error"]["message"]
-                        )
+                    msg = "Error looking up id for VPC peering connection {}: {}".format(
+                        i.get("vpc_peering_connection_name"), r["error"]["message"]
                     )
                     ret["comment"] = msg
                     ret["result"] = False
@@ -1480,10 +1478,8 @@ def _subnets_present(
                     profile=profile,
                 )
                 if "error" in r:
-                    msg = (
-                        "Failed to associate subnet {} with route table {}: {}.".format(
-                            sn, route_table_name, r["error"]["message"]
-                        )
+                    msg = "Failed to associate subnet {} with route table {}: {}.".format(
+                        sn, route_table_name, r["error"]["message"]
                     )
                     ret["comment"] = msg
                     ret["result"] = False
@@ -1927,7 +1923,7 @@ def request_vpc_peering_connection(
         vpc_ids = []
 
     if vpc_ids:
-        ret["comment"] = "VPC peering connection already exists, nothing to be done."
+        ret["comment"] = "VPC peering connection already exists, " "nothing to be done."
         return ret
 
     if __opts__["test"]:
@@ -2039,10 +2035,11 @@ def vpc_peering_connection_present(
             keyid=keyid,
             profile=profile,
         ):
-            ret[
-                "comment"
-            ] = "VPC peering {} already requested - pending acceptance by {}".format(
-                conn_name, peer_owner_id or peer_vpc_name or peer_vpc_id
+            ret["comment"] = (
+                "VPC peering {} already requested - pending "
+                "acceptance by {}".format(
+                    conn_name, peer_owner_id or peer_vpc_name or peer_vpc_id
+                )
             )
             log.info(ret["comment"])
             return ret

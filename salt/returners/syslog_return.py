@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Return data to the host operating system's syslog facility
 
@@ -85,13 +86,18 @@ To override individual configuration items, append
     implmentation's documentation to determine how to adjust this limit.
 
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 
 import salt.returners
+
+# Import Salt libs
 import salt.utils.jid
 import salt.utils.json
+from salt.ext import six
 
+# Import python libs
 try:
     import syslog
 
@@ -152,7 +158,7 @@ def _verify_options(options):
 
     # Sanity check tag
     if "tag" in options:
-        if not isinstance(options["tag"], str):
+        if not isinstance(options["tag"], six.string_types):
             log.error("tag must be a string")
             return False
         if len(options["tag"]) > 32:

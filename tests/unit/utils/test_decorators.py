@@ -253,10 +253,9 @@ class DecoratorsTest(TestCase):
         self.assertEqual(
             self.messages,
             [
-                'Although function "new_function" is called, an alias "new_function" is'
-                " configured as its deprecated version. The lifetime of the function"
-                ' "new_function" expired. Please use its successor "new_function"'
-                " instead."
+                'Although function "new_function" is called, an alias "new_function" '
+                "is configured as its deprecated version. The lifetime of the function "
+                '"new_function" expired. Please use its successor "new_function" instead.'
             ],
         )
 
@@ -277,10 +276,9 @@ class DecoratorsTest(TestCase):
         self.assertEqual(
             self.messages,
             [
-                'Although function "new_function" is called, an alias "new_function" is'
-                " configured as its deprecated version. The lifetime of the function"
-                ' "new_function" expired. Please use its successor "new_function"'
-                " instead."
+                'Although function "new_function" is called, an alias "new_function" '
+                "is configured as its deprecated version. The lifetime of the function "
+                '"new_function" expired. Please use its successor "new_function" instead.'
             ],
         )
 
@@ -315,8 +313,8 @@ class DecoratorsTest(TestCase):
         self.assertEqual(
             self.messages,
             [
-                'The function "old_function" is deprecated and will expire in version'
-                ' "Beryllium". Use its successor "new_function" instead.'
+                'The function "old_function" is deprecated and will expire in version "Beryllium". '
+                'Use its successor "new_function" instead.'
             ],
         )
 

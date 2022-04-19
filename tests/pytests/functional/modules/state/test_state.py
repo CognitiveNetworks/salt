@@ -88,11 +88,9 @@ def test_catch_recurse(state, state_tree):
     """
     with pytest.helpers.temp_file("recurse-fail.sls", sls_contents, state_tree):
         ret = state.sls("recurse-fail")
-        assert ret.failed
-        assert (
-            'A recursive requisite was found, SLS "recurse-fail" ID "/etc/mysql/my.cnf" ID "mysql"'
-            in ret.errors
-        )
+        assert isinstance(ret, list)  # This is an error
+        assert len(ret) == 1  # It only has one entry
+        assert "recursive" in ret[0]
 
 
 RECURSE_SLS_ONE = """
@@ -167,8 +165,9 @@ def test_running_dictionary_consistency(state):
     }
 
     sls = state.single("test.succeed_without_changes", name="gndn")
-    ret_values_set = set(sls.full_return.keys())
-    assert running_dict_fields.issubset(ret_values_set)
+    for ret in sls.values():
+        ret_values_set = set(ret.keys())
+        assert running_dict_fields.issubset(ret_values_set)
 
 
 def test_running_dictionary_key_sls(state, state_tree):
@@ -176,9 +175,6 @@ def test_running_dictionary_key_sls(state, state_tree):
     Ensure the __sls__ key is either null or a string
     """
     sls1 = state.single("test.succeed_with_changes", name="gndn")
-    assert "__sls__" in sls1.full_return
-    assert sls1.full_return["__sls__"] is None
-
     sls_contents = """
     gndn:
       test.succeed_with_changes
@@ -186,9 +182,13 @@ def test_running_dictionary_key_sls(state, state_tree):
     with pytest.helpers.temp_file("gndn.sls", sls_contents, state_tree):
         sls2 = state.sls(mods="gndn")
 
-    for state_return in sls2:
-        assert "__sls__" in state_return.full_return
-        assert isinstance(state_return.full_return["__sls__"], str)
+    for ret in sls1.values():
+        assert "__sls__" in ret
+        assert ret["__sls__"] is None
+
+    for ret in sls2.values():
+        assert "__sls__" in ret
+        assert isinstance(ret["__sls__"], str)
 
 
 @pytest.fixture
@@ -207,10 +207,7 @@ def requested_sls_key(minion_opts, state_tree):
             - name: 'Get-ChildItem C:\ | Measure-Object | %{$_.Count}'
             - shell: powershell
         """
-        sls_key = (
-            r"cmd_|-count_root_dir_contents_|-Get-ChildItem C:\ | Measure-Object |"
-            r" %{$_.Count}_|-run"
-        )
+        sls_key = r"cmd_|-count_root_dir_contents_|-Get-ChildItem C:\ | Measure-Object | %{$_.Count}_|-run"
     try:
         with pytest.helpers.temp_file(
             "requested.sls", sls_contents, state_tree
@@ -304,13 +301,13 @@ def test_issue_1876_syntax_error(state, state_tree, tmp_path):
         testfile
     )
     with pytest.helpers.temp_file("issue-1876.sls", sls_contents, state_tree):
+
         ret = state.sls("issue-1876")
-        assert ret.failed
-        errmsg = (
-            "ID '{}' in SLS 'issue-1876' contains multiple state declarations of the"
-            " same type".format(testfile)
+        assert isinstance(ret, list)  # An error
+        errmsg = "ID '{}' in SLS 'issue-1876' contains multiple state declarations of the same type".format(
+            testfile
         )
-        assert errmsg in ret.errors
+        assert ret == [errmsg]
 
 
 def test_issue_1879_too_simple_contains_check(state, state_tree, tmp_path):
@@ -370,18 +367,18 @@ def test_issue_1879_too_simple_contains_check(state, state_tree, tmp_path):
     ):
         # Create the file
         ret = state.sls("issue-1879")
-        for staterun in ret:
-            assert staterun.result is True
+        staterun = next(iter(ret.values()))
+        assert staterun["result"] is True
 
         # The first append
         ret = state.sls("issue-1879.step-1")
-        for staterun in ret:
-            assert staterun.result is True
+        staterun = next(iter(ret.values()))
+        assert staterun["result"] is True
 
         # The second append
         ret = state.sls("issue-1879.step-2")
-        for staterun in ret:
-            assert staterun.result is True
+        staterun = next(iter(ret.values()))
+        assert staterun["result"] is True
 
         # Does it match?
         contents = testfile.read_text()
@@ -389,12 +386,12 @@ def test_issue_1879_too_simple_contains_check(state, state_tree, tmp_path):
 
         # Make sure we don't re-append existing text
         ret = state.sls("issue-1879.step-1")
-        for staterun in ret:
-            assert staterun.result is True
+        staterun = next(iter(ret.values()))
+        assert staterun["result"] is True
 
         ret = state.sls("issue-1879.step-2")
-        for staterun in ret:
-            assert staterun.result is True
+        staterun = next(iter(ret.values()))
+        assert staterun["result"] is True
 
         # Does it match?
         contents = testfile.read_text()
@@ -432,8 +429,8 @@ def test_include(state, state_tree, tmp_path):
         "include-test.sls", include_sls_contents, state_tree
     ):
         ret = state.sls("include-test")
-        for staterun in ret:
-            assert staterun.result is True
+        ret = pytest.helpers.state_return(ret)
+        ret.assert_state_true_return()
 
     assert include_test_path.exists()
     assert to_include_test_path.exists()
@@ -486,8 +483,8 @@ def test_exclude(state, state_tree, tmp_path):
         "exclude-test.sls", exclude_sls_contents, state_tree
     ):
         ret = state.sls("exclude-test")
-        for staterun in ret:
-            assert staterun.result is True
+        ret = pytest.helpers.state_return(ret)
+        ret.assert_state_true_return()
 
     assert include_test_path.exists()
     assert exclude_test_path.exists()
@@ -521,33 +518,33 @@ def test_issue_2068_template_str(state, state_tree):
     ) as template_str_path:
         # If running this state with state.sls works, so should using state.template_str
         ret = state.sls("issue-2068-no-dot")
-        for staterun in ret:
-            assert staterun.result is True
+        ret = pytest.helpers.state_return(ret)
+        ret.assert_state_true_return()
 
         template_str_no_dot_contents = template_str_no_dot_path.read_text()
         ret = state.template_str(template_str_no_dot_contents)
-        for staterun in ret:
-            assert staterun.result is True
+        ret = pytest.helpers.state_return(ret)
+        ret.assert_state_true_return()
 
         # Now using state.template
         ret = state.template(str(template_str_no_dot_path))
-        for staterun in ret:
-            assert staterun.result is True
+        ret = pytest.helpers.state_return(ret)
+        ret.assert_state_true_return()
 
         # Now the problematic #2068 including dot's
         ret = state.sls("issue-2068")
-        for staterun in ret:
-            assert staterun.result is True
+        ret = pytest.helpers.state_return(ret)
+        ret.assert_state_true_return()
 
         template_str_contents = template_str_path.read_text()
         ret = state.template_str(template_str_contents)
-        for staterun in ret:
-            assert staterun.result is True
+        ret = pytest.helpers.state_return(ret)
+        ret.assert_state_true_return()
 
         # Now using state.template
         ret = state.template(str(template_str_path))
-        for staterun in ret:
-            assert staterun.result is True
+        ret = pytest.helpers.state_return(ret)
+        ret.assert_state_true_return()
 
 
 @pytest.mark.parametrize("item", ("include", "exclude", "extends"))
@@ -567,12 +564,13 @@ def test_template_str_invalid_items(state, item):
     )
 
     ret = state.template_str(TEMPLATE.format(item))
-    assert ret.failed
+    assert isinstance(ret, list)  # An error
+    assert ret != []  # Not an empty error
     errmsg = (
         "The '{}' declaration found on '<template-str>' is invalid when "
         "rendering single templates".format(item)
     )
-    assert errmsg in ret.errors
+    assert ret == [errmsg]
 
 
 @pytest.mark.skip_on_windows(
@@ -595,8 +593,8 @@ def test_pydsl(state, state_tree, tmp_path):
     )
     with pytest.helpers.temp_file("pydsl.sls", sls_contents, state_tree):
         ret = state.sls("pydsl")
-        for staterun in ret:
-            assert staterun.result is True
+        ret = pytest.helpers.state_return(ret)
+        ret.assert_state_true_return()
         assert testfile.exists()
 
 
@@ -634,12 +632,12 @@ def test_issues_7905_and_8174_sls_syntax_error(state, state_tree):
         "badlist1.sls", badlist_1_sls_contents, state_tree
     ), pytest.helpers.temp_file("badlist2.sls", badlist_2_sls_contents, state_tree):
         ret = state.sls("badlist1")
-        assert ret.failed
-        assert ret.errors == ["State 'A' in SLS 'badlist1' is not formed as a list"]
+        assert isinstance(ret, list)
+        assert ret == ["State 'A' in SLS 'badlist1' is not formed as a list"]
 
         ret = state.sls("badlist2")
-        assert ret.failed
-        assert ret.errors == ["State 'C' in SLS 'badlist2' is not formed as a list"]
+        assert isinstance(ret, list)
+        assert ret == ["State 'C' in SLS 'badlist2' is not formed as a list"]
 
 
 @pytest.mark.slow_test
@@ -665,15 +663,17 @@ def test_retry_option(state, state_tree):
     )
     with pytest.helpers.temp_file("retry.sls", sls_contents, state_tree):
         ret = state.sls("retry")
-        for state_return in ret:
-            assert state_return.result is False
-            assert expected_comment in state_return.comment
-            assert state_return.full_return["duration"] >= 3
+        ret = pytest.helpers.state_return(ret)
+        ret.assert_state_false_return()
+        ret.assert_in_state_comment(expected_comment)
+        for entry in ret.get_within_state_return("duration"):
+            assert entry >= 3
 
 
+@pytest.mark.flaky(max_runs=4, rerun_filter=lambda *a: salt.utils.platform.is_windows())
 def test_retry_option_success(state, state_tree, tmp_path):
     """
-    test a state with the retry option that should return True immediately (i.e. no retries)
+    test a state with the retry option that should return True immedietly (i.e. no retries)
     """
     testfile = tmp_path / "testfile"
     testfile.touch()
@@ -691,11 +691,12 @@ def test_retry_option_success(state, state_tree, tmp_path):
     )
     with pytest.helpers.temp_file("retry.sls", sls_contents, state_tree):
         ret = state.sls("retry")
-        for state_return in ret:
-            assert state_return.result is True
-            assert state_return.full_return["duration"] < 4
-            # It should not take 2 attempts
-            assert "Attempt 2" not in state_return.comment
+        ret = pytest.helpers.state_return(ret)
+        ret.assert_state_true_return()
+        for entry in ret.get_within_state_return("duration"):
+            assert entry < 4
+        # It should not take 2 attempts
+        ret.assert_not_in_state_comment("Attempt 2")
 
 
 @pytest.mark.slow_test
@@ -736,11 +737,12 @@ def test_retry_option_eventual_success(state, state_tree, tmp_path):
     with pytest.helpers.temp_file("retry.sls", sls_contents, state_tree):
         thread.start()
         ret = state.sls("retry")
-        for state_return in ret:
-            assert state_return.result is True
-            assert state_return.full_return["duration"] > 4
-            # It should not take 5 attempts
-            assert "Attempt 5" not in state_return.comment
+        ret = pytest.helpers.state_return(ret)
+        ret.assert_state_true_return()
+        for entry in ret.get_within_state_return("duration"):
+            assert entry > 4  # It needs more than one iteration
+        # It should not take 5 attempts
+        ret.assert_not_in_state_comment("Attempt 5")
 
 
 @pytest.mark.slow_test
@@ -759,8 +761,8 @@ def test_state_non_base_environment(state, state_tree_prod, tmp_path):
     )
     with pytest.helpers.temp_file("non-base-env.sls", sls_contents, state_tree_prod):
         ret = state.sls("non-base-env", saltenv="prod")
-        for state_return in ret:
-            assert state_return.result is True
+        ret = pytest.helpers.state_return(ret)
+        ret.assert_state_true_return()
         assert testfile.exists()
 
 
@@ -801,7 +803,7 @@ def test_parallel_state_with_long_tag(state, state_tree):
             __pub_jid="1",  # Because these run in parallel we need a fake JID
         )
 
-    comments = sorted([x.comment for x in ret])
+    comments = sorted([x["comment"] for x in ret.values()])
     expected = sorted(
         ['Command "{}" run'.format(x) for x in (short_command, long_command)]
     )
@@ -843,15 +845,15 @@ def test_state_sls_integer_name(state, state_tree):
     with pytest.helpers.temp_file("12345.sls", sls_contents, state_tree):
         ret = state.sls("12345")
         assert state_id in ret
-        for state_return in ret:
-            assert state_return.result is True
-            assert "Success!" in state_return.comment
+        ret = pytest.helpers.state_return(ret)
+        ret.assert_state_true_return()
+        ret.assert_in_state_comment("Success!")
 
         ret = state.sls(mods=12345)
         assert state_id in ret
-        for state_return in ret:
-            assert state_return.result is True
-            assert "Success!" in state_return.comment
+        ret = pytest.helpers.state_return(ret)
+        ret.assert_state_true_return()
+        ret.assert_in_state_comment("Success!")
 
 
 def test_state_sls_lazyloader_allows_recursion(state, state_tree):
@@ -871,6 +873,6 @@ def test_state_sls_lazyloader_allows_recursion(state, state_tree):
     with pytest.helpers.temp_file("issue-51499.sls", sls_contents, state_tree):
         ret = state.sls("issue-51499")
         assert state_id in ret
-        for state_return in ret:
-            assert state_return.result is True
-            assert "Success!" in state_return.comment
+        ret = pytest.helpers.state_return(ret)
+        ret.assert_state_true_return()
+        ret.assert_in_state_comment("Success!")

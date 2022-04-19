@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 """
 Author: Volker Schwicking, vs@heg.com
 
@@ -33,6 +34,8 @@ For Port 4506
 tcpdump "tcp[tcpflags] & tcp-syn != 0" and port 4506 and "tcp[tcpflags] & tcp-ack == 0"
 """
 # pylint: disable=resource-leakage
+# Import Python Libs
+from __future__ import absolute_import, print_function
 
 import argparse  # pylint: disable=minimum-python-version
 import socket
@@ -43,7 +46,7 @@ from struct import unpack
 import pcapy  # pylint: disable=import-error,3rd-party-module-not-gated
 
 
-class ArgParser:
+class ArgParser(object):
     """
     Simple Argument-Parser class
     """
@@ -66,7 +69,7 @@ class ArgParser:
             default="eth0",
             dest="iface",
             required=False,
-            help="The interface to dump the master runs on(default:eth0)",
+            help=("the interface to dump the" "master runs on(default:eth0)"),
         )
 
         self.main_parser.add_argument(
@@ -75,7 +78,7 @@ class ArgParser:
             default=5,
             dest="ival",
             required=False,
-            help="Interval for printing stats (default:5)",
+            help=("interval for printing stats " "(default:5)"),
         )
 
         self.main_parser.add_argument(
@@ -86,7 +89,7 @@ class ArgParser:
             nargs="?",
             dest="only_ip",
             required=False,
-            help="Print unique IPs making new connections with SYN set",
+            help=("print unique IPs making new " "connections with SYN set"),
         )
 
     def parse_args(self):
@@ -96,7 +99,7 @@ class ArgParser:
         return self.main_parser.parse_args()
 
 
-class PCAPParser:
+class PCAPParser(object):
     """
     parses a network packet on given device and
     returns source, target, source_port and dest_port
@@ -223,7 +226,7 @@ class PCAPParser:
         return source_port, dest_port, tcp_flags, data
 
 
-class SaltNetstat:
+class SaltNetstat(object):
     """
     Reads /proc/net/tcp and returns all connections
     """
@@ -232,7 +235,7 @@ class SaltNetstat:
         """
         Read the table of tcp connections & remove header
         """
-        with open("/proc/net/tcp") as tcp_f:
+        with open("/proc/net/tcp", "r") as tcp_f:
             content = tcp_f.readlines()
             content.pop(0)
         return content
@@ -360,7 +363,7 @@ def main():
     # the ports we want to monitor
     ports = [4505, 4506]
 
-    print("Sniffing device {}".format(args["iface"]))
+    print("Sniffing device {0}".format(args["iface"]))
 
     stat = {
         "4506/new": 0,
@@ -375,15 +378,13 @@ def main():
 
     if args["only_ip"]:
         print(
-            "IPs making new connections (ports:{}, interval:{})".format(
-                ports, args["ival"]
-            )
+            "IPs making new connections "
+            "(ports:{0}, interval:{1})".format(ports, args["ival"])
         )
     else:
         print(
-            "Salt-Master Network Status (ports:{}, interval:{})".format(
-                ports, args["ival"]
-            )
+            "Salt-Master Network Status "
+            "(ports:{0}, interval:{1})".format(ports, args["ival"])
         )
     try:
         while 1:
@@ -424,17 +425,17 @@ def main():
                 # prevent printing within the same second
                 if r_time != s_time:
                     if args["only_ip"]:
-                        msg = "IPs/4505: {}, IPs/4506: {}".format(
+                        msg = "IPs/4505: {0}, IPs/4506: {1}".format(
                             len(ips_auth), len(ips_push)
                         )
                     else:
-                        msg = "4505=>[ est: {}, ".format(stat["4505/est"])
-                        msg += "new: {}/s, ".format(stat["4505/new"] / args["ival"])
-                        msg += "fin: {}/s ] ".format(stat["4505/fin"] / args["ival"])
+                        msg = "4505=>[ est: {0}, ".format(stat["4505/est"])
+                        msg += "new: {0}/s, ".format(stat["4505/new"] / args["ival"])
+                        msg += "fin: {0}/s ] ".format(stat["4505/fin"] / args["ival"])
 
-                        msg += " 4506=>[ est: {}, ".format(stat["4506/est"])
-                        msg += "new: {}/s, ".format(stat["4506/new"] / args["ival"])
-                        msg += "fin: {}/s ]".format(stat["4506/fin"] / args["ival"])
+                        msg += " 4506=>[ est: {0}, ".format(stat["4506/est"])
+                        msg += "new: {0}/s, ".format(stat["4506/new"] / args["ival"])
+                        msg += "fin: {0}/s ]".format(stat["4506/fin"] / args["ival"])
 
                     print(msg)
 

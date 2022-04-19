@@ -8,6 +8,7 @@ import salt.loader
 import salt.modules.boto_secgroup as boto_secgroup
 
 # pylint: disable=import-error
+from salt.ext.six.moves import range  # pylint: disable=redefined-builtin
 from salt.utils.odict import OrderedDict
 from salt.utils.versions import LooseVersion
 from tests.support.mixins import LoaderModuleMockMixin
@@ -96,9 +97,8 @@ def _has_required_boto():
 @skipIf(HAS_MOTO is False, "The moto module must be installed.")
 @skipIf(
     _has_required_boto() is False,
-    "The boto module must be greater than or equal to version {}".format(
-        required_boto_version
-    ),
+    "The boto module must be greater than"
+    " or equal to version {}".format(required_boto_version),
 )
 class BotoSecgroupTestCase(TestCase, LoaderModuleMockMixin):
     """

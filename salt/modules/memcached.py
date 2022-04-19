@@ -1,17 +1,23 @@
+# -*- coding: utf-8 -*-
 """
 Module for Management of Memcached Keys
 
 .. versionadded:: 2014.1.0
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import python libs
 import logging
 
+# Import salt libs
 import salt.utils.functools
 from salt.exceptions import CommandExecutionError, SaltInvocationError
+from salt.ext import six
 
 # TODO: use salt.utils.memcache
 
 
+# Import third party libs
 try:
     import memcache
 
@@ -50,8 +56,8 @@ def _connect(host=DEFAULT_HOST, port=DEFAULT_PORT):
     Returns a tuple of (user, host, port) with config, pillar, or default
     values assigned to missing values.
     """
-    if str(port).isdigit():
-        return memcache.Client(["{}:{}".format(host, port)], debug=0)
+    if six.text_type(port).isdigit():
+        return memcache.Client(["{0}:{1}".format(host, port)], debug=0)
     raise SaltInvocationError("port must be an integer")
 
 
@@ -117,9 +123,9 @@ def set_(
 
         salt '*' memcached.set <key> <value>
     """
-    if not isinstance(time, int):
+    if not isinstance(time, six.integer_types):
         raise SaltInvocationError("'time' must be an integer")
-    if not isinstance(min_compress_len, int):
+    if not isinstance(min_compress_len, six.integer_types):
         raise SaltInvocationError("'min_compress_len' must be an integer")
     conn = _connect(host, port)
     _check_stats(conn)
@@ -136,7 +142,7 @@ def delete(key, host=DEFAULT_HOST, port=DEFAULT_PORT, time=DEFAULT_TIME):
 
         salt '*' memcached.delete <key>
     """
-    if not isinstance(time, int):
+    if not isinstance(time, six.integer_types):
         raise SaltInvocationError("'time' must be an integer")
     conn = _connect(host, port)
     _check_stats(conn)
@@ -161,9 +167,9 @@ def add(
 
         salt '*' memcached.add <key> <value>
     """
-    if not isinstance(time, int):
+    if not isinstance(time, six.integer_types):
         raise SaltInvocationError("'time' must be an integer")
-    if not isinstance(min_compress_len, int):
+    if not isinstance(min_compress_len, six.integer_types):
         raise SaltInvocationError("'min_compress_len' must be an integer")
     conn = _connect(host, port)
     _check_stats(conn)
@@ -189,9 +195,9 @@ def replace(
 
         salt '*' memcached.replace <key> <value>
     """
-    if not isinstance(time, int):
+    if not isinstance(time, six.integer_types):
         raise SaltInvocationError("'time' must be an integer")
-    if not isinstance(min_compress_len, int):
+    if not isinstance(min_compress_len, six.integer_types):
         raise SaltInvocationError("'min_compress_len' must be an integer")
     conn = _connect(host, port)
     stats = conn.get_stats()
@@ -214,10 +220,10 @@ def increment(key, delta=1, host=DEFAULT_HOST, port=DEFAULT_PORT):
     cur = get(key)
 
     if cur is None:
-        raise CommandExecutionError("Key '{}' does not exist".format(key))
-    elif not isinstance(cur, int):
+        raise CommandExecutionError("Key '{0}' does not exist".format(key))
+    elif not isinstance(cur, six.integer_types):
         raise CommandExecutionError(
-            "Value for key '{}' must be an integer to be incremented".format(key)
+            "Value for key '{0}' must be an integer to be " "incremented".format(key)
         )
 
     try:
@@ -245,10 +251,10 @@ def decrement(key, delta=1, host=DEFAULT_HOST, port=DEFAULT_PORT):
 
     cur = get(key)
     if cur is None:
-        raise CommandExecutionError("Key '{}' does not exist".format(key))
-    elif not isinstance(cur, int):
+        raise CommandExecutionError("Key '{0}' does not exist".format(key))
+    elif not isinstance(cur, six.integer_types):
         raise CommandExecutionError(
-            "Value for key '{}' must be an integer to be decremented".format(key)
+            "Value for key '{0}' must be an integer to be " "decremented".format(key)
         )
 
     try:

@@ -1,7 +1,10 @@
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, print_function, unicode_literals
+
 import pyrax  # pylint: disable=3rd-party-module-not-gated
 
 
-class Authenticate:
+class Authenticate(object):
     def __init__(self, username, password, region, **kwargs):
         cloud_kwargs = {"password": password, "region": region}
         pyrax.settings.set("identity_type", kwargs.get("identity_type", "rackspace"))

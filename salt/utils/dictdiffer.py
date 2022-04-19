@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
  Calculate the difference between two dictionaries as:
     (1) items added
@@ -10,16 +11,19 @@
 
   Added the ability to recursively compare dictionaries
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
 import copy
 from collections.abc import Mapping
+
+from salt.ext import six
 
 
 def diff(current_dict, past_dict):
     return DictDiffer(current_dict, past_dict)
 
 
-class DictDiffer:
+class DictDiffer(object):
     """
     Calculate the difference between two dictionaries as:
     (1) items added
@@ -40,10 +44,14 @@ class DictDiffer:
         return self.set_past - self.intersect
 
     def changed(self):
-        return {o for o in self.intersect if self.past_dict[o] != self.current_dict[o]}
+        return set(
+            o for o in self.intersect if self.past_dict[o] != self.current_dict[o]
+        )
 
     def unchanged(self):
-        return {o for o in self.intersect if self.past_dict[o] == self.current_dict[o]}
+        return set(
+            o for o in self.intersect if self.past_dict[o] == self.current_dict[o]
+        )
 
 
 def deep_diff(old, new, ignore=None):
@@ -129,14 +137,14 @@ class RecursiveDictDiffer(DictDiffer):
     Note:
         The <_null_> value is a reserved value
 
-    .. code-block:: text
+.. code-block:: text
 
-        common_key1:
-          common_key2:
-            changed_key1 from '<old_str>' to '<new_str>'
-            changed_key2 from '[<old_elem1>, ..]' to '[<new_elem1>, ..]'
-        common_key3:
-          changed_key3 from <old_int> to <new_int>
+            common_key1:
+              common_key2:
+                changed_key1 from '<old_str>' to '<new_str>'
+                changed_key2 from '[<old_elem1>, ..]' to '[<new_elem1>, ..]'
+            common_key3:
+              changed_key3 from <old_int> to <new_int>
 
     """
 
@@ -155,7 +163,7 @@ class RecursiveDictDiffer(DictDiffer):
             current_dict, but exist in the past_dict. If true, the diff will
             not contain the missing keys.
         """
-        super().__init__(current_dict, past_dict)
+        super(RecursiveDictDiffer, self).__init__(current_dict, past_dict)
         self._diffs = self._get_diffs(
             self.current_dict, self.past_dict, ignore_missing_keys
         )
@@ -221,25 +229,25 @@ class RecursiveDictDiffer(DictDiffer):
                 old_value = diff_dict[p]["old"]
                 if diff_dict[p]["old"] == cls.NONE_VALUE:
                     old_value = "nothing"
-                elif isinstance(diff_dict[p]["old"], str):
-                    old_value = "'{}'".format(diff_dict[p]["old"])
+                elif isinstance(diff_dict[p]["old"], six.string_types):
+                    old_value = "'{0}'".format(diff_dict[p]["old"])
                 elif isinstance(diff_dict[p]["old"], list):
-                    old_value = "'{}'".format(", ".join(diff_dict[p]["old"]))
+                    old_value = "'{0}'".format(", ".join(diff_dict[p]["old"]))
                 new_value = diff_dict[p]["new"]
                 if diff_dict[p]["new"] == cls.NONE_VALUE:
                     new_value = "nothing"
-                elif isinstance(diff_dict[p]["new"], str):
-                    new_value = "'{}'".format(diff_dict[p]["new"])
+                elif isinstance(diff_dict[p]["new"], six.string_types):
+                    new_value = "'{0}'".format(diff_dict[p]["new"])
                 elif isinstance(diff_dict[p]["new"], list):
-                    new_value = "'{}'".format(", ".join(diff_dict[p]["new"]))
+                    new_value = "'{0}'".format(", ".join(diff_dict[p]["new"]))
                 changes_strings.append(
-                    "{} from {} to {}".format(p, old_value, new_value)
+                    "{0} from {1} to {2}".format(p, old_value, new_value)
                 )
             else:
                 sub_changes = cls._get_changes(diff_dict[p])
                 if sub_changes:
-                    changes_strings.append("{}:".format(p))
-                    changes_strings.extend(["  {}".format(c) for c in sub_changes])
+                    changes_strings.append("{0}:".format(p))
+                    changes_strings.extend(["  {0}".format(c) for c in sub_changes])
         return changes_strings
 
     def added(self):
@@ -254,16 +262,18 @@ class RecursiveDictDiffer(DictDiffer):
             keys = []
             for key in diffs.keys():
                 if isinstance(diffs[key], dict) and "old" not in diffs[key]:
-                    keys.extend(_added(diffs[key], prefix="{}{}.".format(prefix, key)))
+                    keys.extend(
+                        _added(diffs[key], prefix="{0}{1}.".format(prefix, key))
+                    )
                 elif diffs[key]["old"] == self.NONE_VALUE:
                     if isinstance(diffs[key]["new"], dict):
                         keys.extend(
                             _added(
-                                diffs[key]["new"], prefix="{}{}.".format(prefix, key)
+                                diffs[key]["new"], prefix="{0}{1}.".format(prefix, key)
                             )
                         )
                     else:
-                        keys.append("{}{}".format(prefix, key))
+                        keys.append("{0}{1}".format(prefix, key))
             return keys
 
         return sorted(_added(self._diffs, prefix=""))
@@ -281,13 +291,15 @@ class RecursiveDictDiffer(DictDiffer):
             for key in diffs.keys():
                 if isinstance(diffs[key], dict) and "old" not in diffs[key]:
                     keys.extend(
-                        _removed(diffs[key], prefix="{}{}.".format(prefix, key))
+                        _removed(diffs[key], prefix="{0}{1}.".format(prefix, key))
                     )
                 elif diffs[key]["new"] == self.NONE_VALUE:
-                    keys.append("{}{}".format(prefix, key))
+                    keys.append("{0}{1}".format(prefix, key))
                 elif isinstance(diffs[key]["new"], dict):
                     keys.extend(
-                        _removed(diffs[key]["new"], prefix="{}{}.".format(prefix, key))
+                        _removed(
+                            diffs[key]["new"], prefix="{0}{1}.".format(prefix, key)
+                        )
                     )
             return keys
 
@@ -309,7 +321,7 @@ class RecursiveDictDiffer(DictDiffer):
 
                 if isinstance(diffs[key], dict) and "old" not in diffs[key]:
                     keys.extend(
-                        _changed(diffs[key], prefix="{}{}.".format(prefix, key))
+                        _changed(diffs[key], prefix="{0}{1}.".format(prefix, key))
                     )
                     continue
                 if self.ignore_unset_values:
@@ -323,14 +335,14 @@ class RecursiveDictDiffer(DictDiffer):
                             keys.extend(
                                 _changed(
                                     diffs[key]["new"],
-                                    prefix="{}{}.".format(prefix, key),
+                                    prefix="{0}{1}.".format(prefix, key),
                                 )
                             )
                         else:
-                            keys.append("{}{}".format(prefix, key))
+                            keys.append("{0}{1}".format(prefix, key))
                     elif isinstance(diffs[key], dict):
                         keys.extend(
-                            _changed(diffs[key], prefix="{}{}.".format(prefix, key))
+                            _changed(diffs[key], prefix="{0}{1}.".format(prefix, key))
                         )
                 else:
                     if "old" in diffs[key] and "new" in diffs[key]:
@@ -338,14 +350,14 @@ class RecursiveDictDiffer(DictDiffer):
                             keys.extend(
                                 _changed(
                                     diffs[key]["new"],
-                                    prefix="{}{}.".format(prefix, key),
+                                    prefix="{0}{1}.".format(prefix, key),
                                 )
                             )
                         else:
-                            keys.append("{}{}".format(prefix, key))
+                            keys.append("{0}{1}".format(prefix, key))
                     elif isinstance(diffs[key], dict):
                         keys.extend(
-                            _changed(diffs[key], prefix="{}{}.".format(prefix, key))
+                            _changed(diffs[key], prefix="{0}{1}.".format(prefix, key))
                         )
 
             return keys
@@ -364,7 +376,7 @@ class RecursiveDictDiffer(DictDiffer):
             keys = []
             for key in current_dict.keys():
                 if key not in diffs:
-                    keys.append("{}{}".format(prefix, key))
+                    keys.append("{0}{1}".format(prefix, key))
                 elif isinstance(current_dict[key], dict):
                     if "new" in diffs[key]:
                         # There is a diff
@@ -374,7 +386,7 @@ class RecursiveDictDiffer(DictDiffer):
                             _unchanged(
                                 current_dict[key],
                                 diffs[key],
-                                prefix="{}{}.".format(prefix, key),
+                                prefix="{0}{1}.".format(prefix, key),
                             )
                         )
 

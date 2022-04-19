@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Return data to a mongodb server
 
@@ -59,13 +60,19 @@ To override individual configuration items, append --return_kwargs '{"key:": "va
     salt '*' test.ping --return mongo --return_kwargs '{"db": "another-salt"}'
 
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import python libs
 import logging
 
 import salt.returners
+
+# import Salt libs
 import salt.utils.jid
+from salt.ext import six
 from salt.utils.versions import LooseVersion as _LooseVersion
 
+# Import third party libs
 try:
     import pymongo
 
@@ -93,7 +100,7 @@ def _remove_dots(src):
     Remove dots from the given data structure
     """
     output = {}
-    for key, val in src.items():
+    for key, val in six.iteritems(src):
         if isinstance(val, dict):
             val = _remove_dots(val)
         output[key.replace(".", "-")] = val

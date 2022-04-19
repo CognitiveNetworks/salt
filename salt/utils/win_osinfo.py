@@ -1,8 +1,11 @@
+# -*- coding: utf-8 -*-
 """
 Get Version information from Windows
 """
 # http://stackoverflow.com/questions/32300004/python-ctypes-getting-0-with-getversionex-function
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import Third Party Libs
 import ctypes
 
 HAS_WIN32 = True
@@ -15,7 +18,7 @@ except (ImportError, ValueError):
 
 if HAS_WIN32:
     kernel32 = ctypes.WinDLL(
-        "kernel32",
+        str("kernel32"),  # future lint: disable=blacklisted-function
         use_last_error=True,
     )
 
@@ -54,7 +57,7 @@ def os_version_info_ex():
         )
 
         def __init__(self, *args, **kwds):
-            super().__init__(*args, **kwds)
+            super(OSVersionInfo, self).__init__(*args, **kwds)
             self.dwOSVersionInfoSize = ctypes.sizeof(self)
             kernel32.GetVersionExW(ctypes.byref(self))
 

@@ -46,8 +46,7 @@ def test_no_user():
 
     _expected = (
         False,
-        "Configuration for glxinfo beacon must include a user as glxinfo is not"
-        " available to root.",
+        "Configuration for glxinfo beacon must include a user as glxinfo is not available to root.",
     )
 
     ret = glxinfo.validate(config)

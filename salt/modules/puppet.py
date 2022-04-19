@@ -1,13 +1,17 @@
+# -*- coding: utf-8 -*-
 """
 Execute puppet routines
 """
 
+# Import python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import datetime
 import logging
 import os
 from distutils import version  # pylint: disable=no-name-in-module
 
+# Import salt libs
 import salt.utils.args
 import salt.utils.files
 import salt.utils.path
@@ -15,6 +19,10 @@ import salt.utils.platform
 import salt.utils.stringutils
 import salt.utils.yaml
 from salt.exceptions import CommandExecutionError
+
+# Import 3rd-party libs
+from salt.ext import six
+from salt.ext.six.moves import range
 
 log = logging.getLogger(__name__)
 
@@ -29,8 +37,9 @@ def __virtual__():
     if unavailable_exes:
         return (
             False,
-            "The puppet execution module cannot be loaded: {} unavailable.".format(
-                unavailable_exes
+            (
+                "The puppet execution module cannot be loaded: "
+                "{0} unavailable.".format(unavailable_exes)
             ),
         )
     else:
@@ -47,7 +56,7 @@ def _format_fact(output):
     return (fact, value)
 
 
-class _Puppet:
+class _Puppet(object):
     """
     Puppet helper class. Used to format command for execution.
     """
@@ -99,15 +108,17 @@ class _Puppet:
         )
 
         args = " ".join(self.subcmd_args)
-        args += "".join([" --{}".format(k) for k in self.args])  # single spaces
-        args += "".join([" --{} {}".format(k, v) for k, v in self.kwargs.items()])
+        args += "".join([" --{0}".format(k) for k in self.args])  # single spaces
+        args += "".join(
+            [" --{0} {1}".format(k, v) for k, v in six.iteritems(self.kwargs)]
+        )
 
         # Ensure that the puppet call will return 0 in case of exit code 2
         if salt.utils.platform.is_windows():
-            return "cmd /V:ON /c {} {} ^& if !ERRORLEVEL! EQU 2 (EXIT 0) ELSE (EXIT /B)".format(
+            return "cmd /V:ON /c {0} {1} ^& if !ERRORLEVEL! EQU 2 (EXIT 0) ELSE (EXIT /B)".format(
                 cmd, args
             )
-        return "({} {}) || test $? -eq 2".format(cmd, args)
+        return "({0} {1}) || test $? -eq 2".format(cmd, args)
 
     def arguments(self, args=None):
         """
@@ -155,14 +166,14 @@ def run(*args, **kwargs):
 
     # new args tuple to filter out agent/apply for _Puppet.arguments()
     buildargs = ()
-    for arg in args:
+    for arg in range(len(args)):
         # based on puppet documentation action must come first. making the same
         # assertion. need to ensure the list of supported cmds here matches
         # those defined in _Puppet.arguments()
-        if arg in ["agent", "apply"]:
-            puppet.subcmd = arg
+        if args[arg] in ["agent", "apply"]:
+            puppet.subcmd = args[arg]
         else:
-            buildargs += (arg,)
+            buildargs += (args[arg],)
     # args will exist as an empty list even if none have been provided
     puppet.arguments(buildargs)
 
@@ -207,8 +218,8 @@ def enable():
     if os.path.isfile(puppet.disabled_lockfile):
         try:
             os.remove(puppet.disabled_lockfile)
-        except OSError as exc:
-            msg = "Failed to enable: {}".format(exc)
+        except (IOError, OSError) as exc:
+            msg = "Failed to enable: {0}".format(exc)
             log.error(msg)
             raise CommandExecutionError(msg)
         else:
@@ -251,8 +262,8 @@ def disable(message=None):
                 lockfile.write(salt.utils.stringutils.to_str(msg))
                 lockfile.close()
                 return True
-            except OSError as exc:
-                msg = "Failed to disable: {}".format(exc)
+            except (IOError, OSError) as exc:
+                msg = "Failed to disable: {0}".format(exc)
                 log.error(msg)
                 raise CommandExecutionError(msg)
 
@@ -335,10 +346,12 @@ def summary():
 
     except salt.utils.yaml.YAMLError as exc:
         raise CommandExecutionError(
-            "YAML error parsing puppet run summary: {}".format(exc)
+            "YAML error parsing puppet run summary: {0}".format(exc)
         )
-    except OSError as exc:
-        raise CommandExecutionError("Unable to read puppet run summary: {}".format(exc))
+    except IOError as exc:
+        raise CommandExecutionError(
+            "Unable to read puppet run summary: {0}".format(exc)
+        )
 
     return result
 
@@ -372,7 +385,7 @@ def facts(puppet=False):
     """
     ret = {}
     opt_puppet = "--puppet" if puppet else ""
-    cmd_ret = __salt__["cmd.run_all"]("facter {}".format(opt_puppet))
+    cmd_ret = __salt__["cmd.run_all"]("facter {0}".format(opt_puppet))
 
     if cmd_ret["retcode"] != 0:
         raise CommandExecutionError(cmd_ret["stderr"])
@@ -404,7 +417,7 @@ def fact(name, puppet=False):
     """
     opt_puppet = "--puppet" if puppet else ""
     ret = __salt__["cmd.run_all"](
-        "facter {} {}".format(opt_puppet, name), python_shell=False
+        "facter {0} {1}".format(opt_puppet, name), python_shell=False
     )
 
     if ret["retcode"] != 0:

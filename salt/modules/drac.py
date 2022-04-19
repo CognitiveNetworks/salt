@@ -1,11 +1,19 @@
+# -*- coding: utf-8 -*-
 """
 Manage Dell DRAC
 """
 
+# Import python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 
+# Import Salt libs
 import salt.utils.path
+
+# Import 3rd-party libs
+from salt.ext import six
+from salt.ext.six.moves import range
 
 log = logging.getLogger(__name__)
 
@@ -43,7 +51,7 @@ def __execute_cmd(command):
     """
     Execute rac commands
     """
-    cmd = __salt__["cmd.run_all"]("racadm {}".format(command))
+    cmd = __salt__["cmd.run_all"]("racadm {0}".format(command))
 
     if cmd["retcode"] != 0:
         log.warning("racadm return an exit code '%s'.", cmd["retcode"])
@@ -106,7 +114,10 @@ def nameservers(*ns):
 
     for i in range(1, len(ns) + 1):
         if not __execute_cmd(
-            "config -g cfgLanNetworking -o cfgDNSServer{} {}".format(i, ns[i - 1])
+            "config -g cfgLanNetworking -o \
+                cfgDNSServer{0} {1}".format(
+                i, ns[i - 1]
+            )
         ):
             return False
 
@@ -126,9 +137,15 @@ def syslog(server, enable=True):
         salt dell drac.syslog [SYSLOG IP] [ENABLE/DISABLE]
         salt dell drac.syslog 0.0.0.0 False
     """
-    if enable and __execute_cmd("config -g cfgRemoteHosts -o cfgRhostsSyslogEnable 1"):
+    if enable and __execute_cmd(
+        "config -g cfgRemoteHosts -o \
+                cfgRhostsSyslogEnable 1"
+    ):
         return __execute_cmd(
-            "config -g cfgRemoteHosts -o cfgRhostsSyslogServer1 {}".format(server)
+            "config -g cfgRemoteHosts -o \
+                cfgRhostsSyslogServer1 {0}".format(
+                server
+            )
         )
 
     return __execute_cmd("config -g cfgRemoteHosts -o cfgRhostsSyslogEnable 0")
@@ -147,9 +164,15 @@ def email_alerts(action):
     """
 
     if action:
-        return __execute_cmd("config -g cfgEmailAlert -o cfgEmailAlertEnable -i 1 1")
+        return __execute_cmd(
+            "config -g cfgEmailAlert -o \
+                cfgEmailAlertEnable -i 1 1"
+        )
     else:
-        return __execute_cmd("config -g cfgEmailAlert -o cfgEmailAlertEnable -i 1 0")
+        return __execute_cmd(
+            "config -g cfgEmailAlert -o \
+                cfgEmailAlertEnable -i 1 0"
+        )
 
 
 def list_users():
@@ -167,7 +190,10 @@ def list_users():
 
     for idx in range(1, 17):
         cmd = __salt__["cmd.run_all"](
-            "racadm getconfig -g cfgUserAdmin -i {}".format(idx)
+            "racadm getconfig -g \
+                cfgUserAdmin -i {0}".format(
+                idx
+            )
         )
 
         if cmd["retcode"] != 0:
@@ -209,7 +235,10 @@ def delete_user(username, uid=None):
 
     if uid:
         return __execute_cmd(
-            'config -g cfgUserAdmin -o cfgUserAdminUserName -i {} ""'.format(uid)
+            'config -g cfgUserAdmin -o \
+                              cfgUserAdminUserName -i {0} ""'.format(
+                uid
+            )
         )
 
     else:
@@ -236,7 +265,8 @@ def change_password(username, password, uid=None):
 
     if uid:
         return __execute_cmd(
-            "config -g cfgUserAdmin -o cfgUserAdminPassword -i {} {}".format(
+            "config -g cfgUserAdmin -o \
+                cfgUserAdminPassword -i {0} {1}".format(
                 uid, password
             )
         )
@@ -278,14 +308,17 @@ def create_user(username, password, permissions, users=None):
         log.warning("'%s' already exists", username)
         return False
 
-    for idx in users.keys():
+    for idx in six.iterkeys(users):
         _uids.add(users[idx]["index"])
 
     uid = sorted(list(set(range(2, 12)) - _uids), reverse=True).pop()
 
     # Create user accountvfirst
     if not __execute_cmd(
-        "config -g cfgUserAdmin -o cfgUserAdminUserName -i {} {}".format(uid, username)
+        "config -g cfgUserAdmin -o \
+                 cfgUserAdminUserName -i {0} {1}".format(
+            uid, username
+        )
     ):
         delete_user(username, uid)
         return False
@@ -304,7 +337,10 @@ def create_user(username, password, permissions, users=None):
 
     # Enable users admin
     if not __execute_cmd(
-        "config -g cfgUserAdmin -o cfgUserAdminEnable -i {} 1".format(uid)
+        "config -g cfgUserAdmin -o \
+                          cfgUserAdminEnable -i {0} 1".format(
+            uid
+        )
     ):
         delete_user(username, uid)
         return False
@@ -361,7 +397,8 @@ def set_permissions(username, permissions, uid=None):
             permission += int(privileges[perm], 16)
 
     return __execute_cmd(
-        "config -g cfgUserAdmin -o cfgUserAdminPrivilege -i {} 0x{:08X}".format(
+        "config -g cfgUserAdmin -o \
+            cfgUserAdminPrivilege -i {0} 0x{1:08X}".format(
             uid, permission
         )
     )
@@ -379,7 +416,10 @@ def set_snmp(community):
         salt dell drac.set_snmp public
     """
     return __execute_cmd(
-        "config -g cfgOobSnmp -o cfgOobSnmpAgentCommunity {}".format(community)
+        "config -g cfgOobSnmp -o \
+            cfgOobSnmpAgentCommunity {0}".format(
+            community
+        )
     )
 
 
@@ -394,7 +434,7 @@ def set_network(ip, netmask, gateway):
         salt dell drac.set_network [DRAC IP] [NETMASK] [GATEWAY]
         salt dell drac.set_network 192.168.0.2 255.255.255.0 192.168.0.1
     """
-    return __execute_cmd("setniccfg -s {} {} {}".format(ip, netmask, gateway))
+    return __execute_cmd("setniccfg -s {0} {1} {2}".format(ip, netmask, gateway))
 
 
 def server_reboot():
@@ -461,7 +501,10 @@ def server_pxe():
 
         salt dell drac.server_pxe
     """
-    if __execute_cmd("config -g cfgServerInfo -o cfgServerFirstBootDevice PXE"):
+    if __execute_cmd(
+        "config -g cfgServerInfo -o \
+            cfgServerFirstBootDevice PXE"
+    ):
         if __execute_cmd("config -g cfgServerInfo -o cfgServerBootOnce 1"):
             return server_reboot
         else:

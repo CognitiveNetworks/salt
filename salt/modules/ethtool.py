@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Module for running ethtool command
 
@@ -9,9 +10,12 @@ Module for running ethtool command
 :platform:      linux
 """
 
+# Import python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 
+# Import third party libs
 try:
     import ethtool
 
@@ -96,7 +100,7 @@ def show_ring(devname):
 
     try:
         ring = ethtool.get_ringparam(devname)
-    except OSError:
+    except IOError:
         log.error("Ring parameters not supported on %s", devname)
         return "Not supported"
 
@@ -120,7 +124,7 @@ def show_coalesce(devname):
 
     try:
         coalesce = ethtool.get_coalesce(devname)
-    except OSError:
+    except IOError:
         log.error("Interrupt coalescing not supported on %s", devname)
         return "Not supported"
 
@@ -144,13 +148,13 @@ def show_driver(devname):
 
     try:
         module = ethtool.get_module(devname)
-    except OSError:
+    except IOError:
         log.error("Driver information not implemented on %s", devname)
         return "Not implemented"
 
     try:
         businfo = ethtool.get_businfo(devname)
-    except OSError:
+    except IOError:
         log.error("Bus information no available on %s", devname)
         return "Not available"
 
@@ -175,7 +179,7 @@ def set_ring(devname, **kwargs):
 
     try:
         ring = ethtool.get_ringparam(devname)
-    except OSError:
+    except IOError:
         log.error("Ring parameters not supported on %s", devname)
         return "Not supported"
 
@@ -192,7 +196,7 @@ def set_ring(devname, **kwargs):
         if changed:
             ethtool.set_ringparam(devname, ring)
         return show_ring(devname)
-    except OSError:
+    except IOError:
         log.error("Invalid ring arguments on %s: %s", devname, ring)
         return "Invalid arguments"
 
@@ -214,7 +218,7 @@ def set_coalesce(devname, **kwargs):
 
     try:
         coalesce = ethtool.get_coalesce(devname)
-    except OSError:
+    except IOError:
         log.error("Interrupt coalescing not supported on %s", devname)
         return "Not supported"
 
@@ -233,7 +237,7 @@ def set_coalesce(devname, **kwargs):
             ethtool.set_coalesce(devname, coalesce)
             # pylint: enable=too-many-function-args
         return show_coalesce(devname)
-    except OSError:
+    except IOError:
         log.error("Invalid coalesce arguments on %s: %s", devname, coalesce)
         return "Invalid arguments"
 
@@ -251,22 +255,22 @@ def show_offload(devname):
 
     try:
         sg = ethtool.get_sg(devname) and "on" or "off"
-    except OSError:
+    except IOError:
         sg = "not supported"
 
     try:
         tso = ethtool.get_tso(devname) and "on" or "off"
-    except OSError:
+    except IOError:
         tso = "not supported"
 
     try:
         ufo = ethtool.get_ufo(devname) and "on" or "off"
-    except OSError:
+    except IOError:
         ufo = "not supported"
 
     try:
         gso = ethtool.get_gso(devname) and "on" or "off"
-    except OSError:
+    except IOError:
         gso = "not supported"
 
     offload = {
@@ -295,7 +299,7 @@ def set_offload(devname, **kwargs):
             value = value == "on" and 1 or 0
             try:
                 ethtool.set_tso(devname, value)
-            except OSError:
+            except IOError:
                 return "Not supported"
 
     return show_offload(devname)

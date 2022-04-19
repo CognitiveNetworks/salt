@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Manage OpenStack configuration file settings.
 
@@ -8,8 +9,13 @@ Manage OpenStack configuration file settings.
 
 """
 
+# Import Python Libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 from salt.exceptions import CommandExecutionError
+
+# Import Salt Libs
+from salt.ext import six
 
 
 def __virtual__():
@@ -60,13 +66,13 @@ def present(name, filename, section, value, parameter=None):
 
         if __opts__["test"]:
             ret["result"] = None
-            ret["comment"] = "Value '{}' is set to be changed to '{}'.".format(
+            ret["comment"] = "Value '{0}' is set to be changed to '{1}'.".format(
                 old_value, value
             )
             return ret
 
     except CommandExecutionError as err:
-        if not str(err).lower().startswith("parameter not found:"):
+        if not six.text_type(err).lower().startswith("parameter not found:"):
             raise
 
     __salt__["openstack_config.set"](
@@ -105,7 +111,7 @@ def absent(name, filename, section, parameter=None):
             filename=filename, section=section, parameter=parameter
         )
     except CommandExecutionError as err:
-        if str(err).lower().startswith("parameter not found:"):
+        if six.text_type(err).lower().startswith("parameter not found:"):
             ret["result"] = True
             ret["comment"] = "The value is already absent"
             return ret
@@ -113,7 +119,7 @@ def absent(name, filename, section, parameter=None):
 
     if __opts__["test"]:
         ret["result"] = None
-        ret["comment"] = "Value '{}' is set to be deleted.".format(old_value)
+        ret["comment"] = "Value '{0}' is set to be deleted.".format(old_value)
         return ret
 
     __salt__["openstack_config.delete"](

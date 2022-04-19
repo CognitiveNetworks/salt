@@ -19,13 +19,13 @@ import shutil
 import tempfile
 import time
 import traceback
-import urllib.parse
 
 import salt.utils.files
 import salt.utils.path
 import salt.utils.user
 import salt.utils.vt
 from salt.exceptions import CommandExecutionError, SaltInvocationError
+from salt.ext.six.moves.urllib.parse import urlparse as _urlparse
 
 HAS_LIBS = False
 
@@ -114,7 +114,7 @@ def _get_src(tree_base, source, saltenv="base", runas="root"):
     """
     Get the named sources and place them into the tree_base
     """
-    parsed = urllib.parse.urlparse(source)
+    parsed = _urlparse(source)
     sbase = os.path.basename(source)
     dest = os.path.join(tree_base, "SOURCES", sbase)
     if parsed.scheme:
@@ -153,7 +153,7 @@ def _get_deps(deps, tree_base, saltenv="base"):
             "'deps' must be a Python list or comma-separated string"
         )
     for deprpm in deps:
-        parsed = urllib.parse._urlparse(deprpm)
+        parsed = _urlparse(deprpm)
         depbase = os.path.basename(deprpm)
         dest = os.path.join(tree_base, depbase)
         if parsed.scheme:
@@ -248,8 +248,7 @@ def _get_gpg_key_resources(keyid, env, use_passphrase, gnupghome, runas):
 
         if pkg_pub_key_file is None or pkg_priv_key_file is None:
             raise SaltInvocationError(
-                "Pillar data should contain Public and Private keys associated with"
-                " 'keyid'"
+                "Pillar data should contain Public and Private keys associated with 'keyid'"
             )
         try:
             __salt__["gpg.import_key"](
@@ -291,8 +290,9 @@ def _get_gpg_key_resources(keyid, env, use_passphrase, gnupghome, runas):
                             break
             except StopIteration:
                 raise SaltInvocationError(
-                    "unable to find keygrip associated with fingerprint '{}' for keyid"
-                    " '{}'".format(local_key_fingerprint, local_keyid)
+                    "unable to find keygrip associated with fingerprint '{}' for keyid '{}'".format(
+                        local_key_fingerprint, local_keyid
+                    )
                 )
 
         if local_keyid is None:
@@ -318,10 +318,8 @@ def _get_gpg_key_resources(keyid, env, use_passphrase, gnupghome, runas):
                     )
 
         if local_uids:
-            define_gpg_name = (
-                "--define='%_signature gpg' --define='%_gpg_name {}'".format(
-                    local_uids[0]
-                )
+            define_gpg_name = "--define='%_signature gpg' --define='%_gpg_name {}'".format(
+                local_uids[0]
             )
 
         # need to update rpm with public key
@@ -472,8 +470,8 @@ def make_src_pkg(
     retrc = __salt__["cmd.retcode"](cmd, runas=runas)
     if retrc != 0:
         raise SaltInvocationError(
-            "Make source package for destination directory {}, spec {}, sources {},"
-            " failed with return error {}, check logs for further details".format(
+            "Make source package for destination directory {}, spec {}, sources {}, failed "
+            "with return error {}, check logs for further details".format(
                 dest_dir, spec, sources, retrc
             )
         )
@@ -602,8 +600,8 @@ def build(
             shutil.rmtree(results_dir)
     if retrc != 0:
         raise SaltInvocationError(
-            "Building packages for destination directory {}, spec {}, sources {},"
-            " failed with return error {}, check logs for further details".format(
+            "Building packages for destination directory {}, spec {}, sources {}, failed "
+            "with return error {}, check logs for further details".format(
                 dest_dir, spec, sources, retrc
             )
         )

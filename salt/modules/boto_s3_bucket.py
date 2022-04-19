@@ -57,6 +57,7 @@ import salt.utils.compat
 import salt.utils.json
 import salt.utils.versions
 from salt.exceptions import SaltInvocationError
+from salt.ext.six.moves import range  # pylint: disable=import-error
 
 log = logging.getLogger(__name__)
 
@@ -163,7 +164,9 @@ def create(
             "GrantWriteACP",
         ):
             if locals()[arg] is not None:
-                kwargs[arg] = str(locals()[arg])
+                kwargs[arg] = str(
+                    locals()[arg]
+                )  # future lint: disable=blacklisted-function
         if LocationConstraint:
             kwargs["CreateBucketConfiguration"] = {
                 "LocationConstraint": LocationConstraint
@@ -556,7 +559,9 @@ def put_acl(
             "GrantWriteACP",
         ):
             if locals()[arg] is not None:
-                kwargs[arg] = str(locals()[arg])
+                kwargs[arg] = str(
+                    locals()[arg]
+                )  # future lint: disable=blacklisted-function
         conn.put_bucket_acl(Bucket=Bucket, **kwargs)
         return {"updated": True, "name": Bucket}
     except ClientError as e:

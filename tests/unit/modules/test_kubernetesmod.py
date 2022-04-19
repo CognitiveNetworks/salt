@@ -1,8 +1,11 @@
+# -*- coding: utf-8 -*-
 """
     :codeauthor: Jochen Breuer <jbreuer@suse.de>
 """
 # pylint: disable=no-value-for-parameter
 
+# Import Python Libs
+from __future__ import absolute_import
 
 import os
 from contextlib import contextmanager
@@ -10,6 +13,8 @@ from contextlib import contextmanager
 import salt.utils.files
 import salt.utils.platform
 from salt.modules import kubernetesmod as kubernetes
+
+# Import Salt Testing Libs
 from tests.support.mixins import LoaderModuleMockMixin
 from tests.support.mock import Mock, patch
 from tests.support.unit import TestCase, skipIf
@@ -28,7 +33,7 @@ def mock_kubernetes_library():
 
 @skipIf(
     not kubernetes.HAS_LIBS,
-    "Kubernetes client lib is not installed. Skipping test_kubernetes.py",
+    "Kubernetes client lib is not installed. " "Skipping test_kubernetes.py",
 )
 class KubernetesTestCase(TestCase, LoaderModuleMockMixin):
     """
@@ -218,8 +223,7 @@ class KubernetesTestCase(TestCase, LoaderModuleMockMixin):
                 mock_kubernetes_lib.config.load_kube_config = Mock()
                 config = kubernetes._setup_conn()
                 self.assertEqual(
-                    self.settings("kubernetes.kubeconfig"),
-                    config["kubeconfig"],
+                    self.settings("kubernetes.kubeconfig"), config["kubeconfig"],
                 )
 
     def test_setup_kubeconfig_data_overwrite(self):
@@ -302,6 +306,5 @@ class KubernetesTestCase(TestCase, LoaderModuleMockMixin):
             2: 2,
         }
         self.assertEqual(
-            {"unicode": "1", "2": "2"},
-            func(data),
+            {"unicode": "1", "2": "2"}, func(data),
         )

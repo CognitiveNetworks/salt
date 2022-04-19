@@ -9,13 +9,9 @@ import sys
 
 import salt.scripts
 import salt.utils.platform
-
-# tiamat pip breaks singlebin on Windows at the moment
-# https://gitlab.com/saltstack/pop/tiamat-pip/-/issues/4
-if not sys.platform.startswith("win"):
-    import tiamatpip.cli
-    import tiamatpip.configure
-    import tiamatpip.utils
+import tiamatpip.cli
+import tiamatpip.configure
+import tiamatpip.utils
 
 AVAIL = (
     "minion",
@@ -37,13 +33,10 @@ AVAIL = (
 )
 
 
-# tiamat pip breaks singlebin on Windows at the moment
-# https://gitlab.com/saltstack/pop/tiamat-pip/-/issues/4
-if not sys.platform.startswith("win"):
-    PIP_PATH = pathlib.Path(f"{os.sep}opt", "saltstack", "salt", "pypath")
-    with contextlib.suppress(PermissionError):
-        PIP_PATH.mkdir(mode=0o755, parents=True, exist_ok=True)
-    tiamatpip.configure.set_user_site_packages_path(PIP_PATH)
+PIP_PATH = pathlib.Path(f"{os.sep}opt", "saltstack", "salt", "pypath")
+with contextlib.suppress(PermissionError):
+    PIP_PATH.mkdir(mode=0o755, parents=True, exist_ok=True)
+tiamatpip.configure.set_user_site_packages_path(PIP_PATH)
 
 
 def redirect(argv):
@@ -54,18 +47,15 @@ def redirect(argv):
         msg = "Must pass in a salt command, available commands are:"
         for cmd in AVAIL:
             msg += f"\n{cmd}"
-        print(msg, file=sys.stderr, flush=True)
+        print(msg, stream=sys.stderr, flush=True)
         sys.exit(1)
     cmd = sys.argv[1]
     if cmd == "shell":
         py_shell()
         return
-    # tiamat pip breaks singlebin on Windows at the moment
-    # https://gitlab.com/saltstack/pop/tiamat-pip/-/issues/4
-    if not sys.platform.startswith("win"):
-        if tiamatpip.cli.should_redirect_argv(argv):
-            tiamatpip.cli.process_pip_argv(argv)
-            return
+    if tiamatpip.cli.should_redirect_argv(argv):
+        tiamatpip.cli.process_pip_argv(argv)
+        return
     if cmd not in AVAIL:
         # Fall back to the salt command
         args = ["salt"]
@@ -75,18 +65,12 @@ def redirect(argv):
         sys.argv.pop(1)
         s_fun = getattr(salt.scripts, f"salt_{cmd}")
     args.extend(argv[1:])
-    # tiamat pip breaks singlebin on Windows at the moment
-    # https://gitlab.com/saltstack/pop/tiamat-pip/-/issues/4
-    if not sys.platform.startswith("win"):
-        with tiamatpip.utils.patched_sys_argv(args):
-            s_fun()
-    else:
+    with tiamatpip.utils.patched_sys_argv(args):
         s_fun()
 
 
 def py_shell():
-    if not sys.platform.startswith("win"):
-        import readline  # optional, will allow Up/Down/History in the console
+    import readline  # optional, will allow Up/Down/History in the console
     import code
 
     variables = globals().copy()

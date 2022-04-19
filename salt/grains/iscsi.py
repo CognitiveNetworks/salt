@@ -9,10 +9,12 @@ To enable these grains set `iscsi_grains: True` in the minion config.
 
     iscsi_grains: True
 """
+# Import Python libs
 
 import errno
 import logging
 
+# Import Salt libs
 import salt.modules.cmdmod
 import salt.utils.files
 import salt.utils.path
@@ -99,9 +101,8 @@ def _windows_iqn():
     get = "iSCSINodeName"
 
     cmd_ret = salt.modules.cmdmod.run_all(
-        "{} /namespace:{} path {} get {} /format:table".format(
-            wmic, namespace, path, get
-        )
+        "{} /namespace:{} path {} get {} /format:table"
+        "".format(wmic, namespace, path, get)
     )
 
     for line in cmd_ret["stdout"].splitlines():

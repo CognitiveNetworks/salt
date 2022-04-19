@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Module for getting information about syslog-ng
 
@@ -24,6 +25,14 @@ configuration file.
 
 """
 
+# Import Python libs
+from __future__ import (
+    absolute_import,
+    generators,
+    print_function,
+    unicode_literals,
+    with_statement,
+)
 
 import logging
 import os
@@ -31,9 +40,15 @@ import os.path
 import time
 
 import salt
+
+# Import Salt libs
 import salt.utils.files
 import salt.utils.path
 from salt.exceptions import CommandExecutionError
+
+# Import 3rd-party libs
+from salt.ext import six
+from salt.ext.six.moves import range
 
 __SYSLOG_NG_BINARY_PATH = None
 __SYSLOG_NG_CONFIG_FILE = "/etc/syslog-ng.conf"
@@ -80,7 +95,7 @@ def _indent(value):
     """
     Returns the indented parameter.
     """
-    return "{}{}".format(_INDENT, value)
+    return "{0}{1}".format(_INDENT, value)
 
 
 def _indentln(string):
@@ -90,7 +105,7 @@ def _indentln(string):
     return _indent(string + "\n")
 
 
-class Buildable:
+class Buildable(object):
     """
     Base class of most classes, which have a build method.
 
@@ -153,7 +168,9 @@ class Statement(Buildable):
     """
 
     def __init__(self, type, id="", options=None, has_name=True):
-        super().__init__(options, join_body_on="", append_extra_newline=False)
+        super(Statement, self).__init__(
+            options, join_body_on="", append_extra_newline=False
+        )
         self.type = type
         self.id = id
         self.options = options if options else []
@@ -181,7 +198,7 @@ class NamedStatement(Statement):
     """
 
     def __init__(self, type, id="", options=None):
-        super().__init__(type, id, options, has_name=True)
+        super(NamedStatement, self).__init__(type, id, options, has_name=True)
 
 
 class UnnamedStatement(Statement):
@@ -193,7 +210,9 @@ class UnnamedStatement(Statement):
     """
 
     def __init__(self, type, options=None):
-        super().__init__(type, id="", options=options, has_name=False)
+        super(UnnamedStatement, self).__init__(
+            type, id="", options=options, has_name=False
+        )
 
 
 class GivenStatement(Buildable):
@@ -205,7 +224,7 @@ class GivenStatement(Buildable):
     """
 
     def __init__(self, value, add_newline=True):
-        super().__init__(iterable=None)
+        super(GivenStatement, self).__init__(iterable=None)
         self.value = value
         self.add_newline = add_newline
 
@@ -226,13 +245,13 @@ class Option(Buildable):
     """
 
     def __init__(self, type="", params=None):
-        super().__init__(params, ",\n")
+        super(Option, self).__init__(params, ",\n")
         self.type = type
         self.params = params if params else []
         self.iterable = self.params
 
     def build(self):
-        header = _indentln("{}(".format(self.type))
+        header = _indentln("{0}(".format(self.type))
         tail = _indentln(");")
         body = self.build_body()
 
@@ -250,7 +269,7 @@ class Parameter(Buildable):
     """
 
     def __init__(self, iterable=None, join_body_on=""):
-        super().__init__(iterable, join_body_on)
+        super(Parameter, self).__init__(iterable, join_body_on)
 
 
 class SimpleParameter(Parameter):
@@ -274,7 +293,7 @@ class SimpleParameter(Parameter):
     """
 
     def __init__(self, value=""):
-        super().__init__()
+        super(SimpleParameter, self).__init__()
         self.value = value
 
     def build(self):
@@ -299,13 +318,13 @@ class TypedParameter(Parameter):
     """
 
     def __init__(self, type="", values=None):
-        super().__init__(values, ",\n")
+        super(TypedParameter, self).__init__(values, ",\n")
         self.type = type
         self.values = values if values else []
         self.iterable = self.values
 
     def build(self):
-        header = _indentln("{}(".format(self.type))
+        header = _indentln("{0}(".format(self.type))
         tail = _indent(")")
         body = self.build_body()
 
@@ -323,7 +342,7 @@ class ParameterValue(Buildable):
     """
 
     def __init__(self, iterable=None, join_body_on=""):
-        super().__init__(iterable, join_body_on)
+        super(ParameterValue, self).__init__(iterable, join_body_on)
 
 
 class SimpleParameterValue(ParameterValue):
@@ -336,7 +355,7 @@ class SimpleParameterValue(ParameterValue):
     """
 
     def __init__(self, value=""):
-        super().__init__()
+        super(SimpleParameterValue, self).__init__()
         self.value = value
 
     def build(self):
@@ -367,13 +386,13 @@ class TypedParameterValue(ParameterValue):
     """
 
     def __init__(self, type="", arguments=None):
-        super().__init__(arguments, "\n")
+        super(TypedParameterValue, self).__init__(arguments, "\n")
         self.type = type
         self.arguments = arguments if arguments else []
         self.iterable = self.arguments
 
     def build(self):
-        header = _indentln("{}(".format(self.type))
+        header = _indentln("{0}(".format(self.type))
         tail = _indent(")")
         body = self.build_body()
 
@@ -383,7 +402,7 @@ class TypedParameterValue(ParameterValue):
         self.arguments.append(arg)
 
 
-class Argument:
+class Argument(object):
     """
     A TypedParameterValue has one or more Arguments. For example this can be
     the value of key_file.
@@ -413,7 +432,7 @@ def _is_simple_type(value):
     int, str, float or bool.
     """
     return (
-        isinstance(value, str)
+        isinstance(value, six.string_types)
         or isinstance(value, int)
         or isinstance(value, float)
         or isinstance(value, bool)
@@ -429,7 +448,7 @@ def _get_type_id_options(name, configuration):
         type_, sep, id_ = name.partition(".")
         options = configuration
     else:
-        type_ = next(iter(configuration.keys()))
+        type_ = next(six.iterkeys(configuration))
         id_ = name
         options = configuration[type_]
 
@@ -440,7 +459,7 @@ def _expand_one_key_dictionary(_dict):
     """
     Returns the only one key and its value from a dictionary.
     """
-    key = next(iter(_dict.keys()))
+    key = next(six.iterkeys(_dict))
     value = _dict[key]
     return key, value
 
@@ -530,7 +549,7 @@ def _is_reference(arg):
     return (
         isinstance(arg, dict)
         and len(arg) == 1
-        and isinstance(next(iter(arg.values())), str)
+        and isinstance(next(six.itervalues(arg)), six.string_types)
     )
 
 
@@ -539,7 +558,9 @@ def _is_junction(arg):
     Return True, if arg is a junction statement.
     """
     return (
-        isinstance(arg, dict) and len(arg) == 1 and next(iter(arg.keys())) == "junction"
+        isinstance(arg, dict)
+        and len(arg) == 1
+        and next(six.iterkeys(arg)) == "junction"
     )
 
 
@@ -561,7 +582,7 @@ def _is_inline_definition(arg):
     return (
         isinstance(arg, dict)
         and len(arg) == 1
-        and isinstance(next(iter(arg.values())), list)
+        and isinstance(next(six.itervalues(arg)), list)
     )
 
 
@@ -664,7 +685,7 @@ def config(name, config, write=True):
     configs = _render_configuration()
 
     if __opts__.get("test", False):
-        comment = "State syslog_ng will write '{}' into {}".format(
+        comment = "State syslog_ng will write '{0}' into {1}".format(
             configs, __SYSLOG_NG_CONFIG_FILE
         )
         return _format_state_result(name, result=None, comment=comment)
@@ -788,7 +809,9 @@ def _run_command_in_extended_path(syslog_ng_sbin_dir, command, params):
         # normalizes the paths to unicode to join them together, and then
         # converts back to a str type.
         env = {
-            "PATH": salt.utils.stringutils.to_str(
+            str(
+                "PATH"
+            ): salt.utils.stringutils.to_str(  # future lint: disable=blacklisted-function
                 os.pathsep.join(salt.utils.data.decode((orig_path, syslog_ng_sbin_dir)))
             )
         }
@@ -823,12 +846,12 @@ def config_test(syslog_ng_sbin_dir=None, cfgfile=None):
     """
     params = ["--syntax-only"]
     if cfgfile:
-        params.append("--cfgfile={}".format(cfgfile))
+        params.append("--cfgfile={0}".format(cfgfile))
 
     try:
         ret = _run_command_in_extended_path(syslog_ng_sbin_dir, "syslog-ng", params)
     except CommandExecutionError as err:
-        return _format_return_data(retcode=-1, stderr=str(err))
+        return _format_return_data(retcode=-1, stderr=six.text_type(err))
 
     retcode = ret.get("retcode", -1)
     stderr = ret.get("stderr", None)
@@ -852,7 +875,7 @@ def version(syslog_ng_sbin_dir=None):
     try:
         ret = _run_command_in_extended_path(syslog_ng_sbin_dir, "syslog-ng", ("-V",))
     except CommandExecutionError as err:
-        return _format_return_data(retcode=-1, stderr=str(err))
+        return _format_return_data(retcode=-1, stderr=six.text_type(err))
 
     if ret["retcode"] != 0:
         return _format_return_data(
@@ -883,7 +906,7 @@ def modules(syslog_ng_sbin_dir=None):
     try:
         ret = _run_command_in_extended_path(syslog_ng_sbin_dir, "syslog-ng", ("-V",))
     except CommandExecutionError as err:
-        return _format_return_data(retcode=-1, stderr=str(err))
+        return _format_return_data(retcode=-1, stderr=six.text_type(err))
 
     if ret["retcode"] != 0:
         return _format_return_data(ret["retcode"], ret.get("stdout"), ret.get("stderr"))
@@ -914,7 +937,7 @@ def stats(syslog_ng_sbin_dir=None):
             syslog_ng_sbin_dir, "syslog-ng-ctl", ("stats",)
         )
     except CommandExecutionError as err:
-        return _format_return_data(retcode=-1, stderr=str(err))
+        return _format_return_data(retcode=-1, stderr=six.text_type(err))
 
     return _format_return_data(ret["retcode"], ret.get("stdout"), ret.get("stderr"))
 
@@ -937,7 +960,7 @@ def _add_cli_param(params, key, value):
     Adds key and value as a command line parameter to params.
     """
     if value is not None:
-        params.append("--{}={}".format(key, value))
+        params.append("--{0}={1}".format(key, value))
 
 
 def _add_boolean_cli_param(params, key, value):
@@ -945,7 +968,7 @@ def _add_boolean_cli_param(params, key, value):
     Adds key as a command line parameter to params.
     """
     if value is True:
-        params.append("--{}".format(key))
+        params.append("--{0}".format(key))
 
 
 def stop(name=None):
@@ -1041,7 +1064,7 @@ def start(
         command = [syslog_ng_binary] + params
 
         if __opts__.get("test", False):
-            comment = "Syslog_ng state module will start {}".format(command)
+            comment = "Syslog_ng state module will start {0}".format(command)
             return _format_state_result(name, result=None, comment=comment)
 
         result = __salt__["cmd.run_all"](command, python_shell=False)
@@ -1049,7 +1072,7 @@ def start(
         command = ["syslog-ng"] + params
 
         if __opts__.get("test", False):
-            comment = "Syslog_ng state module will start {}".format(command)
+            comment = "Syslog_ng state module will start {0}".format(command)
             return _format_state_result(name, result=None, comment=comment)
 
         result = __salt__["cmd.run_all"](command, python_shell=False)
@@ -1126,7 +1149,7 @@ def _write_config(config, newlines=2):
     """
     text = config
     if isinstance(config, dict) and len(list(list(config.keys()))) == 1:
-        key = next(iter(config.keys()))
+        key = next(six.iterkeys(config))
         text = config[key]
 
     try:
@@ -1137,7 +1160,7 @@ def _write_config(config, newlines=2):
                 fha.write(salt.utils.stringutils.to_str(os.linesep))
         return True
     except Exception as err:  # pylint: disable=broad-except
-        log.error(str(err))
+        log.error(six.text_type(err))
         return False
 
 
@@ -1157,7 +1180,7 @@ def write_version(name):
         salt '*' syslog_ng.write_version name="3.6"
 
     """
-    line = "@version: {}".format(name)
+    line = "@version: {0}".format(name)
     try:
         if os.path.exists(__SYSLOG_NG_CONFIG_FILE):
             log.debug(

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Zookeeper Module
 ~~~~~~~~~~~~~~~~
@@ -63,6 +64,7 @@ Configuration
             username: daniel
             password: test
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
 # Import Salt libraries
 import salt.utils.stringutils

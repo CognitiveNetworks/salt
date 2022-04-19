@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """
 Provide token storage in Redis cluster.
 
@@ -13,12 +15,14 @@ Default values for these configs are as follow:
 :depends:   - redis-py-cluster Python package
 """
 
+from __future__ import absolute_import, print_function, unicode_literals
 
 import hashlib
 import logging
 import os
 
 import salt.payload
+from salt.ext import six
 
 try:
     import rediscluster
@@ -75,18 +79,19 @@ def mk_token(opts, tdata):
     if not redis_client:
         return {}
     hash_type = getattr(hashlib, opts.get("hash_type", "md5"))
-    tok = str(hash_type(os.urandom(512)).hexdigest())
+    tok = six.text_type(hash_type(os.urandom(512)).hexdigest())
     try:
         while redis_client.get(tok) is not None:
-            tok = str(hash_type(os.urandom(512)).hexdigest())
+            tok = six.text_type(hash_type(os.urandom(512)).hexdigest())
     except Exception as err:  # pylint: disable=broad-except
         log.warning(
             "Authentication failure: cannot get token %s from redis: %s", tok, err
         )
         return {}
     tdata["token"] = tok
+    serial = salt.payload.Serial(opts)
     try:
-        redis_client.set(tok, salt.payload.dumps(tdata))
+        redis_client.set(tok, serial.dumps(tdata))
     except Exception as err:  # pylint: disable=broad-except
         log.warning(
             "Authentication failure: cannot save token %s to redis: %s", tok, err
@@ -106,8 +111,9 @@ def get_token(opts, tok):
     redis_client = _redis_client(opts)
     if not redis_client:
         return {}
+    serial = salt.payload.Serial(opts)
     try:
-        tdata = salt.payload.loads(redis_client.get(tok))
+        tdata = serial.loads(redis_client.get(tok))
         return tdata
     except Exception as err:  # pylint: disable=broad-except
         log.warning(
@@ -145,6 +151,7 @@ def list_tokens(opts):
     redis_client = _redis_client(opts)
     if not redis_client:
         return []
+    serial = salt.payload.Serial(opts)
     try:
         return [k.decode("utf8") for k in redis_client.keys()]
     except Exception as err:  # pylint: disable=broad-except

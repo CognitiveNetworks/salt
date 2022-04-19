@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Display output for minions that did not return
 ==============================================
@@ -11,11 +12,16 @@ Example output::
     virtucentos:
         Minion did not return
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import salt libs
 import salt.utils.color
 
+# Import 3rd-party libs
+from salt.ext import six
 
-class NestDisplay:
+
+class NestDisplay(object):
     """
     Create generator for nested output
     """
@@ -29,16 +35,16 @@ class NestDisplay:
         """
         Recursively iterate down through data structures to determine output
         """
-        if isinstance(ret, str):
+        if isinstance(ret, six.string_types):
             lines = ret.split("\n")
             for line in lines:
-                out += "{}{}{}{}{}\n".format(
+                out += "{0}{1}{2}{3}{4}\n".format(
                     self.colors["RED"], " " * indent, prefix, line, self.colors["ENDC"]
                 )
         elif isinstance(ret, dict):
             for key in sorted(ret):
                 val = ret[key]
-                out += "{}{}{}{}{}:\n".format(
+                out += "{0}{1}{2}{3}{4}:\n".format(
                     self.colors["CYAN"], " " * indent, prefix, key, self.colors["ENDC"]
                 )
                 out = self.display(val, indent + 4, "", out)

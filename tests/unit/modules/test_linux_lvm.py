@@ -24,11 +24,9 @@ class LinuxLVMTestCase(TestCase, LoaderModuleMockMixin):
         Tests LVM version info from lvm version
         """
         mock = MagicMock(
-            return_value=(
-                "  LVM version:     2.02.168(2) (2016-11-30)\n"
-                "  Library version: 1.03.01 (2016-11-30)\n"
-                "  Driver version:  4.35.0\n"
-            )
+            return_value="  LVM version:     2.02.168(2) (2016-11-30)\n"
+            "  Library version: 1.03.01 (2016-11-30)\n"
+            "  Driver version:  4.35.0\n"
         )
         with patch.dict(linux_lvm.__salt__, {"cmd.run": mock}):
             self.assertEqual(linux_lvm.version(), "2.02.168(2) (2016-11-30)")
@@ -38,11 +36,9 @@ class LinuxLVMTestCase(TestCase, LoaderModuleMockMixin):
         Tests all version info from lvm version
         """
         mock = MagicMock(
-            return_value=(
-                "  LVM version:     2.02.168(2) (2016-11-30)\n"
-                "  Library version: 1.03.01 (2016-11-30)\n"
-                "  Driver version:  4.35.0\n"
-            )
+            return_value="  LVM version:     2.02.168(2) (2016-11-30)\n"
+            "  Library version: 1.03.01 (2016-11-30)\n"
+            "  Driver version:  4.35.0\n"
         )
         with patch.dict(linux_lvm.__salt__, {"cmd.run": mock}):
             self.assertDictEqual(
@@ -311,9 +307,7 @@ class LinuxLVMTestCase(TestCase, LoaderModuleMockMixin):
                 self.assertDictEqual(
                     linux_lvm.vgcreate("fakevg", "B"),
                     {
-                        "Output from vgcreate": (
-                            'Volume group "fakevg" successfully created'
-                        )
+                        "Output from vgcreate": 'Volume group "fakevg" successfully created'
                     },
                 )
 
@@ -331,9 +325,7 @@ class LinuxLVMTestCase(TestCase, LoaderModuleMockMixin):
                 self.assertDictEqual(
                     linux_lvm.vgextend("fakevg", "B"),
                     {
-                        "Output from vgextend": (
-                            'Volume group "fakevg" successfully extended'
-                        )
+                        "Output from vgextend": 'Volume group "fakevg" successfully extended'
                     },
                 )
 
@@ -459,9 +451,7 @@ class LinuxLVMTestCase(TestCase, LoaderModuleMockMixin):
             self.assertDictEqual(
                 linux_lvm.lvresize(12, "/dev/fakevg/fakelv"),
                 {
-                    "Output from lvresize": (
-                        'Logical volume "/dev/fakevg/fakelv" successfully resized.'
-                    )
+                    "Output from lvresize": 'Logical volume "/dev/fakevg/fakelv" successfully resized.'
                 },
             )
 
@@ -478,8 +468,6 @@ class LinuxLVMTestCase(TestCase, LoaderModuleMockMixin):
             self.assertDictEqual(
                 linux_lvm.lvextend(12, "/dev/fakevg/fakelv"),
                 {
-                    "Output from lvextend": (
-                        'Logical volume "/dev/fakevg/fakelv" successfully extended.'
-                    )
+                    "Output from lvextend": 'Logical volume "/dev/fakevg/fakelv" successfully extended.'
                 },
             )

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2018 Cisco and/or its affiliates.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +16,7 @@
 """
 Util functions for the NXOS modules.
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
 import collections
 import http.client
@@ -52,7 +54,7 @@ class UHTTPConnection(http.client.HTTPConnection):
         self.sock = sock
 
 
-class NxapiClient:
+class NxapiClient(object):
     """
     Class representing an NX-API client that connects over http(s) or
     unix domain socket (UDS).
@@ -83,7 +85,7 @@ class NxapiClient:
         if self.nxargs["connect_over_uds"]:
             if not os.path.exists(self.NXAPI_UDS):
                 raise NxosClientError(
-                    "No host specified and no UDS found at {}\n".format(self.NXAPI_UDS)
+                    "No host specified and no UDS found at {0}\n".format(self.NXAPI_UDS)
                 )
 
             # Create UHTTPConnection object for NX-API communication over UDS.
@@ -218,7 +220,7 @@ class NxapiClient:
         # Don't just return body['ins_api']['outputs']['output'] directly.
         output = body.get("ins_api")
         if output is None:
-            raise NxosClientError("Unexpected JSON output\n{}".format(body))
+            raise NxosClientError("Unexpected JSON output\n{0}".format(body))
         if output.get("outputs"):
             output = output["outputs"]
         if output.get("output"):

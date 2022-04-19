@@ -8,9 +8,7 @@ import pytest
 
 log = logging.getLogger(__name__)
 
-pytestmark = [
-    pytest.mark.skip_if_binaries_missing("dockerd"),
-]
+pytestmark = [pytest.mark.skip_if_binaries_missing("dockerd")]
 
 
 @pytest.fixture(scope="module", autouse=True)

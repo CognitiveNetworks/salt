@@ -12,10 +12,15 @@ import binascii
 import hashlib
 import logging
 import re
-import shlex
 
 import salt.modules.cmdmod
 import salt.utils.path
+
+try:
+    from shlex import quote as _quote_args  # pylint: disable=e0611
+except ImportError:
+    from pipes import quote as _quote_args
+
 
 log = logging.getLogger(__name__)
 
@@ -162,7 +167,7 @@ def delete(login):
     """
     if login in list_users(False):
         res = __salt__["cmd.run_all"](
-            "pdbedit --delete {login}".format(login=shlex.quote(login)),
+            "pdbedit --delete {login}".format(login=_quote_args(login)),
         )
 
         if res["retcode"] > 0:
@@ -207,7 +212,7 @@ def create(login, password, password_hashed=False, machine_account=False):
         # NOTE: --create requires a password, even if blank
         res = __salt__["cmd.run_all"](
             cmd="pdbedit --create --user {login} -t {machine}".format(
-                login=shlex.quote(login),
+                login=_quote_args(login),
                 machine="--machine" if machine_account else "",
             ),
             stdin="{password}\n{password}\n".format(password=password),
@@ -223,7 +228,7 @@ def create(login, password, password_hashed=False, machine_account=False):
     if user["nt hash"] != password_hash:
         res = __salt__["cmd.run_all"](
             "pdbedit --modify --user {login} --set-nt-hash={nthash}".format(
-                login=shlex.quote(login), nthash=shlex.quote(password_hash)
+                login=_quote_args(login), nthash=_quote_args(password_hash)
             ),
         )
 
@@ -364,8 +369,9 @@ def modify(
                 for f in val.upper():
                     if f not in ["N", "D", "H", "L", "X"]:
                         log.warning(
-                            "pdbedit.modify - unknown %s flag for account_control, ignored",
-                            f,
+                            "pdbedit.modify - unknown {f} flag for account_control, ignored".format(
+                                f=f
+                            )
                         )
                     else:
                         new.append(f)
@@ -380,8 +386,7 @@ def modify(
         for change in changes:
             cmds.append(
                 "{flag}{value}".format(
-                    flag=flags[change],
-                    value=shlex.quote(changes[change]),
+                    flag=flags[change], value=_quote_args(changes[change]),
                 )
             )
         if reset_login_hours:
@@ -391,8 +396,7 @@ def modify(
 
         res = __salt__["cmd.run_all"](
             "pdbedit --modify --user {login} {changes}".format(
-                login=shlex.quote(login),
-                changes=" ".join(cmds),
+                login=_quote_args(login), changes=" ".join(cmds),
             ),
         )
 

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Chronos
 ========
@@ -23,6 +24,7 @@ the chronos endpoint:
 
 .. versionadded:: 2015.8.2
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 
@@ -55,21 +57,18 @@ def ping():
     """
     try:
         response = salt.utils.http.query(
-            "{}/scheduler/jobs".format(CONFIG[CONFIG_BASE_URL]),
+            "{0}/scheduler/jobs".format(CONFIG[CONFIG_BASE_URL]),
             decode_type="json",
             decode=True,
         )
         log.debug(
-            "chronos.info returned successfully: %s",
-            response,
+            "chronos.info returned successfully: %s", response,
         )
         if "dict" in response:
             return True
     except Exception as ex:  # pylint: disable=broad-except
         log.error(
-            "error pinging chronos with base_url %s: %s",
-            CONFIG[CONFIG_BASE_URL],
-            ex,
+            "error pinging chronos with base_url %s: %s", CONFIG[CONFIG_BASE_URL], ex,
         )
     return False
 

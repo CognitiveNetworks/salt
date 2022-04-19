@@ -1,10 +1,15 @@
+# -*- coding: utf-8 -*-
 """
 Support for pam
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
+
+# Import python libs
 import os
 
+# Import salt libs
 import salt.utils.files
 
 log = logging.getLogger(__name__)
@@ -50,11 +55,11 @@ def _parse(contents=None, file_name=None):
             for part in comps[2:]:
                 position += 1
                 if part.endswith("]"):
-                    control_flag += " {}".format(part.replace("]", ""))
+                    control_flag += " {0}".format(part.replace("]", ""))
                     position += 1
                     break
                 else:
-                    control_flag += " {}".format(part)
+                    control_flag += " {0}".format(part)
         else:
             control_flag = comps[1]
             position += 1

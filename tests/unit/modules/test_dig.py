@@ -1,9 +1,15 @@
+# -*- coding: utf-8 -*-
 """
     :codeauthor: Nicole Thomas <nicole@saltstack.com>
 """
 
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import salt libs
 import salt.modules.dig as dig
+
+# Import Salt Testing Libs
 from tests.support.mixins import LoaderModuleMockMixin
 from tests.support.mock import MagicMock, patch
 from tests.support.unit import TestCase, skipIf
@@ -73,14 +79,12 @@ class DigTestCase(TestCase, LoaderModuleMockMixin):
                 "pid": 3656,
                 "retcode": 0,
                 "stderr": "",
-                "stdout": (
-                    "74.125.193.104\n"
-                    "74.125.193.105\n"
-                    "74.125.193.99\n"
-                    "74.125.193.106\n"
-                    "74.125.193.103\n"
-                    "74.125.193.147"
-                ),
+                "stdout": "74.125.193.104\n"
+                "74.125.193.105\n"
+                "74.125.193.99\n"
+                "74.125.193.106\n"
+                "74.125.193.103\n"
+                "74.125.193.147",
             }
         )
         with patch.dict(dig.__salt__, {"cmd.run_all": dig_mock}):
@@ -154,13 +158,11 @@ class DigTestCase(TestCase, LoaderModuleMockMixin):
                 "pid": 27780,
                 "retcode": 0,
                 "stderr": "",
-                "stdout": (
-                    "10 aspmx.l.google.com.\n"
-                    "20 alt1.aspmx.l.google.com.\n"
-                    "40 alt3.aspmx.l.google.com.\n"
-                    "50 alt4.aspmx.l.google.com.\n"
-                    "30 alt2.aspmx.l.google.com."
-                ),
+                "stdout": "10 aspmx.l.google.com.\n"
+                "20 alt1.aspmx.l.google.com.\n"
+                "40 alt3.aspmx.l.google.com.\n"
+                "50 alt4.aspmx.l.google.com.\n"
+                "30 alt2.aspmx.l.google.com.",
             }
         )
         with patch.dict(dig.__salt__, {"cmd.run_all": dig_mock}):

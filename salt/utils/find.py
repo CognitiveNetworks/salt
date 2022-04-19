@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Approximate the Unix find(1) command and return a list of paths that
 meet the specified criteria.
@@ -82,6 +83,8 @@ the following:
     user:  user name
 """
 
+# Import python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 import os
@@ -93,10 +96,15 @@ import time
 from subprocess import PIPE, Popen
 
 import salt.defaults.exitcodes
+
+# Import salt libs
 import salt.utils.args
 import salt.utils.hashutils
 import salt.utils.path
 import salt.utils.stringutils
+
+# Import 3rd-party libs
+from salt.ext import six
 from salt.utils.filebuffer import BufferedReader
 
 try:
@@ -161,9 +169,9 @@ def _parse_interval(value):
         m = minute
         s = second
     """
-    match = _INTERVAL_REGEX.match(str(value))
+    match = _INTERVAL_REGEX.match(six.text_type(value))
     if match is None:
-        raise ValueError("invalid time interval: '{}'".format(value))
+        raise ValueError("invalid time interval: '{0}'".format(value))
 
     result = 0
     resolution = None
@@ -212,14 +220,14 @@ def _parse_size(value):
         try:
             num = int(float(scalar) * multiplier)
         except ValueError:
-            raise ValueError('invalid size: "{}"'.format(value))
+            raise ValueError('invalid size: "{0}"'.format(value))
 
     if style == "-":
         min_size = 0
         max_size = num
     elif style == "+":
         min_size = num
-        max_size = sys.maxsize
+        max_size = six.MAXSIZE
     else:
         min_size = num
         max_size = num + multiplier - 1
@@ -227,7 +235,7 @@ def _parse_size(value):
     return min_size, max_size
 
 
-class Option:
+class Option(object):
     """
     Abstract base class for all find options.
     """
@@ -280,7 +288,7 @@ class RegexOption(Option):
         try:
             self.regex = re.compile(value)
         except re.error:
-            raise ValueError('invalid regular expression: "{}"'.format(value))
+            raise ValueError('invalid regular expression: "{0}"'.format(value))
 
     def match(self, dirname, filename, fstat):
         return self.regex.match(filename)
@@ -297,7 +305,7 @@ class IregexOption(Option):
         try:
             self.regex = re.compile(value, re.IGNORECASE)
         except re.error:
-            raise ValueError('invalid regular expression: "{}"'.format(value))
+            raise ValueError('invalid regular expression: "{0}"'.format(value))
 
     def match(self, dirname, filename, fstat):
         return self.regex.match(filename)
@@ -326,7 +334,7 @@ class TypeOption(Option):
             try:
                 self.ftypes.add(_FILE_TYPES[ftype])
             except KeyError:
-                raise ValueError('invalid file type "{}"'.format(ftype))
+                raise ValueError('invalid file type "{0}"'.format(ftype))
 
     def requires(self):
         return _REQUIRES_STAT
@@ -352,7 +360,7 @@ class OwnerOption(Option):
                 try:
                     self.uids.add(pwd.getpwnam(value).pw_uid)
                 except KeyError:
-                    raise ValueError('no such user "{}"'.format(name))
+                    raise ValueError('no such user "{0}"'.format(name))
 
     def requires(self):
         return _REQUIRES_STAT
@@ -378,7 +386,7 @@ class GroupOption(Option):
                 try:
                     self.gids.add(grp.getgrnam(name).gr_gid)
                 except KeyError:
-                    raise ValueError('no such group "{}"'.format(name))
+                    raise ValueError('no such group "{0}"'.format(name))
 
     def requires(self):
         return _REQUIRES_STAT
@@ -450,7 +458,7 @@ class GrepOption(Option):
         try:
             self.regex = re.compile(value)
         except re.error:
-            raise ValueError('invalid regular expression: "{}"'.format(value))
+            raise ValueError('invalid regular expression: "{0}"'.format(value))
 
     def requires(self):
         return _REQUIRES_CONTENTS | _REQUIRES_STAT
@@ -554,7 +562,7 @@ class DeleteOption(TypeOption):
     def __init__(self, key, value):
         if "a" in value:
             value = "bcdpfls"
-        super().__init__(key, value)
+        super(DeleteOption, self).__init__(key, value)
 
     def execute(self, fullpath, fstat, test=False):
         if test:
@@ -564,7 +572,7 @@ class DeleteOption(TypeOption):
                 os.remove(fullpath)
             elif os.path.isdir(fullpath):
                 shutil.rmtree(fullpath)
-        except OSError as exc:
+        except (OSError, IOError) as exc:
             return None
         return fullpath
 
@@ -590,14 +598,14 @@ class ExecOption(Option):
                     command,
                     salt.utils.stringutils.to_str(err),
                 )
-            return "{}:\n{}\n".format(command, salt.utils.stringutils.to_str(out))
+            return "{0}:\n{1}\n".format(command, salt.utils.stringutils.to_str(out))
 
         except Exception as e:  # pylint: disable=broad-except
             log.error('Exception while executing command "%s":\n\n%s', command, e)
-            return "{}: Failed".format(fullpath)
+            return "{0}: Failed".format(fullpath)
 
 
-class Finder:
+class Finder(object):
     def __init__(self, options):
         self.actions = []
         self.maxdepth = None
@@ -617,16 +625,16 @@ class Finder:
         if "test" in options:
             self.test = options["test"]
             del options["test"]
-        for key, value in options.items():
+        for key, value in six.iteritems(options):
             if key.startswith("_"):
                 # this is a passthrough object, continue
                 continue
             if not value:
-                raise ValueError('missing value for "{}" option'.format(key))
+                raise ValueError('missing value for "{0}" option'.format(key))
             try:
                 obj = globals()[key.title() + "Option"](key, value)
             except KeyError:
-                raise ValueError('invalid option "{}"'.format(key))
+                raise ValueError('invalid option "{0}"'.format(key))
             if hasattr(obj, "match"):
                 requires = obj.requires()
                 if requires & _REQUIRES_CONTENTS:
@@ -657,7 +665,8 @@ class Finder:
             dirpath, name = os.path.split(path)
             match, fstat = self._check_criteria(dirpath, name, path)
             if match:
-                yield from self._perform_actions(path, fstat=fstat)
+                for result in self._perform_actions(path, fstat=fstat):
+                    yield result
 
         for dirpath, dirs, files in salt.utils.path.os_walk(path):
             relpath = os.path.relpath(dirpath, path)
@@ -669,7 +678,8 @@ class Finder:
                     fullpath = os.path.join(dirpath, name)
                     match, fstat = self._check_criteria(dirpath, name, fullpath)
                     if match:
-                        yield from self._perform_actions(fullpath, fstat=fstat)
+                        for result in self._perform_actions(fullpath, fstat=fstat):
+                            yield result
 
             if self.maxdepth is not None and depth > self.maxdepth:
                 dirs[:] = []
@@ -722,7 +732,7 @@ def find(path, options):
 
 def _main():
     if len(sys.argv) < 2:
-        sys.stderr.write("usage: {} path [options]\n".format(sys.argv[0]))
+        sys.stderr.write("usage: {0} path [options]\n".format(sys.argv[0]))
         sys.exit(salt.defaults.exitcodes.EX_USAGE)
 
     path = sys.argv[1]
@@ -734,7 +744,7 @@ def _main():
     try:
         finder = Finder(criteria)
     except ValueError as ex:
-        sys.stderr.write("error: {}\n".format(ex))
+        sys.stderr.write("error: {0}\n".format(ex))
         sys.exit(salt.defaults.exitcodes.EX_GENERIC)
 
     for result in finder.find(path):

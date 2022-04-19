@@ -141,7 +141,9 @@ class ContextDict(MutableMapping):
 
 
 class ChildContextDict(MutableMapping):
-    """An overrideable child of ContextDict"""
+    """An overrideable child of ContextDict
+
+    """
 
     def __init__(self, parent, overrides=None, threadsafe=False):
         self.parent = parent

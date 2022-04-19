@@ -1,8 +1,11 @@
+# -*- coding: utf-8 -*-
 """
 Aptly Debian repository manager.
 
 .. versionadded:: 2018.3.0
 """
+# Import python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 import os
@@ -12,6 +15,9 @@ import salt.utils.json
 import salt.utils.path
 import salt.utils.stringutils
 from salt.exceptions import SaltInvocationError
+
+# Import salt libs
+from salt.ext import six
 
 _DEFAULT_CONFIG_PATH = "/etc/aptly.conf"
 log = logging.getLogger(__name__)
@@ -177,7 +183,7 @@ def get_repo(name, config_path=_DEFAULT_CONFIG_PATH, with_packages=False):
         salt '*' aptly.get_repo name="test-repo"
     """
     _validate_config(config_path)
-    with_packages = str(bool(with_packages)).lower()
+    with_packages = six.text_type(bool(with_packages)).lower()
 
     ret = dict()
     cmd = [
@@ -384,7 +390,7 @@ def delete_repo(name, config_path=_DEFAULT_CONFIG_PATH, force=False):
         salt '*' aptly.delete_repo name="test-repo"
     """
     _validate_config(config_path)
-    force = str(bool(force)).lower()
+    force = six.text_type(bool(force)).lower()
 
     current_repo = __salt__["aptly.get_repo"](name=name, config_path=config_path)
 
@@ -511,7 +517,7 @@ def cleanup_db(config_path=_DEFAULT_CONFIG_PATH, dry_run=False):
         salt '*' aptly.cleanup_db
     """
     _validate_config(config_path)
-    dry_run = str(bool(dry_run)).lower()
+    dry_run = six.text_type(bool(dry_run)).lower()
 
     ret = {"deleted_keys": list(), "deleted_files": list()}
 

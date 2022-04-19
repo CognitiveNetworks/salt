@@ -63,7 +63,9 @@ def test_requisites_mixed_require_prereq_use_1(state, state_tree):
     """
     with pytest.helpers.temp_file("requisite.sls", sls_contents, state_tree):
         ret = state.sls("requisite")
-        result = normalize_ret(ret.raw)
+        result = normalize_ret(ret)
+        ret = pytest.helpers.state_return(ret)
+        ret.assert_return_non_empty_state_type()
         assert result == expected_simple_result
 
 
@@ -157,7 +159,9 @@ def test_requisites_mixed_require_prereq_use_2(state, state_tree):
     # TODO: this is actually failing badly
     with pytest.helpers.temp_file("requisite.sls", sls_contents, state_tree):
         ret = state.sls("requisite")
-        result = normalize_ret(ret.raw)
+        result = normalize_ret(ret)
+        ret = pytest.helpers.state_return(ret)
+        ret.assert_return_non_empty_state_type()
         assert result == expected_result
 
 
@@ -306,18 +310,18 @@ def test_issue_46762_prereqs_on_a_state_with_unfulfilled_requirements(
 
     state_id = "test_|-a_|-a_|-fail_without_changes"
     assert state_id in ret
-    assert ret[state_id].result is False
-    assert ret[state_id].comment == "Failure!"
+    assert ret[state_id]["result"] is False
+    assert ret[state_id]["comment"] == "Failure!"
 
     state_id = "test_|-b_|-b_|-nop"
     assert state_id in ret
-    assert ret[state_id].result is False
-    assert ret[state_id].comment == "One or more requisite failed: requisite.c"
+    assert ret[state_id]["result"] is False
+    assert ret[state_id]["comment"] == "One or more requisite failed: requisite.c"
 
     state_id = "test_|-c_|-c_|-nop"
     assert state_id in ret
-    assert ret[state_id].result is False
-    assert ret[state_id].comment == "One or more requisite failed: requisite.a"
+    assert ret[state_id]["result"] is False
+    assert ret[state_id]["comment"] == "One or more requisite failed: requisite.a"
 
 
 @pytest.mark.skip_on_darwin(reason="Test is broken on macosx")
@@ -361,8 +365,7 @@ def test_issue_30161_unless_and_onlyif_together(state, state_tree, tmp_path):
     )
     with pytest.helpers.temp_file("requisite.sls", sls_contents, state_tree):
         ret = state.sls("requisite")
-        for state_entry in ret:
-            assert state_entry.result is True
+        pytest.helpers.state_return(ret).assert_state_true_return()
         # We must assert against the comment here to make sure the comment reads that the
         # command "echo "hello"" was run. This ensures that we made it to the last unless
         # command in the state. If the comment reads "unless condition is true", or similar,
@@ -400,4 +403,4 @@ def test_issue_30161_unless_and_onlyif_together(state, state_tree, tmp_path):
         },
     }
     for slsid in _expected:
-        assert ret[slsid].comment == _expected[slsid]["comment"]
+        assert ret[slsid]["comment"] == _expected[slsid]["comment"]

@@ -1,7 +1,10 @@
+# -*- coding: utf-8 -*-
 """
 Module for managing Solaris logadm based log rotations.
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import python libs
 import logging
 import shlex
 
@@ -9,6 +12,9 @@ import salt.utils.args
 import salt.utils.decorators as decorators
 import salt.utils.files
 import salt.utils.stringutils
+
+# Import salt libs
+from salt.ext import six
 
 try:
     from shlex import quote as _quote_args  # pylint: disable=E0611
@@ -295,12 +301,11 @@ def rotate(name, pattern=None, conf_file=default_conf, **kwargs):
     command = "logadm -f {}".format(conf_file)
     for arg, val in kwargs.items():
         if arg in option_toggles.values() and val:
-            command = "{} {}".format(
-                command,
-                _arg2opt(arg),
-            )
+            command = "{} {}".format(command, _arg2opt(arg),)
         elif arg in option_flags.values():
-            command = "{} {} {}".format(command, _arg2opt(arg), _quote_args(str(val)))
+            command = "{} {} {}".format(
+                command, _arg2opt(arg), _quote_args(six.text_type(val))
+            )
         elif arg != "log_file":
             log.warning("Unknown argument %s, don't know how to map this!", arg)
     if "log_file" in kwargs:
@@ -335,7 +340,7 @@ def remove(name, conf_file=default_conf):
 
       salt '*' logadm.remove myapplog
     """
-    command = "logadm -f {} -r {}".format(conf_file, name)
+    command = "logadm -f {0} -r {1}".format(conf_file, name)
     result = __salt__["cmd.run_all"](command, python_shell=False)
     if result["retcode"] != 0:
         return dict(

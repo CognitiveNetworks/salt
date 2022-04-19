@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Manages VMware storage policies
 (called pbm because the vCenter endpoint is /pbm)
@@ -90,11 +91,14 @@ PyVmomi can be installed via pip:
     information.
 """
 
+# Import Python Libs
+from __future__ import absolute_import
 
 import copy
 import logging
 import sys
 
+# Import Salt Libs
 from salt.exceptions import ArgumentValueError, CommandExecutionError
 from salt.utils.dictdiffer import recursive_diff
 from salt.utils.listdiffer import list_diff
@@ -124,8 +128,10 @@ def __virtual__():
 
         return (
             False,
-            "State module did not load: Incompatible versions "
-            "of Python and pyVmomi present. See Issue #29537.",
+            (
+                "State module did not load: Incompatible versions "
+                "of Python and pyVmomi present. See Issue #29537."
+            ),
         )
     return True
 
@@ -149,13 +155,13 @@ def default_vsan_policy_configured(name, policy):
     # It's going to make the whole thing much easier
     policy_copy = copy.deepcopy(policy)
     proxy_type = __salt__["vsphere.get_proxy_type"]()
-    log.trace("proxy_type = %s", proxy_type)
+    log.trace("proxy_type = {0}".format(proxy_type))
     # All allowed proxies have a shim execution module with the same
     # name which implementes a get_details function
     # All allowed proxies have a vcenter detail
-    vcenter = __salt__["{}.get_details".format(proxy_type)]()["vcenter"]
-    log.info("Running %s on vCenter '%s'", name, vcenter)
-    log.trace("policy = %s", policy)
+    vcenter = __salt__["{0}.get_details".format(proxy_type)]()["vcenter"]
+    log.info("Running {0} on vCenter " "'{1}'".format(name, vcenter))
+    log.trace("policy = {0}".format(policy))
     changes_required = False
     ret = {"name": name, "changes": {}, "result": None, "comment": None}
     comments = []
@@ -167,14 +173,15 @@ def default_vsan_policy_configured(name, policy):
         # TODO policy schema validation
         si = __salt__["vsphere.get_service_instance_via_proxy"]()
         current_policy = __salt__["vsphere.list_default_vsan_policy"](si)
-        log.trace("current_policy = %s", current_policy)
+        log.trace("current_policy = {0}".format(current_policy))
         # Building all diffs between the current and expected policy
         # XXX We simplify the comparison by assuming we have at most 1
         # sub_profile
         if policy.get("subprofiles"):
             if len(policy["subprofiles"]) > 1:
                 raise ArgumentValueError(
-                    "Multiple sub_profiles ({0}) are not supported in the input policy"
+                    "Multiple sub_profiles ({0}) are not "
+                    "supported in the input policy"
                 )
             subprofile = policy["subprofiles"][0]
             current_subprofile = current_policy["subprofiles"][0]
@@ -215,7 +222,7 @@ def default_vsan_policy_configured(name, policy):
                     if subprofile_differ.diffs:
                         str_changes.extend(
                             [
-                                "  {}".format(change)
+                                "  {0}".format(change)
                                 for change in subprofile_differ.changes_str.split("\n")
                             ]
                         )
@@ -223,15 +230,15 @@ def default_vsan_policy_configured(name, policy):
                         str_changes.append("  capabilities:")
                         str_changes.extend(
                             [
-                                "  {}".format(change)
+                                "  {0}".format(change)
                                 for change in capabilities_differ.changes_str2.split(
                                     "\n"
                                 )
                             ]
                         )
                 comments.append(
-                    "State {} will update the default VSAN policy on "
-                    "vCenter '{}':\n{}"
+                    "State {0} will update the default VSAN policy on "
+                    "vCenter '{1}':\n{2}"
                     "".format(name, vcenter, "\n".join(str_changes))
                 )
             else:
@@ -241,7 +248,8 @@ def default_vsan_policy_configured(name, policy):
                     service_instance=si,
                 )
                 comments.append(
-                    "Updated the default VSAN policy in vCenter '{}'".format(vcenter)
+                    "Updated the default VSAN policy in vCenter "
+                    "'{0}'".format(vcenter)
                 )
             log.info(comments[-1])
 
@@ -269,7 +277,7 @@ def default_vsan_policy_configured(name, policy):
             log.trace(changes)
         __salt__["vsphere.disconnect"](si)
     except CommandExecutionError as exc:
-        log.error("Error: %s", exc)
+        log.error("Error: {}".format(exc))
         if si:
             __salt__["vsphere.disconnect"](si)
         if not __opts__["test"]:
@@ -284,7 +292,7 @@ def default_vsan_policy_configured(name, policy):
             {
                 "comment": (
                     "Default VSAN policy in vCenter "
-                    "'{}' is correctly configured. "
+                    "'{0}' is correctly configured. "
                     "Nothing to be done.".format(vcenter)
                 ),
                 "result": True,
@@ -312,21 +320,21 @@ def storage_policies_configured(name, policies):
     changes = []
     changes_required = False
     ret = {"name": name, "changes": {}, "result": None, "comment": None}
-    log.trace("policies = %s", policies)
+    log.trace("policies = {0}".format(policies))
     si = None
     try:
         proxy_type = __salt__["vsphere.get_proxy_type"]()
-        log.trace("proxy_type = %s", proxy_type)
+        log.trace("proxy_type = {0}".format(proxy_type))
         # All allowed proxies have a shim execution module with the same
         # name which implementes a get_details function
         # All allowed proxies have a vcenter detail
-        vcenter = __salt__["{}.get_details".format(proxy_type)]()["vcenter"]
-        log.info("Running state '%s' on vCenter '%s'", name, vcenter)
+        vcenter = __salt__["{0}.get_details".format(proxy_type)]()["vcenter"]
+        log.info("Running state '{0}' on vCenter " "'{1}'".format(name, vcenter))
         si = __salt__["vsphere.get_service_instance_via_proxy"]()
         current_policies = __salt__["vsphere.list_storage_policies"](
             policy_names=[policy["name"] for policy in policies], service_instance=si
         )
-        log.trace("current_policies = %s", current_policies)
+        log.trace("current_policies = {0}".format(current_policies))
         # TODO Refactor when recurse_differ supports list_differ
         # It's going to make the whole thing much easier
         for policy in policies:
@@ -340,8 +348,8 @@ def storage_policies_configured(name, policies):
                 changes_required = True
                 if __opts__["test"]:
                     comments.append(
-                        "State {} will create the storage policy "
-                        "'{}' on vCenter '{}'"
+                        "State {0} will create the storage policy "
+                        "'{1}' on vCenter '{2}'"
                         "".format(name, policy["name"], vcenter)
                     )
                 else:
@@ -349,9 +357,8 @@ def storage_policies_configured(name, policies):
                         policy["name"], policy, service_instance=si
                     )
                     comments.append(
-                        "Created storage policy '{}' on vCenter '{}'".format(
-                            policy["name"], vcenter
-                        )
+                        "Created storage policy '{0}' on "
+                        "vCenter '{1}'".format(policy["name"], vcenter)
                     )
                     changes.append({"new": policy, "old": None})
                 log.trace(comments[-1])
@@ -402,7 +409,7 @@ def storage_policies_configured(name, policies):
                         if subprofile_differ.diffs:
                             str_changes.extend(
                                 [
-                                    "  {}".format(change)
+                                    "  {0}".format(change)
                                     for change in subprofile_differ.changes_str.split(
                                         "\n"
                                     )
@@ -412,15 +419,15 @@ def storage_policies_configured(name, policies):
                             str_changes.append("  capabilities:")
                             str_changes.extend(
                                 [
-                                    "  {}".format(change)
+                                    "  {0}".format(change)
                                     for change in capabilities_differ.changes_str2.split(
                                         "\n"
                                     )
                                 ]
                             )
                     comments.append(
-                        "State {} will update the storage policy '{}'"
-                        " on vCenter '{}':\n{}"
+                        "State {0} will update the storage policy '{1}'"
+                        " on vCenter '{2}':\n{3}"
                         "".format(name, policy["name"], vcenter, "\n".join(str_changes))
                     )
                 else:
@@ -430,9 +437,9 @@ def storage_policies_configured(name, policies):
                         service_instance=si,
                     )
                     comments.append(
-                        "Updated the storage policy '{}' in vCenter '{}'".format(
-                            policy["name"], vcenter
-                        )
+                        "Updated the storage policy '{0}'"
+                        "in vCenter '{1}'"
+                        "".format(policy["name"], vcenter)
                     )
                 log.info(comments[-1])
 
@@ -459,13 +466,12 @@ def storage_policies_configured(name, policies):
             else:
                 # No diffs found - no updates required
                 comments.append(
-                    "Storage policy '{}' is up to date. Nothing to be done.".format(
-                        policy["name"]
-                    )
+                    "Storage policy '{0}' is up to date. "
+                    "Nothing to be done.".format(policy["name"])
                 )
         __salt__["vsphere.disconnect"](si)
     except CommandExecutionError as exc:
-        log.error("Error: %s", exc)
+        log.error("Error: {0}".format(exc))
         if si:
             __salt__["vsphere.disconnect"](si)
         if not __opts__["test"]:
@@ -480,7 +486,7 @@ def storage_policies_configured(name, policies):
             {
                 "comment": (
                     "All storage policy in vCenter "
-                    "'{}' is correctly configured. "
+                    "'{0}' is correctly configured. "
                     "Nothing to be done.".format(vcenter)
                 ),
                 "result": True,
@@ -508,7 +514,8 @@ def default_storage_policy_assigned(name, policy, datastore):
         Name of datastore
     """
     log.info(
-        "Running state %s for policy '%s', datastore '%s'.", name, policy, datastore
+        "Running state {0} for policy '{1}', datastore '{2}'."
+        "".format(name, policy, datastore)
     )
     changes = {}
     changes_required = False
@@ -521,8 +528,8 @@ def default_storage_policy_assigned(name, policy, datastore):
         )
         if existing_policy["name"] == policy:
             comment = (
-                "Storage policy '{}' is already assigned to "
-                "datastore '{}'. Nothing to be done."
+                "Storage policy '{0}' is already assigned to "
+                "datastore '{1}'. Nothing to be done."
                 "".format(policy, datastore)
             )
         else:
@@ -534,19 +541,19 @@ def default_storage_policy_assigned(name, policy, datastore):
                 }
             }
             if __opts__["test"]:
-                comment = "State {} will assign storage policy '{}' to datastore '{}'.".format(
-                    name, policy, datastore
-                )
+                comment = (
+                    "State {0} will assign storage policy '{1}' to " "datastore '{2}'."
+                ).format(name, policy, datastore)
             else:
                 __salt__["vsphere.assign_default_storage_policy_to_datastore"](
                     policy=policy, datastore=datastore, service_instance=si
                 )
-                comment = "Storage policy '{} was assigned to datastore '{}'.".format(
-                    policy, name
-                )
+                comment = (
+                    "Storage policy '{0} was assigned to datastore " "'{1}'."
+                ).format(policy, name)
         log.info(comment)
     except CommandExecutionError as exc:
-        log.error("Error: %s", exc)
+        log.error("Error: {}".format(exc))
         if si:
             __salt__["vsphere.disconnect"](si)
         ret.update(

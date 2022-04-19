@@ -1,8 +1,14 @@
+# -*- coding: utf-8 -*-
 """
 Cheetah Renderer for Salt
 """
 
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import salt libs
+from salt.ext import six
+
+# Import 3rd party libs
 try:
     from Cheetah.Template import Template
 
@@ -20,7 +26,7 @@ def render(cheetah_data, saltenv="base", sls="", method="xml", **kws):
     if not HAS_LIBS:
         return {}
 
-    if not isinstance(cheetah_data, str):
+    if not isinstance(cheetah_data, six.string_types):
         cheetah_data = cheetah_data.read()
 
     if cheetah_data.startswith("#!"):
@@ -28,4 +34,4 @@ def render(cheetah_data, saltenv="base", sls="", method="xml", **kws):
     if not cheetah_data.strip():
         return {}
 
-    return str(Template(cheetah_data, searchList=[kws]))
+    return six.text_type(Template(cheetah_data, searchList=[kws]))

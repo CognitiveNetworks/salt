@@ -1,6 +1,13 @@
-import importlib
+# coding: utf-8
 
+# Import Python libs
+from __future__ import absolute_import, unicode_literals
+
+# Import Salt libs
 import salt.utils.locales as locales
+
+# Import 3rd-part libs
+from salt.ext.six.moves import reload_module
 from tests.support.mock import patch
 from tests.support.unit import TestCase
 
@@ -9,12 +16,12 @@ class TestLocales(TestCase):
     def test_get_encodings(self):
         # reload locales modules before and after to defeat memoization of
         # get_encodings()
-        importlib.reload(locales)
+        reload_module(locales)
         with patch("sys.getdefaultencoding", return_value="xyzzy"):
             encodings = locales.get_encodings()
             for enc in (__salt_system_encoding__, "xyzzy", "utf-8", "latin-1"):
                 self.assertIn(enc, encodings)
-        importlib.reload(locales)
+        reload_module(locales)
 
     def test_split_locale(self):
         self.assertDictEqual(

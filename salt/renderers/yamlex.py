@@ -1,6 +1,11 @@
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, print_function, unicode_literals
+
+# Import python libs
 import logging
 import warnings
 
+# Import salt libs
 import salt.utils.url
 from salt.serializers.yamlex import deserialize
 

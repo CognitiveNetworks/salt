@@ -1,12 +1,16 @@
+# -*- coding: utf-8 -*-
 """
 Utilities to enable exception reraising across the master commands
 
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
-import builtins
-
+# Import salt libs
 import salt.exceptions
 import salt.utils.event
+
+# Import 3rd-party libs
+from salt.ext.six.moves import builtins as exceptions
 
 
 def raise_error(name=None, args=None, message=""):
@@ -18,8 +22,8 @@ def raise_error(name=None, args=None, message=""):
     name = name or "Exception"
     if hasattr(salt.exceptions, name):
         ex = getattr(salt.exceptions, name)
-    elif hasattr(builtins, name):
-        ex = getattr(builtins, name)
+    elif hasattr(exceptions, name):
+        ex = getattr(exceptions, name)
     else:
         name = "SaltException"
         ex = getattr(salt.exceptions, name)

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Pull sdb values from a YAML file
 
@@ -41,6 +42,8 @@ embedded GPG-encrypted data using the :py:mod:`GPG renderer
 <salt.renderers.gpg>`.
 """
 
+# import python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 
@@ -95,7 +98,7 @@ def _get_values(profile=None):
                 ret = salt.utils.dictupdate.merge(
                     ret, contents, **profile.get("merge", {})
                 )
-        except OSError:
+        except IOError:
             log.error("File '%s' not found ", fname)
         except TypeError as exc:
             log.error("Error deserializing sdb file '%s': %s", fname, exc)

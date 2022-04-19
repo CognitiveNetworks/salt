@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Manage Windows features via the ServerManager powershell module. Can install and
 remove roles/features.
@@ -7,6 +8,7 @@ remove roles/features.
 :depends:       win_servermanager.install
 :depends:       win_servermanager.remove
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
 # Import salt modules
 import salt.utils.data
@@ -137,7 +139,7 @@ def installed(
     for feature in features:
 
         if feature not in old:
-            ret["changes"][feature] = "Will be installed recurse={}".format(recurse)
+            ret["changes"][feature] = "Will be installed recurse={0}".format(recurse)
         elif recurse:
             ret["changes"][feature] = "Already installed but might install sub-features"
         else:
@@ -168,13 +170,13 @@ def installed(
     for feature in status["Features"]:
         # Features that failed to install or be removed
         if not status["Features"][feature].get("Success", True):
-            fail_feat.append("- {}".format(feature))
+            fail_feat.append("- {0}".format(feature))
         # Features that installed
         elif "(exclude)" not in status["Features"][feature]["Message"]:
-            new_feat.append("- {}".format(feature))
+            new_feat.append("- {0}".format(feature))
         # Show items that were removed because they were part of `exclude`
         elif "(exclude)" in status["Features"][feature]["Message"]:
-            rem_feat.append("- {}".format(feature))
+            rem_feat.append("- {0}".format(feature))
 
     if fail_feat:
         fail_feat.insert(0, "Failed to install the following:")
@@ -302,10 +304,10 @@ def removed(name, features=None, remove_payload=False, restart=False):
         # feature is already uninstalled
         if not status["Features"][feature].get("Success", True):
             # Show items that failed to uninstall
-            fail_feat.append("- {}".format(feature))
+            fail_feat.append("- {0}".format(feature))
         else:
             # Show items that uninstalled
-            rem_feat.append("- {}".format(feature))
+            rem_feat.append("- {0}".format(feature))
 
     if fail_feat:
         fail_feat.insert(0, "Failed to remove the following:")

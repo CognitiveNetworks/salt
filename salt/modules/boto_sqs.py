@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Connection module for Amazon SQS
 
@@ -43,12 +44,18 @@ Connection module for Amazon SQS
 # keep lint from choking on _get_conn and _cache_id
 # pylint: disable=E0602
 
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import Python libs
 import logging
-import urllib.parse
 
+# Import Salt libs
 import salt.utils.json
 import salt.utils.versions
+
+# Import 3rd-party libs
+from salt.ext import six
+from salt.ext.six.moves.urllib.parse import urlparse as _urlparse
 
 log = logging.getLogger(__name__)
 
@@ -56,6 +63,7 @@ __func_alias__ = {
     "list_": "list",
 }
 
+# Import third party libs
 try:
     # pylint: disable=unused-import
     import boto3
@@ -82,7 +90,7 @@ def _preprocess_attributes(attributes):
     """
     Pre-process incoming queue attributes before setting them
     """
-    if isinstance(attributes, str):
+    if isinstance(attributes, six.string_types):
         attributes = salt.utils.json.loads(attributes)
 
     def stringified(val):
@@ -92,7 +100,7 @@ def _preprocess_attributes(attributes):
             return salt.utils.json.dumps(val)
         return val
 
-    return {attr: stringified(val) for attr, val in attributes.items()}
+    return dict((attr, stringified(val)) for attr, val in six.iteritems(attributes))
 
 
 def exists(name, region=None, key=None, keyid=None, profile=None):
@@ -118,12 +126,7 @@ def exists(name, region=None, key=None, keyid=None, profile=None):
 
 
 def create(
-    name,
-    attributes=None,
-    region=None,
-    key=None,
-    keyid=None,
-    profile=None,
+    name, attributes=None, region=None, key=None, keyid=None, profile=None,
 ):
     """
     Create an SQS queue.
@@ -183,7 +186,7 @@ def list_(prefix="", region=None, key=None, keyid=None, profile=None):
 
     def extract_name(queue_url):
         # Note: this logic taken from boto, so should be safe
-        return urllib.parse.urlparse(queue_url).path.split("/")[2]
+        return _urlparse(queue_url).path.split("/")[2]
 
     try:
         r = conn.list_queues(QueueNamePrefix=prefix)
@@ -215,12 +218,7 @@ def get_attributes(name, region=None, key=None, keyid=None, profile=None):
 
 
 def set_attributes(
-    name,
-    attributes,
-    region=None,
-    key=None,
-    keyid=None,
-    profile=None,
+    name, attributes, region=None, key=None, keyid=None, profile=None,
 ):
     """
     Set attributes on an SQS queue.

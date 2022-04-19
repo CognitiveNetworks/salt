@@ -10,20 +10,19 @@ class MacDefaultsTestCase(TestCase, LoaderModuleMockMixin):
 
     def test_write_default(self):
         """
-        Test writing a default setting
+            Test writing a default setting
         """
         mock = MagicMock()
         with patch.dict(macdefaults.__salt__, {"cmd.run_all": mock}):
             macdefaults.write("com.apple.CrashReporter", "DialogType", "Server")
             mock.assert_called_once_with(
-                'defaults write "com.apple.CrashReporter" "DialogType" -string'
-                ' "Server"',
+                'defaults write "com.apple.CrashReporter" "DialogType" -string "Server"',
                 runas=None,
             )
 
     def test_write_with_user(self):
         """
-        Test writing a default setting with a specific user
+            Test writing a default setting with a specific user
         """
         mock = MagicMock()
         with patch.dict(macdefaults.__salt__, {"cmd.run_all": mock}):
@@ -31,14 +30,13 @@ class MacDefaultsTestCase(TestCase, LoaderModuleMockMixin):
                 "com.apple.CrashReporter", "DialogType", "Server", user="frank"
             )
             mock.assert_called_once_with(
-                'defaults write "com.apple.CrashReporter" "DialogType" -string'
-                ' "Server"',
+                'defaults write "com.apple.CrashReporter" "DialogType" -string "Server"',
                 runas="frank",
             )
 
     def test_write_default_boolean(self):
         """
-        Test writing a default setting
+            Test writing a default setting
         """
         mock = MagicMock()
         with patch.dict(macdefaults.__salt__, {"cmd.run_all": mock}):
@@ -50,7 +48,7 @@ class MacDefaultsTestCase(TestCase, LoaderModuleMockMixin):
 
     def test_read_default(self):
         """
-        Test reading a default setting
+            Test reading a default setting
         """
         mock = MagicMock()
         with patch.dict(macdefaults.__salt__, {"cmd.run": mock}):
@@ -61,7 +59,7 @@ class MacDefaultsTestCase(TestCase, LoaderModuleMockMixin):
 
     def test_read_default_with_user(self):
         """
-        Test reading a default setting as a specific user
+            Test reading a default setting as a specific user
         """
         mock = MagicMock()
         with patch.dict(macdefaults.__salt__, {"cmd.run": mock}):
@@ -72,7 +70,7 @@ class MacDefaultsTestCase(TestCase, LoaderModuleMockMixin):
 
     def test_delete_default(self):
         """
-        Test delete a default setting
+            Test delete a default setting
         """
         mock = MagicMock()
         with patch.dict(macdefaults.__salt__, {"cmd.run_all": mock}):
@@ -85,7 +83,7 @@ class MacDefaultsTestCase(TestCase, LoaderModuleMockMixin):
 
     def test_delete_default_with_user(self):
         """
-        Test delete a default setting as a specific user
+            Test delete a default setting as a specific user
         """
         mock = MagicMock()
         with patch.dict(macdefaults.__salt__, {"cmd.run_all": mock}):

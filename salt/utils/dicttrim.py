@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, print_function, unicode_literals
+
 import sys
 
 import salt.payload
@@ -59,16 +62,17 @@ def trim_dict(
                          that the msgpack data should be decoded with
                          "encoding='utf-8'".
     """
+    serializer = salt.payload.Serial({"serial": "msgpack"})
     if is_msgpacked:
         dict_size = sys.getsizeof(data)
     else:
-        dict_size = sys.getsizeof(salt.payload.dumps(data))
+        dict_size = sys.getsizeof(serializer.dumps(data))
     if dict_size > max_dict_bytes:
         if is_msgpacked:
             if use_bin_type:
-                data = salt.payload.loads(data, encoding="utf-8")
+                data = serializer.loads(data, encoding="utf-8")
             else:
-                data = salt.payload.loads(data)
+                data = serializer.loads(data)
         while True:
             percent = float(percent)
             max_val_size = float(max_dict_bytes * (percent / 100))
@@ -82,9 +86,9 @@ def trim_dict(
                 percent = percent - stepper_size
                 max_val_size = float(max_dict_bytes * (percent / 100))
                 if use_bin_type:
-                    dump_data = salt.payload.dumps(data, use_bin_type=True)
+                    dump_data = serializer.dumps(data, use_bin_type=True)
                 else:
-                    dump_data = salt.payload.dumps(data)
+                    dump_data = serializer.dumps(data)
                 cur_dict_size = sys.getsizeof(dump_data)
                 if cur_dict_size < max_dict_bytes:
                     if is_msgpacked:  # Repack it
@@ -100,9 +104,9 @@ def trim_dict(
                 pass
         if is_msgpacked:
             if use_bin_type:
-                return salt.payload.dumps(data, use_bin_type=True)
+                return serializer.dumps(data, use_bin_type=True)
             else:
-                return salt.payload.dumps(data)
+                return serializer.dumps(data)
         else:
             return data
     else:

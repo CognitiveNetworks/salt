@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Parses roster entries out of Host directives from SSH config
 
@@ -5,15 +6,20 @@ Parses roster entries out of Host directives from SSH config
 
     salt-ssh --roster sshconfig '*' -r "echo hi"
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
 import collections
 import fnmatch
 import logging
+
+# Import python libs
 import os
 import re
 
+# Import Salt libs
 import salt.utils.files
 import salt.utils.stringutils
+from salt.ext import six
 
 log = logging.getLogger(__name__)
 
@@ -31,9 +37,9 @@ def _get_ssh_config_file(opts):
     """
     ssh_config_file = opts.get("ssh_config_file")
     if not os.path.isfile(ssh_config_file):
-        raise OSError("Cannot find SSH config file")
+        raise IOError("Cannot find SSH config file")
     if not os.access(ssh_config_file, os.R_OK):
-        raise OSError("Cannot access SSH config file: {}".format(ssh_config_file))
+        raise IOError("Cannot access SSH config file: {}".format(ssh_config_file))
     return ssh_config_file
 
 
@@ -102,7 +108,7 @@ def targets(tgt, tgt_type="glob", **kwargs):
     return matched
 
 
-class RosterMatcher:
+class RosterMatcher(object):
     """
     Matcher for the roster data structure
     """
@@ -117,7 +123,7 @@ class RosterMatcher:
         Execute the correct tgt_type routine and return
         """
         try:
-            return getattr(self, "ret_{}_minions".format(self.tgt_type))()
+            return getattr(self, "ret_{0}_minions".format(self.tgt_type))()
         except AttributeError:
             return {}
 
@@ -137,7 +143,7 @@ class RosterMatcher:
         """
         Return the configured ip
         """
-        if isinstance(self.raw[minion], str):
+        if isinstance(self.raw[minion], six.string_types):
             return {"host": self.raw[minion]}
         if isinstance(self.raw[minion], dict):
             return self.raw[minion]

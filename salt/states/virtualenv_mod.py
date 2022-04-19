@@ -1,9 +1,12 @@
+# -*- coding: utf-8 -*-
 """
 Setup of Python virtualenv sandboxes.
 
 .. versionadded:: 0.17.0
 """
 
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 import os
@@ -11,8 +14,13 @@ import os
 import salt.utils.functools
 import salt.utils.platform
 import salt.utils.versions
+
+# Import Salt libs
 import salt.version
 from salt.exceptions import CommandExecutionError, CommandNotFoundError
+
+# Import 3rd-party libs
+from salt.ext import six
 
 log = logging.getLogger(__name__)
 
@@ -161,7 +169,7 @@ def managed(
             ret.update(
                 {
                     "result": False,
-                    "comment": "pip requirements file '{}' not found".format(
+                    "comment": "pip requirements file '{0}' not found".format(
                         requirements
                     ),
                 }
@@ -173,20 +181,20 @@ def managed(
     if venv_exists and clear:
         ret["changes"]["cleared_packages"] = __salt__["pip.freeze"](bin_env=name)
         ret["changes"]["old"] = __salt__["cmd.run_stderr"](
-            "{} -V".format(venv_py)
+            "{0} -V".format(venv_py)
         ).strip("\n")
 
     # Create (or clear) the virtualenv
     if __opts__["test"]:
         if venv_exists and clear:
             ret["result"] = None
-            ret["comment"] = "Virtualenv {} is set to be cleared".format(name)
+            ret["comment"] = "Virtualenv {0} is set to be cleared".format(name)
             return ret
         if venv_exists and not clear:
-            ret["comment"] = "Virtualenv {} is already created".format(name)
+            ret["comment"] = "Virtualenv {0} is already created".format(name)
             return ret
         ret["result"] = None
-        ret["comment"] = "Virtualenv {} is set to be created".format(name)
+        ret["comment"] = "Virtualenv {0} is set to be created".format(name)
         return ret
 
     if not venv_exists or (venv_exists and clear):
@@ -207,7 +215,7 @@ def managed(
             )
         except CommandNotFoundError as err:
             ret["result"] = False
-            ret["comment"] = "Failed to create virtualenv: {}".format(err)
+            ret["comment"] = "Failed to create virtualenv: {0}".format(err)
             return ret
 
         if venv_ret["retcode"] != 0:
@@ -217,7 +225,7 @@ def managed(
 
         ret["result"] = True
         ret["changes"]["new"] = __salt__["cmd.run_stderr"](
-            "{} -V".format(venv_py)
+            "{0} -V".format(venv_py)
         ).strip("\n")
 
         if clear:
@@ -243,9 +251,9 @@ def managed(
             ret["result"] = False
             ret["comment"] = (
                 "The 'use_wheel' option is only supported in "
-                "pip between {} and {}. The version of pip detected "
-                "was {}.".format(min_version, max_version, cur_version)
-            )
+                "pip between {0} and {1}. The version of pip detected "
+                "was {2}."
+            ).format(min_version, max_version, cur_version)
             return ret
 
     # Check that the pip binary supports the 'no_use_wheel' option
@@ -263,9 +271,9 @@ def managed(
             ret["result"] = False
             ret["comment"] = (
                 "The 'no_use_wheel' option is only supported in "
-                "pip between {} and {}. The version of pip detected "
-                "was {}.".format(min_version, max_version, cur_version)
-            )
+                "pip between {0} and {1}. The version of pip detected "
+                "was {2}."
+            ).format(min_version, max_version, cur_version)
             return ret
 
     # Check that the pip binary supports the 'no_binary' option
@@ -279,9 +287,9 @@ def managed(
             ret["result"] = False
             ret["comment"] = (
                 "The 'no_binary' option is only supported in "
-                "pip {} and newer. The version of pip detected "
-                "was {}.".format(min_version, cur_version)
-            )
+                "pip {0} and newer. The version of pip detected "
+                "was {1}."
+            ).format(min_version, cur_version)
             return ret
 
     # Populate the venv via a requirements file
@@ -295,7 +303,7 @@ def managed(
 
         if requirements:
 
-            if isinstance(requirements, str):
+            if isinstance(requirements, six.string_types):
                 req_canary = requirements.split(",")[0]
             elif isinstance(requirements, list):
                 req_canary = requirements[0]
@@ -333,7 +341,7 @@ def managed(
         )
         ret["result"] &= pip_ret["retcode"] == 0
         if pip_ret["retcode"] > 0:
-            ret["comment"] = "{}\n{}\n{}".format(
+            ret["comment"] = "{0}\n{1}\n{2}".format(
                 ret["comment"], pip_ret["stdout"], pip_ret["stderr"]
             )
 

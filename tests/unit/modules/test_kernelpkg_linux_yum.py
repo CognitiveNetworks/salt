@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     :synopsis: Unit Tests for 'module.yumkernelpkg'
     :platform: Linux
@@ -6,6 +7,8 @@
 """
 # pylint: disable=invalid-name,no-member
 
+# Import Python Libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 try:
     # Import Salt Testing Libs
@@ -43,7 +46,9 @@ class YumKernelPkgTestCase(KernelPkgTestCase, TestCase, LoaderModuleMockMixin):
                 "__grains__": {
                     "os": self.OS_NAME,
                     "osmajorrelease": self.OS_MAJORRELEASE,
-                    "kernelrelease": "{}.{}".format(self.KERNEL_LIST[0], self.OS_ARCH),
+                    "kernelrelease": "{0}.{1}".format(
+                        self.KERNEL_LIST[0], self.OS_ARCH
+                    ),
                 },
                 "__salt__": {
                     "pkg.normalize_name": pkg.normalize_name,
@@ -87,7 +92,7 @@ class YumKernelPkgTestCase(KernelPkgTestCase, TestCase, LoaderModuleMockMixin):
                 ):
                     result = self._kernelpkg.remove(release=self.KERNEL_LIST[0])
                     self.assertIn("removed", result)
-                    target = "{}-{}".format(
+                    target = "{0}-{1}".format(
                         self._kernelpkg._package_name(), self.KERNEL_LIST[0]
                     )  # pylint: disable=protected-access
                     self.assertListEqual(result["removed"], [target])

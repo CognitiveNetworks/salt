@@ -8,9 +8,7 @@ import shutil
 
 import pytest
 
-pytestmark = [
-    pytest.mark.windows_whitelisted,
-]
+pytestmark = [pytest.mark.windows_whitelisted]
 
 
 @pytest.fixture(scope="module", autouse=True)

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Monitor Server with Server Density
 ==================================
@@ -46,10 +47,16 @@ Example:
       serverdensity_device.monitored
 """
 
+# Import python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 
+# Import Salt libs
 import salt.utils.json
+
+# Import 3rd-party libs
+from salt.ext import six
 
 # TODO:
 #
@@ -79,10 +86,10 @@ def _get_salt_params():
             sd_os = {"code": all_grains["kernel"].lower(), "name": all_grains["kernel"]}
         params["os"] = salt.utils.json.dumps(sd_os)
         params["cpuCores"] = all_stats["cpuinfo"]["cpu cores"]
-        params["installedRAM"] = str(
+        params["installedRAM"] = six.text_type(
             int(all_stats["meminfo"]["MemTotal"]["value"]) / 1024
         )
-        params["swapSpace"] = str(
+        params["swapSpace"] = six.text_type(
             int(all_stats["meminfo"]["SwapTotal"]["value"]) / 1024
         )
         params["privateIPs"] = salt.utils.json.dumps(all_grains["fqdn_ip4"])
@@ -166,7 +173,7 @@ def monitored(
 
     # override salt_params with given params
     if salt_params:
-        for key, value in params.items():
+        for key, value in six.iteritems(params):
             params_from_salt[key] = value
         params_to_use = params_from_salt
     else:
@@ -177,10 +184,9 @@ def monitored(
 
     if device_in_sd and sd_agent_installed:
         ret["result"] = True
-        ret["comment"] = (
-            "Such server name already exists in this Server Density account. And"
-            " sd-agent is installed"
-        )
+        ret[
+            "comment"
+        ] = "Such server name already exists in this Server Density account. And sd-agent is installed"
         ret["changes"] = {}
         return ret
 
@@ -199,10 +205,9 @@ def monitored(
         ret["comment"] = "Device was already in Server Density db."
     else:
         ret["result"] = False
-        ret["comment"] = (
-            "Failed to create device in Server Density DB and this device does not"
-            " exist in db either."
-        )
+        ret[
+            "comment"
+        ] = "Failed to create device in Server Density DB and this device does not exist in db either."
         ret["changes"] = {}
         if __opts__["test"]:
             ret["result"] = None
@@ -213,10 +218,9 @@ def monitored(
 
     if __opts__["test"]:
         ret["result"] = None
-        ret["comment"] = (
-            "Server Density agent is set to be installed and device created in the"
-            " Server Density DB"
-        )
+        ret[
+            "comment"
+        ] = "Server Density agent is set to be installed and device created in the Server Density DB"
         return ret
 
     installed_agent = __salt__["serverdensity_device.install_agent"](

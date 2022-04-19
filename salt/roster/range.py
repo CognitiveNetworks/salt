@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 This roster resolves targets from a range server.
 
@@ -10,6 +11,7 @@ When you want to use a range query for target matching, use ``--roster range``. 
     salt-ssh --roster range '%%%example.range.cluster' test.ping
 
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
 import copy
 import fnmatch

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Module for sending messages to Pushbullet (https://www.pushbullet.com)
 
@@ -21,6 +22,8 @@ For example:
 
 """
 
+# Import python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 
@@ -44,7 +47,7 @@ def __virtual__():
     return True
 
 
-class _SaltPushbullet:
+class _SaltPushbullet(object):
     def __init__(self, device_name):
         api_key = __salt__["config.get"]("pushbullet.api_key") or __salt__[
             "config.get"

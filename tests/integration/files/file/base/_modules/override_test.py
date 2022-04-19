@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
 """
 Module for running arbitrary tests
 """
+from __future__ import absolute_import
 
 __virtualname__ = "test"
 

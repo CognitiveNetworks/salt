@@ -1,11 +1,15 @@
+# -*- coding: utf-8 -*-
 """
 Management of NTP servers on Windows
 
 .. versionadded:: 2014.1.0
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import Python libs
 import logging
 
+# Import Salt libs
 import salt.utils.platform
 
 log = logging.getLogger(__name__)
@@ -42,7 +46,7 @@ def set_servers(*servers):
         "W32tm",
         "/config",
         "/syncfromflags:manual",
-        "/manualpeerlist:{}".format(" ".join(servers)),
+        "/manualpeerlist:{0}".format(" ".join(servers)),
     ]
     reliable_cmd = ["W32tm", "/config", "/reliable:yes"]
     update_cmd = ["W32tm", "/config", "/update"]

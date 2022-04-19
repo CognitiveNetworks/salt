@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Some utils functions to be used throughout the integration test files.
 """

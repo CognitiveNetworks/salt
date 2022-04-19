@@ -88,9 +88,8 @@ def test_absent_noremove():
     ):
         ret = postgres_schema.absent("dbname", "foo")
         assert ret == {
-            "comment": (
-                "Schema foo is not present in database dbname, so it cannot be removed"
-            ),
+            "comment": "Schema foo is not present in database dbname,"
+            " so it cannot be removed",
             "changes": {},
             "dbname": "dbname",
             "name": "foo",

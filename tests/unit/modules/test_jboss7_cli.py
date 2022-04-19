@@ -1,13 +1,23 @@
+# -*- coding: utf-8 -*-
+
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
+
 import re
 
 import salt.modules.jboss7_cli as jboss7_cli
 from salt.exceptions import CommandExecutionError
+
+# Import Salt libs
+from salt.ext import six
+
+# Import Salt testing libs
 from tests.support.mixins import LoaderModuleMockMixin
 from tests.support.mock import patch
 from tests.support.unit import TestCase
 
 
-class CmdMock:
+class CmdMock(object):
     commands = []
     command_response_func = None  # if you want to test complete response object (with retcode, stdout and stderr)
     cli_commands = []
@@ -80,9 +90,7 @@ class JBoss7CliTestCase(TestCase, LoaderModuleMockMixin):
 
         self.assertEqual(
             self.cmd.get_last_command(),
-            "/opt/jboss/jboss-eap-6.0.1/bin/jboss-cli.sh --connect"
-            ' --controller="123.234.345.456:9999" --user="jbossadm"'
-            ' --password="jbossadm" --command="some cli operation"',
+            '/opt/jboss/jboss-eap-6.0.1/bin/jboss-cli.sh --connect --controller="123.234.345.456:9999" --user="jbossadm" --password="jbossadm" --command="some cli operation"',
         )
 
     def test_controller_without_authentication(self):
@@ -94,8 +102,7 @@ class JBoss7CliTestCase(TestCase, LoaderModuleMockMixin):
 
         self.assertEqual(
             self.cmd.get_last_command(),
-            "/opt/jboss/jboss-eap-6.0.1/bin/jboss-cli.sh --connect"
-            ' --controller="123.234.345.456:9999" --command="some cli operation"',
+            '/opt/jboss/jboss-eap-6.0.1/bin/jboss-cli.sh --connect --controller="123.234.345.456:9999" --command="some cli operation"',
         )
 
     def test_operation_execution(self):
@@ -104,9 +111,7 @@ class JBoss7CliTestCase(TestCase, LoaderModuleMockMixin):
 
         self.assertEqual(
             self.cmd.get_last_command(),
-            r"/opt/jboss/jboss-eap-6.0.1/bin/jboss-cli.sh --connect"
-            r' --controller="123.234.345.456:9999" --user="jbossadm"'
-            r' --password="jbossadm" --command="sample_operation"',
+            r'/opt/jboss/jboss-eap-6.0.1/bin/jboss-cli.sh --connect --controller="123.234.345.456:9999" --user="jbossadm" --password="jbossadm" --command="sample_operation"',
         )
 
     def test_handling_jboss_error(self):
@@ -149,7 +154,7 @@ class JBoss7CliTestCase(TestCase, LoaderModuleMockMixin):
             assert False
         except CommandExecutionError as err:
             self.assertTrue(
-                str(err).startswith("Could not execute jboss-cli.sh script")
+                six.text_type(err).startswith("Could not execute jboss-cli.sh script")
             )
 
     def test_handling_other_cmd_error(self):
@@ -167,7 +172,7 @@ class JBoss7CliTestCase(TestCase, LoaderModuleMockMixin):
             # should throw an exception
             self.fail("An exception should be thrown")
         except CommandExecutionError as err:
-            self.assertTrue(str(err).startswith("Command execution failed"))
+            self.assertTrue(six.text_type(err).startswith("Command execution failed"))
 
     def test_matches_cli_output(self):
         text = """{
@@ -451,19 +456,12 @@ class JBoss7CliTestCase(TestCase, LoaderModuleMockMixin):
         self.assertEqual(conn_url_attributes["restart-required"], "no-services")
 
     def test_escaping_operation_with_backslashes_and_quotes(self):
-        operation = (
-            r'/subsystem=naming/binding="java:/sampleapp/web-module/ldap/username":add(binding-type=simple,'
-            r' value="DOMAIN\\\\user")'
-        )
+        operation = r'/subsystem=naming/binding="java:/sampleapp/web-module/ldap/username":add(binding-type=simple, value="DOMAIN\\\\user")'
         jboss7_cli.run_operation(self.jboss_config, operation)
 
         self.assertEqual(
             self.cmd.get_last_command(),
-            r"/opt/jboss/jboss-eap-6.0.1/bin/jboss-cli.sh --connect"
-            r' --controller="123.234.345.456:9999" --user="jbossadm"'
-            r' --password="jbossadm"'
-            r' --command="/subsystem=naming/binding=\"java:/sampleapp/web-module/ldap/username\":add(binding-type=simple,'
-            r' value=\"DOMAIN\\\\\\\\user\")"',
+            r'/opt/jboss/jboss-eap-6.0.1/bin/jboss-cli.sh --connect --controller="123.234.345.456:9999" --user="jbossadm" --password="jbossadm" --command="/subsystem=naming/binding=\"java:/sampleapp/web-module/ldap/username\":add(binding-type=simple, value=\"DOMAIN\\\\\\\\user\")"',
         )
 
     def test_run_operation_wflyctl_error(self):

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     :codeauthor: Pedro Algarvio (pedro@algarvio.me)
 
@@ -19,8 +20,13 @@
         http://stackoverflow.com/questions/6190331/
 """
 
+# Import python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 from collections.abc import Callable
+
+# Import 3rd-party libs
+from salt.ext import six
 
 try:
     # pylint: disable=E0611,minimum-python-version
@@ -42,10 +48,12 @@ except (ImportError, AttributeError):
         # Backport of OrderedDict() class that runs on Python 2.4, 2.5, 2.6, 2.7 and pypy.
         # Passes Python2.7's test suite and incorporates all the latest updates.
 
+        # pylint: disable=import-error,no-name-in-module
         try:
-            from _thread import get_ident as _get_ident
+            from salt.ext.six.moves._thread import get_ident as _get_ident
         except ImportError:
-            from _dummy_thread import get_ident as _get_ident
+            from salt.ext.six.moves._dummy_thread import get_ident as _get_ident
+        # pylint: enable=import-error,no-name-in-module
 
         #        try:
         #            from _abcoll import KeysView, ValuesView, ItemsView
@@ -71,10 +79,10 @@ except (ImportError, AttributeError):
                 because their insertion order is arbitrary.
 
                 """
-                super().__init__()
+                super(OrderedDict, self).__init__()  # pylint: disable=E1003
                 if len(args) > 1:
                     raise TypeError(
-                        "expected at most 1 arguments, got {}".format(len(args))
+                        "expected at most 1 arguments, got {0}".format(len(args))
                     )
                 try:
                     self.__root
@@ -122,7 +130,7 @@ except (ImportError, AttributeError):
             def clear(self):
                 "od.clear() -> None.  Remove all items from od."
                 try:
-                    for node in self.__map.values():
+                    for node in six.itervalues(self.__map):
                         del node[:]
                     root = self.__root
                     root[:] = [root, root, None]
@@ -194,7 +202,7 @@ except (ImportError, AttributeError):
                 if len(args) > 2:
                     raise TypeError(
                         "update() takes at most 2 positional "
-                        "arguments ({} given)".format(len(args))
+                        "arguments ({0} given)".format(len(args))
                     )
                 elif not args:
                     raise TypeError("update() takes at least 1 argument (0 given)")
@@ -212,7 +220,7 @@ except (ImportError, AttributeError):
                 else:
                     for key, value in other:
                         self[key] = value
-                for key, value in kwds.items():
+                for key, value in six.iteritems(kwds):
                     self[key] = value
 
             __update = (
@@ -249,8 +257,8 @@ except (ImportError, AttributeError):
                 _repr_running[call_key] = 1
                 try:
                     if not self:
-                        return "{}()".format(self.__class__.__name__)
-                    return "{}('{}')".format(
+                        return "{0}()".format(self.__class__.__name__)
+                    return "{0}('{1}')".format(
                         self.__class__.__name__, list(self.items())
                     )
                 finally:
@@ -311,14 +319,12 @@ except (ImportError, AttributeError):
 
 
 class DefaultOrderedDict(OrderedDict):
-    """
-    Dictionary that remembers insertion order
-    """
+    "Dictionary that remembers insertion order and "
 
     def __init__(self, default_factory=None, *a, **kw):
         if default_factory is not None and not isinstance(default_factory, Callable):
             raise TypeError("first argument must be callable")
-        super().__init__(*a, **kw)
+        super(DefaultOrderedDict, self).__init__(*a, **kw)
         self.default_factory = default_factory
 
     def __getitem__(self, key):
@@ -352,6 +358,6 @@ class DefaultOrderedDict(OrderedDict):
         return type(self)(self.default_factory, copy.deepcopy(self.items()))
 
     def __repr__(self, _repr_running={}):  # pylint: disable=W0102
-        return "DefaultOrderedDict({}, {})".format(
-            self.default_factory, super().__repr__()
+        return "DefaultOrderedDict({0}, {1})".format(
+            self.default_factory, super(DefaultOrderedDict, self).__repr__()
         )

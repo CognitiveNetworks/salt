@@ -62,8 +62,7 @@ def __virtual__():
         return __virtualname__
     return (
         False,
-        "The ebuild execution module cannot be loaded: either the system is not Gentoo"
-        " or the portage python library is not available.",
+        "The ebuild execution module cannot be loaded: either the system is not Gentoo or the portage python library is not available.",
     )
 
 

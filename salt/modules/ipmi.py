@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Support IPMI commands over LAN. This module does not talk to the local
 systems hardware through IPMI drivers. It uses a python module `pyghmi`.
@@ -30,13 +31,18 @@ systems hardware through IPMI drivers. It uses a python module `pyghmi`.
                                     uid=1
 """
 
+# Import Python Libs
+from __future__ import absolute_import, print_function, unicode_literals
+
+# Import Salt libs
+from salt.ext import six
 
 IMPORT_ERR = None
 try:
     from pyghmi.ipmi import command
     from pyghmi.ipmi.private import session
 except Exception as ex:  # pylint: disable=broad-except
-    IMPORT_ERR = str(ex)
+    IMPORT_ERR = six.text_type(ex)
 
 __virtualname__ = "ipmi"
 
@@ -58,14 +64,14 @@ def _get_config(**kwargs):
         "api_login_timeout": 2,
     }
     if "__salt__" in globals():
-        config_key = "{}.config".format(__virtualname__)
+        config_key = "{0}.config".format(__virtualname__)
         config.update(__salt__["config.get"](config_key, {}))
     for k in set(config) & set(kwargs):
         config[k] = kwargs[k]
     return config
 
 
-class _IpmiCommand:
+class _IpmiCommand(object):
     o = None
 
     def __init__(self, **kwargs):
@@ -86,7 +92,7 @@ class _IpmiCommand:
             self.o.ipmi_session.logout()
 
 
-class _IpmiSession:
+class _IpmiSession(object):
     o = None
 
     def _onlogon(self, response):

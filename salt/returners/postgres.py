@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Return data to a postgresql server
 
@@ -125,15 +126,23 @@ To override individual configuration items, append --return_kwargs '{"key:": "va
     salt '*' test.ping --return postgres --return_kwargs '{"db": "another-salt"}'
 
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
+
+# Import python libs
 import sys
 from contextlib import contextmanager
 
 import salt.exceptions
 import salt.returners
+
+# Import Salt libs
 import salt.utils.jid
 import salt.utils.json
+
+# Import third party libs
+from salt.ext import six
 
 try:
     import psycopg2
@@ -174,7 +183,7 @@ def _get_options(ret=None):
     }
 
     _options = salt.returners.get_returner_options(
-        "returner.{}".format(__virtualname__),
+        "returner.{0}".format(__virtualname__),
         ret,
         attrs,
         __salt__=__salt__,
@@ -213,9 +222,9 @@ def _get_serv(ret=None, commit=False):
         yield cursor
     except psycopg2.DatabaseError as err:
         error = err.args
-        sys.stderr.write(str(error))
+        sys.stderr.write(six.text_type(error))
         cursor.execute("ROLLBACK")
-        raise
+        six.reraise(*sys.exc_info())
     else:
         if commit:
             cursor.execute("COMMIT")
@@ -247,8 +256,7 @@ def returner(ret):
             )
     except salt.exceptions.SaltMasterError:
         log.critical(
-            "Could not store return with postgres returner. PostgreSQL server"
-            " unavailable."
+            "Could not store return with postgres returner. PostgreSQL server unavailable."
         )
 
 

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 NAPALM Formula helpers
 ======================
@@ -8,11 +9,14 @@ This is an Execution Module providing helpers for various NAPALM formulas,
 e.g., napalm-interfaces-formula, napalm-bgp-formula, napalm-ntp-formula etc.,
 meant to provide various helper functions to make the templates more readable.
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import python libs
 import copy
 import fnmatch
 import logging
 
+import salt.ext.six as six
 import salt.utils.dictupdate
 
 # Import salt modules
@@ -42,7 +46,7 @@ def _container_path(model, key=None, container=None, delim=DEFAULT_TARGET_DELIM)
         key = ""
     if not container:
         container = "config"
-    for model_key, model_value in model.items():
+    for model_key, model_value in six.iteritems(model):
         if key:
             key_depth = "{prev_key}{delim}{cur_key}".format(
                 prev_key=key, delim=delim, cur_key=model_key
@@ -52,9 +56,10 @@ def _container_path(model, key=None, container=None, delim=DEFAULT_TARGET_DELIM)
         if model_key == container:
             yield key_depth
         else:
-            yield from _container_path(
+            for value in _container_path(
                 model_value, key=key_depth, container=container, delim=delim
-            )
+            ):
+                yield value
 
 
 def container_path(model, key=None, container=None, delim=DEFAULT_TARGET_DELIM):

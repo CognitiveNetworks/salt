@@ -41,6 +41,7 @@ Module was developed against.
 
 import logging
 import sys
+import traceback
 
 import salt.exceptions
 from salt.config.schemas.esxcluster import ESXClusterConfigSchema, LicenseSchema
@@ -82,8 +83,7 @@ def __virtual__():
 
         return (
             False,
-            "State module did not load: Incompatible versions of Python and pyVmomi"
-            " present. See Issue #29537.",
+            "State module did not load: Incompatible versions of Python and pyVmomi present. See Issue #29537.",
         )
     return True
 
@@ -171,13 +171,12 @@ def cluster_configured(name, cluster_config):
             "Unsupported proxy {}".format(proxy_type)
         )
     log.info(
-        "Running %s for cluster '%s' in datacenter '%s'",
-        name,
-        cluster_name,
-        datacenter_name,
+        "Running {} for cluster '{}' in datacenter '{}'".format(
+            name, cluster_name, datacenter_name
+        )
     )
     cluster_dict = cluster_config
-    log.trace("cluster_dict = %s", cluster_dict)
+    log.trace("cluster_dict =  {}".format(cluster_dict))
     changes_required = False
     ret = {"name": name, "changes": {}, "result": None, "comment": "Default"}
     comments = []
@@ -187,7 +186,7 @@ def cluster_configured(name, cluster_config):
     try:
         log.trace("Validating cluster_configured state input")
         schema = ESXClusterConfigSchema.serialize()
-        log.trace("schema = %s", schema)
+        log.trace("schema = {}".format(schema))
         try:
             jsonschema.validate(cluster_dict, schema)
         except jsonschema.exceptions.ValidationError as exc:
@@ -211,9 +210,9 @@ def cluster_configured(name, cluster_config):
                 ret.update({"result": None, "comment": "\n".join(comments)})
                 return ret
             log.trace(
-                "Creating cluster '%s' in datacenter '%s'.",
-                cluster_name,
-                datacenter_name,
+                "Creating cluster '{}' in datacenter '{}'.".format(
+                    cluster_name, datacenter_name
+                )
             )
             __salt__["vsphere.create_cluster"](
                 cluster_dict, datacenter_name, cluster_name, service_instance=si
@@ -235,13 +234,13 @@ def cluster_configured(name, cluster_config):
                     cluster_dict.get("ha", {}).get("options", []),
                     "key",
                 )
-                log.trace("options diffs = %s", ldiff.diffs)
+                log.trace("options diffs = {}".format(ldiff.diffs))
                 # Remove options if exist
                 del cluster_dict["ha"]["options"]
                 if "ha" in current and "options" in current["ha"]:
                     del current["ha"]["options"]
             diff = recursive_diff(current, cluster_dict)
-            log.trace("diffs = %s", diff.diffs)
+            log.trace("diffs = {}".format(diff.diffs))
             if not (diff.diffs or (ldiff and ldiff.diffs)):
                 # No differences
                 comments.append(
@@ -280,7 +279,7 @@ def cluster_configured(name, cluster_config):
                         dictupdate.update(
                             old_values, {"ha": {"options": ldiff.old_values}}
                         )
-                    log.trace("new_values = %s", new_values)
+                    log.trace("new_values = {}".format(new_values))
                     __salt__["vsphere.update_cluster"](
                         new_values, datacenter_name, cluster_name, service_instance=si
                     )
@@ -300,7 +299,7 @@ def cluster_configured(name, cluster_config):
         )
         return ret
     except salt.exceptions.CommandExecutionError as exc:
-        log.error("Error: %s", exc, exc_info=True)
+        log.error("Error: {}\n{}".format(exc, traceback.format_exc()))
         if si:
             __salt__["vsphere.disconnect"](si)
         ret.update({"result": False, "comment": str(exc)})
@@ -321,7 +320,7 @@ def vsan_datastore_configured(name, datastore_name):
         __salt__["esxcluster.get_details"]()["datacenter"],
     )
     display_name = "{}/{}".format(datacenter_name, cluster_name)
-    log.info("Running vsan_datastore_configured for '%s'", display_name)
+    log.info("Running vsan_datastore_configured for '{}'".format(display_name))
     ret = {"name": name, "changes": {}, "result": None, "comment": "Default"}
     comments = []
     changes = {}
@@ -350,9 +349,9 @@ def vsan_datastore_configured(name, datastore_name):
                 log.info(comments[-1])
             else:
                 log.trace(
-                    "Renaming vSAN datastore '%s' to '%s'",
-                    vsan_ds["name"],
-                    datastore_name,
+                    "Renaming vSAN datastore '{}' to '{}'".format(
+                        vsan_ds["name"], datastore_name
+                    )
                 )
                 __salt__["vsphere.rename_datastore"](
                     datastore_name=vsan_ds["name"],
@@ -384,7 +383,7 @@ def vsan_datastore_configured(name, datastore_name):
         )
         return ret
     except salt.exceptions.CommandExecutionError as exc:
-        log.error("Error: %s", exc, exc_info=True)
+        log.error("Error: {}\n{}".format(exc, traceback.format_exc()))
         if si:
             __salt__["vsphere.disconnect"](si)
         ret.update({"result": False, "comment": exc.strerror})
@@ -411,13 +410,15 @@ def licenses_configured(name, licenses=None):
         __salt__["esxcluster.get_details"]()["datacenter"],
     )
     display_name = "{}/{}".format(datacenter_name, cluster_name)
-    log.info("Running licenses configured for '%s'", display_name)
-    log.trace("licenses = %s", licenses)
+    log.info("Running licenses configured for '{}'".format(display_name))
+    log.trace("licenses = {}".format(licenses))
     entity = {"type": "cluster", "datacenter": datacenter_name, "cluster": cluster_name}
-    log.trace("entity = %s", entity)
+    log.trace("entity = {}".format(entity))
 
     comments = []
     changes = {}
+    old_licenses = []
+    new_licenses = []
     has_errors = False
     needs_changes = False
     try:
@@ -432,6 +433,7 @@ def licenses_configured(name, licenses=None):
         si = __salt__["vsphere.get_service_instance_via_proxy"]()
         # Retrieve licenses
         existing_licenses = __salt__["vsphere.list_licenses"](service_instance=si)
+        remaining_licenses = existing_licenses[:]
         # Cycle through licenses
         for license_name, license in licenses.items():
             # Check if license already exists
@@ -506,8 +508,9 @@ def licenses_configured(name, licenses=None):
             if existing_license["capacity"] <= existing_license["used"]:
                 # License is already fully used
                 comments.append(
-                    "Cannot assign license '{}' to cluster '{}'. No free capacity"
-                    " available.".format(license_name, display_name)
+                    "Cannot assign license '{}' to cluster '{}'. No free capacity available.".format(
+                        license_name, display_name
+                    )
                 )
                 log.error(comments[-1])
                 has_errors = True
@@ -584,7 +587,7 @@ def licenses_configured(name, licenses=None):
 
         return ret
     except salt.exceptions.CommandExecutionError as exc:
-        log.error("Error: %s", exc, exc_info=True)
+        log.error("Error: {}\n{}".format(exc, traceback.format_exc()))
         if si:
             __salt__["vsphere.disconnect"](si)
         ret.update({"result": False, "comment": exc.strerror})

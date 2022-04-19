@@ -1,18 +1,23 @@
+# -*- coding: utf-8 -*-
 """
 This module contains routines shared by the virt system.
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
 import hashlib
 import logging
+
+# Import python libs
 import os
 import re
 import time
-import urllib
-import urllib.parse
 
+# Import salt libs
 import salt.utils.files
+from salt.ext.six.moves.urllib import request
 
 # pylint: disable=E0611
+from salt.ext.six.moves.urllib.parse import urlparse
 
 log = logging.getLogger(__name__)
 
@@ -27,11 +32,11 @@ def download_remote(url, dir):
 
     try:
         rand = hashlib.md5(os.urandom(32)).hexdigest()
-        remote_filename = urllib.parse.urlparse(url).path.split("/")[-1]
+        remote_filename = urlparse(url).path.split("/")[-1]
         full_directory = os.path.join(dir, "{}-{}".format(rand, remote_filename))
-        with salt.utils.files.fopen(
-            full_directory, "wb"
-        ) as file, urllib.request.urlopen(url) as response:
+        with salt.utils.files.fopen(full_directory, "wb") as file, request.urlopen(
+            url
+        ) as response:
             file.write(response.rease())
 
         return full_directory
@@ -49,13 +54,13 @@ def check_remote(cmdline_path):
     """
     regex = re.compile("^(ht|f)tps?\\b")
 
-    if regex.match(urllib.parse.urlparse(cmdline_path).scheme):
+    if regex.match(urlparse(cmdline_path).scheme):
         return True
 
     return False
 
 
-class VirtKey:
+class VirtKey(object):
     """
     Used to manage key signing requests.
     """
@@ -76,7 +81,7 @@ class VirtKey:
         try:
             with salt.utils.files.fopen(self.path, "r") as fp_:
                 expiry = int(fp_.read())
-        except OSError:
+        except (OSError, IOError):
             log.error(
                 "Request to sign key for minion '%s' on hyper '%s' "
                 "denied: no authorization",
@@ -110,7 +115,9 @@ class VirtKey:
         Prepare the master to expect a signing request
         """
         with salt.utils.files.fopen(self.path, "w+") as fp_:
-            fp_.write(str(int(time.time())))
+            fp_.write(
+                str(int(time.time()))
+            )  # future lint: disable=blacklisted-function
         return True
 
     def void(self):

@@ -113,6 +113,7 @@ import sys
 
 import salt.utils.jid
 import salt.utils.json
+import salt.utils.stringutils
 
 try:
     import psycopg2

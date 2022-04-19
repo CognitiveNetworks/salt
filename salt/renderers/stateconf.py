@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 A flexible renderer that takes a templating engine and a data format
 
@@ -25,18 +26,24 @@ A flexible renderer that takes a templating engine and a data format
 #         - apache: >= 0.1.0
 #
 
+# Import python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import copy
 import getopt
-import io
 import logging
 import os
 import re
 from itertools import chain
 
+# Import salt libs
 import salt.utils.files
 import salt.utils.stringutils
 from salt.exceptions import SaltRenderError
+
+# Import 3rd-party libs
+from salt.ext import six
+from salt.ext.six.moves import StringIO  # pylint: disable=import-error
 
 __all__ = ["render"]
 
@@ -110,12 +117,7 @@ def render(input, saltenv="base", sls="", argline="", **kws):
             ctx.update(context)
 
         tmplout = render_template(
-            io.StringIO(data),
-            saltenv,
-            sls,
-            context=ctx,
-            argline=rt_argline.strip(),
-            **kws
+            StringIO(data), saltenv, sls, context=ctx, argline=rt_argline.strip(), **kws
         )
         high = render_data(tmplout, saltenv, sls, argline=rd_argline.strip())
         return process_high_data(high, extract)
@@ -133,7 +135,7 @@ def render(input, saltenv="base", sls="", argline="", **kws):
                 sid = has_names_decls(data)
                 if sid:
                     raise SaltRenderError(
-                        "'names' declaration(found in state id: {}) is "
+                        "'names' declaration(found in state id: {0}) is "
                         "not supported with implicitly ordered states! You "
                         "should generate the states in a template for-loop "
                         "instead.".format(sid)
@@ -201,11 +203,11 @@ def render(input, saltenv="base", sls="", argline="", **kws):
             name, rt_argline = (args[1] + " ").split(" ", 1)
             render_template = renderers[name]  # e.g., the mako renderer
         except KeyError as err:
-            raise SaltRenderError("Renderer: {} is not available!".format(err))
+            raise SaltRenderError("Renderer: {0} is not available!".format(err))
         except IndexError:
             raise INVALID_USAGE_ERROR
 
-        if isinstance(input, str):
+        if isinstance(input, six.string_types):
             with salt.utils.files.fopen(input, "r") as ifile:
                 sls_templ = salt.utils.stringutils.to_unicode(ifile.read())
         else:  # assume file-like
@@ -225,7 +227,7 @@ def render(input, saltenv="base", sls="", argline="", **kws):
                 prefix = sls + "::"
                 tmplctx = {
                     k[len(prefix) :] if k.startswith(prefix) else k: v
-                    for k, v in tmplctx.items()
+                    for k, v in six.iteritems(tmplctx)
                 }
         else:
             tmplctx = {}
@@ -260,8 +262,8 @@ def rewrite_single_shorthand_state_decl(data):  # pylint: disable=C0103
       state_id_decl:
         state.func: []
     """
-    for sid, states in data.items():
-        if isinstance(states, str):
+    for sid, states in six.iteritems(data):
+        if isinstance(states, six.string_types):
             data[sid] = {states: []}
 
 
@@ -326,7 +328,7 @@ def nvlist(thelist, names=None):
     for nvitem in thelist:
         if isinstance(nvitem, dict):
             # then nvitem is a name-value item(a dict) of the list.
-            name, value = next(iter(nvitem.items()))
+            name, value = next(six.iteritems(nvitem))
             if names is None or name in names:
                 yield nvitem, name, value
 
@@ -347,16 +349,17 @@ def nvlist2(thelist, names=None):
 
     """
     for _, _, value in nvlist(thelist, names):
-        yield from nvlist(value)
+        for each in nvlist(value):
+            yield each
 
 
 def statelist(states_dict, sid_excludes=frozenset(["include", "exclude"])):
-    for sid, states in states_dict.items():
+    for sid, states in six.iteritems(states_dict):
         if sid.startswith("__"):
             continue
         if sid in sid_excludes:
             continue
-        for sname, args in states.items():
+        for sname, args in six.iteritems(states):
             if sname.startswith("__"):
                 continue
             yield sid, states, sname, args
@@ -398,11 +401,11 @@ def rename_state_ids(data, sls, is_extend=False):
             newsid = _local_to_abs_sid(sid, sls)
             if newsid in data:
                 raise SaltRenderError(
-                    "Can't rename state id({}) into {} because the later "
+                    "Can't rename state id({0}) into {1} because the later "
                     "already exists!".format(sid, newsid)
                 )
             # add a '- name: sid' to those states without '- name'.
-            for sname, args in data[sid].items():
+            for sname, args in six.iteritems(data[sid]):
                 if state_name(sname) == STATE_NAME:
                     continue
                 for arg in args:
@@ -427,7 +430,7 @@ EXTENDED_REQUIRE_IN = {}
 #   explicit require_in/watch_in/listen_in/onchanges_in/onfail_in can only contain states after it
 def add_implicit_requires(data):
     def T(sid, state):  # pylint: disable=C0103
-        return "{}:{}".format(sid, state_name(state))
+        return "{0}:{1}".format(sid, state_name(state))
 
     states_before = set()
     states_after = set()
@@ -459,8 +462,8 @@ def add_implicit_requires(data):
         for _, rstate, rsid in reqs:
             if T(rsid, rstate) in states_after:
                 raise SaltRenderError(
-                    "State({}) can't require/watch/listen/onchanges/onfail a state({})"
-                    " defined after it!".format(tag, T(rsid, rstate))
+                    "State({0}) can't require/watch/listen/onchanges/onfail a state({1}) defined "
+                    "after it!".format(tag, T(rsid, rstate))
                 )
 
         reqs = nvlist2(args, REQUIRE_IN)
@@ -469,9 +472,8 @@ def add_implicit_requires(data):
         for _, rstate, rsid in reqs:
             if T(rsid, rstate) in states_before:
                 raise SaltRenderError(
-                    "State({}) can't"
-                    " require_in/watch_in/listen_in/onchanges_in/onfail_in a state({})"
-                    " defined before it!".format(tag, T(rsid, rstate))
+                    "State({0}) can't require_in/watch_in/listen_in/onchanges_in/onfail_in a state({1}) "
+                    "defined before it!".format(tag, T(rsid, rstate))
                 )
 
         # add a (- state: sid) item, at the beginning of the require of this
@@ -490,9 +492,8 @@ def add_start_state(data, sls):
     start_sid = __opts__["stateconf_start_state"]
     if start_sid in data:
         raise SaltRenderError(
-            "Can't generate start state({})! The same state id already exists!".format(
-                start_sid
-            )
+            "Can't generate start state({0})! The same state id already "
+            "exists!".format(start_sid)
         )
     if not data:
         return
@@ -501,14 +502,14 @@ def add_start_state(data, sls):
     # no __sls__, or it's the first state whose id declaration has a
     # __sls__ == sls.
     non_sids = ("include", "exclude", "extend")
-    for sid, states in data.items():
+    for sid, states in six.iteritems(data):
         if sid in non_sids or sid.startswith("__"):
             continue
         if "__sls__" not in states or states["__sls__"] == sls:
             break
     else:
         raise SaltRenderError("Can't determine the first state in the sls file!")
-    reqin = {state_name(next(iter(data[sid].keys()))): sid}
+    reqin = {state_name(next(six.iterkeys(data[sid]))): sid}
     data[start_sid] = {STATE_FUNC: [{"require_in": [reqin]}]}
 
 
@@ -516,9 +517,8 @@ def add_goal_state(data):
     goal_sid = __opts__["stateconf_goal_state"]
     if goal_sid in data:
         raise SaltRenderError(
-            "Can't generate goal state({})! The same state id already exists!".format(
-                goal_sid
-            )
+            "Can't generate goal state({0})! The same state id already "
+            "exists!".format(goal_sid)
         )
     else:
         reqlist = []
@@ -561,7 +561,7 @@ STATE_CONF_EXT = {}  # stateconf.set under extend: ...
 
 
 def extract_state_confs(data, is_extend=False):
-    for state_id, state_dict in data.items():
+    for state_id, state_dict in six.iteritems(data):
         if state_id == "extend" and not is_extend:
             extract_state_confs(state_dict, True)
             continue
@@ -578,7 +578,7 @@ def extract_state_confs(data, is_extend=False):
         for sdk in state_dict[key]:
             if not isinstance(sdk, dict):
                 continue
-            key, val = next(iter(sdk.items()))
+            key, val = next(six.iteritems(sdk))
             conf[key] = val
 
         if not is_extend and state_id in STATE_CONF_EXT:

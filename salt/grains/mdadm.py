@@ -1,9 +1,13 @@
+# -*- coding: utf-8 -*-
 """
 Detect MDADM RAIDs
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import python libs
 import logging
 
+# Import salt libs
 import salt.utils.files
 
 log = logging.getLogger(__name__)
@@ -24,7 +28,7 @@ def mdadm():
                     continue
                 if " : " in line:
                     devices.add(line.split(" : ")[0])
-    except OSError:
+    except IOError:
         return {}
 
     devices = sorted(devices)

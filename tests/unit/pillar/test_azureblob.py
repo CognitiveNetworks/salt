@@ -1,6 +1,9 @@
+# -*- coding: utf-8 -*-
 """
 Tests for the Azure Blob External Pillar.
 """
+# Import python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import os
 import pickle
@@ -9,12 +12,17 @@ import time
 
 import salt.config
 import salt.loader
+
+# Import Salt Libs
 import salt.pillar.azureblob as azureblob
 import salt.utils.files
 from tests.support.mixins import LoaderModuleMockMixin
 from tests.support.mock import MagicMock, patch
+
+# Import Salt Testing libs
 from tests.support.unit import TestCase, skipIf
 
+# Import Azure libs
 HAS_LIBS = False
 try:
     # pylint: disable=no-name-in-module
@@ -35,7 +43,7 @@ class MockBlob(dict):
     name = ""
 
     def __init__(self):
-        super().__init__(
+        super(MockBlob, self).__init__(
             {
                 "container": None,
                 "name": "test.sls",
@@ -47,7 +55,7 @@ class MockBlob(dict):
         )
 
 
-class MockContainerClient:
+class MockContainerClient(object):
     """
     Creates a Mock ContainerClient.
     """
@@ -62,7 +70,7 @@ class MockContainerClient:
         pass
 
 
-class MockBlobServiceClient:
+class MockBlobServiceClient(object):
     """
     Creates a Mock BlobServiceClient.
     """

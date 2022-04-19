@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Execute calls on selinux
 
@@ -10,16 +11,23 @@ Execute calls on selinux
     proper packages are installed.
 """
 
+# Import python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import os
 import re
 
 import salt.utils.decorators as decorators
+
+# Import salt libs
 import salt.utils.files
 import salt.utils.path
 import salt.utils.stringutils
 import salt.utils.versions
 from salt.exceptions import CommandExecutionError, SaltInvocationError
+
+# Import 3rd-party libs
+from salt.ext import six
 
 _SELINUX_FILETYPES = {
     "a": "all files",
@@ -96,7 +104,7 @@ def getenforce():
                 return "Permissive"
             else:
                 return "Enforcing"
-    except (OSError, AttributeError):
+    except (IOError, OSError, AttributeError):
         return "Disabled"
 
 
@@ -117,7 +125,7 @@ def getconfig():
                 line = salt.utils.stringutils.to_unicode(line)
                 if line.strip().startswith("SELINUX="):
                     return line.split("=")[1].capitalize().strip()
-    except (OSError, AttributeError):
+    except (IOError, OSError, AttributeError):
         return None
     return None
 
@@ -132,7 +140,7 @@ def setenforce(mode):
 
         salt '*' selinux.setenforce enforcing
     """
-    if isinstance(mode, str):
+    if isinstance(mode, six.string_types):
         if mode.lower() == "enforcing":
             mode = "1"
             modestring = "Enforcing"
@@ -143,14 +151,14 @@ def setenforce(mode):
             mode = "0"
             modestring = "Disabled"
         else:
-            return "Invalid mode {}".format(mode)
+            return "Invalid mode {0}".format(mode)
     elif isinstance(mode, int):
         if mode:
             mode = "1"
         else:
             mode = "0"
     else:
-        return "Invalid mode {}".format(mode)
+        return "Invalid mode {0}".format(mode)
 
     # enforce file does not exist if currently disabled.  Only for toggling enforcing/permissive
     if getenforce() != "Disabled":
@@ -158,7 +166,7 @@ def setenforce(mode):
         try:
             with salt.utils.files.fopen(enforce, "w") as _fp:
                 _fp.write(salt.utils.stringutils.to_str(mode))
-        except OSError as exc:
+        except (IOError, OSError) as exc:
             msg = "Could not write SELinux enforce file: {0}"
             raise CommandExecutionError(msg.format(exc))
 
@@ -170,10 +178,10 @@ def setenforce(mode):
             with salt.utils.files.fopen(config, "w") as _cf:
                 conf = re.sub(r"\nSELINUX=.*\n", "\nSELINUX=" + modestring + "\n", conf)
                 _cf.write(salt.utils.stringutils.to_str(conf))
-        except OSError as exc:
+        except (IOError, OSError) as exc:
             msg = "Could not write SELinux config file: {0}"
             raise CommandExecutionError(msg.format(exc))
-    except OSError as exc:
+    except (IOError, OSError) as exc:
         msg = "Could not read SELinux config file: {0}"
         raise CommandExecutionError(msg.format(exc))
 
@@ -204,9 +212,9 @@ def setsebool(boolean, value, persist=False):
         salt '*' selinux.setsebool virt_use_usb off
     """
     if persist:
-        cmd = "setsebool -P {} {}".format(boolean, value)
+        cmd = "setsebool -P {0} {1}".format(boolean, value)
     else:
-        cmd = "setsebool {} {}".format(boolean, value)
+        cmd = "setsebool {0} {1}".format(boolean, value)
     return not __salt__["cmd.retcode"](cmd, python_shell=False)
 
 
@@ -226,8 +234,8 @@ def setsebools(pairs, persist=False):
         cmd = "setsebool -P "
     else:
         cmd = "setsebool "
-    for boolean, value in pairs.items():
-        cmd = "{} {}={}".format(cmd, boolean, value)
+    for boolean, value in six.iteritems(pairs):
+        cmd = "{0} {1}={2}".format(cmd, boolean, value)
     return not __salt__["cmd.retcode"](cmd, python_shell=False)
 
 
@@ -284,9 +292,9 @@ def setsemod(module, state):
     .. versionadded:: 2016.3.0
     """
     if state.lower() == "enabled":
-        cmd = "semodule -e {}".format(module)
+        cmd = "semodule -e {0}".format(module)
     elif state.lower() == "disabled":
-        cmd = "semodule -d {}".format(module)
+        cmd = "semodule -d {0}".format(module)
     return not __salt__["cmd.retcode"](cmd)
 
 
@@ -304,7 +312,7 @@ def install_semod(module_path):
     """
     if module_path.find("salt://") == 0:
         module_path = __salt__["cp.cache_file"](module_path)
-    cmd = "semodule -i {}".format(module_path)
+    cmd = "semodule -i {0}".format(module_path)
     return not __salt__["cmd.retcode"](cmd)
 
 
@@ -320,7 +328,7 @@ def remove_semod(module):
 
     .. versionadded:: 2016.11.6
     """
-    cmd = "semodule -r {}".format(module)
+    cmd = "semodule -r {0}".format(module)
     return not __salt__["cmd.retcode"](cmd)
 
 
@@ -376,7 +384,7 @@ def _validate_filetype(filetype):
     specification. Throws an SaltInvocationError if it isn't.
     """
     if filetype not in _SELINUX_FILETYPES.keys():
-        raise SaltInvocationError("Invalid filetype given: {}".format(filetype))
+        raise SaltInvocationError("Invalid filetype given: {0}".format(filetype))
     return True
 
 
@@ -394,11 +402,12 @@ def _parse_protocol_port(name, protocol, port):
     protocol_port_pattern = r"^(tcp|udp)\/(([\d]+)\-?[\d]+)$"
     name_parts = re.match(protocol_port_pattern, name)
     if not name_parts:
-        name_parts = re.match(protocol_port_pattern, "{}/{}".format(protocol, port))
+        name_parts = re.match(protocol_port_pattern, "{0}/{1}".format(protocol, port))
     if not name_parts:
         raise SaltInvocationError(
-            'Invalid name "{}" format and protocol and port not provided or invalid:'
-            ' "{}" "{}".'.format(name, protocol, port)
+            'Invalid name "{0}" format and protocol and port not provided or invalid: "{1}" "{2}".'.format(
+                name, protocol, port
+            )
         )
     return name_parts.group(1), name_parts.group(2)
 
@@ -609,20 +618,20 @@ def _fcontext_add_or_delete_policy(
     """
     if action not in ["add", "delete"]:
         raise SaltInvocationError(
-            'Actions supported are "add" and "delete", not "{}".'.format(action)
+            'Actions supported are "add" and "delete", not "{0}".'.format(action)
         )
-    cmd = "semanage fcontext --{}".format(action)
+    cmd = "semanage fcontext --{0}".format(action)
     # "semanage --ftype a" isn't valid on Centos 6,
     # don't pass --ftype since "a" is the default filetype.
     if filetype is not None and filetype != "a":
         _validate_filetype(filetype)
-        cmd += " --ftype {}".format(filetype)
+        cmd += " --ftype {0}".format(filetype)
     if sel_type is not None:
-        cmd += " --type {}".format(sel_type)
+        cmd += " --type {0}".format(sel_type)
     if sel_user is not None:
-        cmd += " --seuser {}".format(sel_user)
+        cmd += " --seuser {0}".format(sel_user)
     if sel_level is not None:
-        cmd += " --range {}".format(sel_level)
+        cmd += " --range {0}".format(sel_level)
     cmd += " " + re.escape(name)
     return __salt__["cmd.run_all"](cmd)
 
@@ -700,7 +709,7 @@ def fcontext_apply_policy(name, recursive=False):
             old = _context_string_to_dict(item[1])
             new = _context_string_to_dict(item[2])
             intersect = {}
-            for key, value in old.items():
+            for key, value in six.iteritems(old):
                 if new.get(key) == value:
                     intersect.update({key: value})
             for key in intersect:
@@ -841,15 +850,15 @@ def _port_add_or_delete_policy(
     """
     if action not in ["add", "delete"]:
         raise SaltInvocationError(
-            'Actions supported are "add" and "delete", not "{}".'.format(action)
+            'Actions supported are "add" and "delete", not "{0}".'.format(action)
         )
     if action == "add" and not sel_type:
         raise SaltInvocationError("SELinux Type is required to add a policy")
     (protocol, port) = _parse_protocol_port(name, protocol, port)
-    cmd = "semanage port --{} --proto {}".format(action, protocol)
+    cmd = "semanage port --{0} --proto {1}".format(action, protocol)
     if sel_type:
-        cmd += " --type {}".format(sel_type)
+        cmd += " --type {0}".format(sel_type)
     if sel_range:
-        cmd += " --range {}".format(sel_range)
-    cmd += " {}".format(port)
+        cmd += " --range {0}".format(sel_range)
+    cmd += " {0}".format(port)
     return __salt__["cmd.run_all"](cmd)

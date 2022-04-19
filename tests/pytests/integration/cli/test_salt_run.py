@@ -1,7 +1,11 @@
+"""
+Tests for the salt-run command
+"""
+
+
 import re
 
 import pytest
-import salt.defaults.exitcodes
 import salt.utils.files
 import salt.utils.platform
 import salt.utils.pycrypto
@@ -17,9 +21,20 @@ USERA_PWD = "saltdev"
 
 
 @pytest.fixture(scope="module")
-def saltdev_account():
-    with pytest.helpers.create_account(username="saltdev-runner") as account:
-        yield account
+def saltdev_account(sminion):
+    try:
+        assert sminion.functions.user.add(USERA, createhome=False)
+        assert sminion.functions.shadow.set_password(
+            USERA,
+            USERA_PWD
+            if salt.utils.platform.is_darwin()
+            else salt.utils.pycrypto.gen_hash(password=USERA_PWD),
+        )
+        assert USERA in sminion.functions.user.list_users()
+        # Run tests
+        yield
+    finally:
+        sminion.functions.user.delete(USERA, remove=True)
 
 
 @pytest.fixture
@@ -27,7 +42,7 @@ def salt_run_cli(salt_master):
     """
     Override salt_run_cli fixture to provide an increased default_timeout to the calls
     """
-    return salt_master.salt_run_cli(timeout=120)
+    return salt_master.get_salt_run_cli(default_timeout=120)
 
 
 def test_in_docs(salt_run_cli):
@@ -75,7 +90,7 @@ def test_exit_status_correct_usage(salt_run_cli):
     """
     Ensure correct exit status when salt-run starts correctly.
     """
-    ret = salt_run_cli.run("test.arg", "arg1", kwarg1="kwarg1")
+    ret = salt_run_cli.run()
     assert ret.exitcode == salt.defaults.exitcodes.EX_OK, ret
 
 
@@ -91,9 +106,9 @@ def test_salt_run_with_eauth_all_args(salt_run_cli, saltdev_account, flag):
         flag,
         "pam",
         "--username",
-        saltdev_account.username,
+        USERA,
         "--password",
-        saltdev_account.password,
+        USERA_PWD,
         "test.arg",
         "arg",
         kwarg="kwarg1",
@@ -115,7 +130,7 @@ def test_salt_run_with_eauth_bad_passwd(salt_run_cli, saltdev_account):
         "-a",
         "pam",
         "--username",
-        saltdev_account.username,
+        USERA,
         "--password",
         "wrongpassword",
         "test.arg",
@@ -124,13 +139,11 @@ def test_salt_run_with_eauth_bad_passwd(salt_run_cli, saltdev_account):
     )
     assert (
         ret.stdout
-        == 'Authentication failure of type "eauth" occurred for user {}.'.format(
-            saltdev_account.username
-        )
+        == 'Authentication failure of type "eauth" occurred for user {}.'.format(USERA)
     )
 
 
-def test_salt_run_with_wrong_eauth(salt_run_cli, saltdev_account):
+def test_salt_run_with_wrong_eauth(salt_run_cli):
     """
     test salt-run with wrong eauth parameter
     """
@@ -138,16 +151,15 @@ def test_salt_run_with_wrong_eauth(salt_run_cli, saltdev_account):
         "-a",
         "wrongeauth",
         "--username",
-        saltdev_account.username,
+        USERA,
         "--password",
-        saltdev_account.password,
+        USERA_PWD,
         "test.arg",
         "arg",
         kwarg="kwarg1",
     )
     assert ret.exitcode == 0, ret
     assert re.search(
-        r"^The specified external authentication system \"wrongeauth\" is not"
-        r" available\nAvailable eauth types: auto, .*",
+        r"^The specified external authentication system \"wrongeauth\" is not available\nAvailable eauth types: auto, .*",
         ret.stdout.replace("\r\n", "\n"),
     )

@@ -15,7 +15,6 @@ import logging
 import multiprocessing
 import os
 import pprint
-import queue
 import subprocess
 import tempfile
 import time
@@ -31,6 +30,9 @@ import salt.utils.process
 import salt.utils.stringutils
 import salt.utils.yaml
 import salt.version
+from salt.ext import six
+from salt.ext.six.moves import zip
+from salt.ext.six.moves.queue import Empty
 from salt.utils.immutabletypes import freeze
 from salt.utils.verify import verify_env
 from saltfactories.utils import random_string
@@ -323,9 +325,8 @@ class ShellCaseCommonTestsMixin(CheckShellBinaryNameAndVersionMixin):
             out, err = process.communicate()
         if not out:
             self.skipTest(
-                "Failed to get the output of 'git describe'. Error: '{}'".format(
-                    salt.utils.stringutils.to_str(err)
-                )
+                "Failed to get the output of 'git describe'. "
+                "Error: '{}'".format(salt.utils.stringutils.to_str(err))
             )
 
         parsed_version = SaltStackVersion.parse(out)
@@ -390,12 +391,10 @@ class LoaderModuleMockMixin(metaclass=_FixLoaderModuleMockMixinMroOrder):
             loader_modules_configs = self.setup_loader_modules()
             if not isinstance(loader_modules_configs, dict):
                 raise RuntimeError(
-                    "{}.setup_loader_modules() must return a dictionary where the keys"
-                    " are the modules that require loader mocking setup and the values,"
-                    " the global module variables for each of the module being mocked."
-                    " For example '__salt__', '__opts__', etc.".format(
-                        self.__class__.__name__
-                    )
+                    "{}.setup_loader_modules() must return a dictionary where the keys are the "
+                    "modules that require loader mocking setup and the values, the global module "
+                    "variables for each of the module being mocked. For example '__salt__', "
+                    "'__opts__', etc.".format(self.__class__.__name__)
                 )
 
             mocker = LoaderModuleMock(loader_modules_configs)
@@ -415,9 +414,9 @@ class LoaderModuleMockMixin(metaclass=_FixLoaderModuleMockMixinMroOrder):
 
 class XMLEqualityMixin:
     def assertEqualXML(self, e1, e2):
-        if isinstance(e1, bytes):
+        if six.PY3 and isinstance(e1, bytes):
             e1 = e1.decode("utf-8")
-        if isinstance(e2, bytes):
+        if six.PY3 and isinstance(e2, bytes):
             e2 = e2.decode("utf-8")
         if isinstance(e1, str):
             e1 = etree.XML(e1)
@@ -497,7 +496,7 @@ class SaltReturnAssertsMixin:
             for saltret in self.__getWithinSaltReturn(ret, "result"):
                 self.assertTrue(saltret)
         except AssertionError:
-            log.info("Salt Full Return:\n%s", pprint.pformat(ret))
+            log.info("Salt Full Return:\n{}".format(pprint.pformat(ret)))
             try:
                 raise AssertionError(
                     "{result} is not True. Salt Comment:\n{comment}".format(
@@ -516,7 +515,7 @@ class SaltReturnAssertsMixin:
             for saltret in self.__getWithinSaltReturn(ret, "result"):
                 self.assertFalse(saltret)
         except AssertionError:
-            log.info("Salt Full Return:\n%s", pprint.pformat(ret))
+            log.info("Salt Full Return:\n{}".format(pprint.pformat(ret)))
             try:
                 raise AssertionError(
                     "{result} is not False. Salt Comment:\n{comment}".format(
@@ -533,7 +532,7 @@ class SaltReturnAssertsMixin:
             for saltret in self.__getWithinSaltReturn(ret, "result"):
                 self.assertIsNone(saltret)
         except AssertionError:
-            log.info("Salt Full Return:\n%s", pprint.pformat(ret))
+            log.info("Salt Full Return:\n{}".format(pprint.pformat(ret)))
             try:
                 raise AssertionError(
                     "{result} is not None. Salt Comment:\n{comment}".format(
@@ -656,7 +655,7 @@ class SaltMinionEventAssertsMixin:
         while True:
             try:
                 event = self.q.get(False)
-            except queue.Empty:
+            except Empty:
                 time.sleep(sleep_time)
                 if time.time() - start >= timeout:
                     break

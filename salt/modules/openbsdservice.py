@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 The service module for OpenBSD
 
@@ -8,14 +9,21 @@ The service module for OpenBSD
     <module-provider-override>`.
 """
 
+# Import python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import fnmatch
 import logging
 import os
 import re
 
+# Import Salt libs
 import salt.utils.data
 import salt.utils.files
+
+# Import 3rd-party libs
+from salt.ext import six
+from salt.ext.six.moves import map  # pylint: disable=import-error,redefined-builtin
 
 log = logging.getLogger(__name__)
 
@@ -56,7 +64,7 @@ def start(name):
 
         salt '*' service.start <service name>
     """
-    cmd = "/etc/rc.d/{} -f start".format(name)
+    cmd = "/etc/rc.d/{0} -f start".format(name)
     return not __salt__["cmd.retcode"](cmd)
 
 
@@ -70,7 +78,7 @@ def stop(name):
 
         salt '*' service.stop <service name>
     """
-    cmd = "/etc/rc.d/{} -f stop".format(name)
+    cmd = "/etc/rc.d/{0} -f stop".format(name)
     return not __salt__["cmd.retcode"](cmd)
 
 
@@ -84,7 +92,7 @@ def restart(name):
 
         salt '*' service.restart <service name>
     """
-    cmd = "/etc/rc.d/{} -f restart".format(name)
+    cmd = "/etc/rc.d/{0} -f restart".format(name)
     return not __salt__["cmd.retcode"](cmd)
 
 
@@ -121,7 +129,7 @@ def status(name, sig=None):
         services = [name]
     results = {}
     for service in services:
-        cmd = "/etc/rc.d/{} -f check".format(service)
+        cmd = "/etc/rc.d/{0} -f check".format(service)
         results[service] = not __salt__["cmd.retcode"](cmd, ignore_retcode=True)
     if contains_globbing:
         return results
@@ -140,7 +148,7 @@ def reload_(name):
 
         salt '*' service.reload <service name>
     """
-    cmd = "/etc/rc.d/{} -f reload".format(name)
+    cmd = "/etc/rc.d/{0} -f reload".format(name)
     return not __salt__["cmd.retcode"](cmd)
 
 
@@ -165,7 +173,7 @@ def _get_rc():
         # to know what are the system enabled daemons
         with salt.utils.files.fopen("/etc/rc", "r") as handle:
             lines = salt.utils.data.decode(handle.readlines())
-    except OSError:
+    except IOError:
         log.error("Unable to read /etc/rc")
     else:
         for line in lines:
@@ -220,7 +228,7 @@ def available(name):
 
         salt '*' service.available sshd
     """
-    path = "/etc/rc.d/{}".format(name)
+    path = "/etc/rc.d/{0}".format(name)
     return os.path.isfile(path) and os.access(path, os.X_OK)
 
 
@@ -276,7 +284,7 @@ def get_enabled():
         salt '*' service.get_enabled
     """
     services = []
-    for daemon, is_enabled in _get_rc().items():
+    for daemon, is_enabled in six.iteritems(_get_rc()):
         if is_enabled:
             services.append(daemon)
     return sorted(set(get_all()) & set(services))
@@ -310,7 +318,7 @@ def get_disabled():
         salt '*' service.get_disabled
     """
     services = []
-    for daemon, is_enabled in _get_rc().items():
+    for daemon, is_enabled in six.iteritems(_get_rc()):
         if not is_enabled:
             services.append(daemon)
     return sorted(set(get_all()) & set(services))

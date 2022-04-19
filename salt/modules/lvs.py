@@ -22,8 +22,7 @@ def __virtual__():
     if not __detect_os():
         return (
             False,
-            "The lvs execution module cannot be loaded: the ipvsadm binary is not in"
-            " the path.",
+            "The lvs execution module cannot be loaded: the ipvsadm binary is not in the path.",
         )
 
     return "lvs"

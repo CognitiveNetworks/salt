@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Management of timezones
 =======================
@@ -26,7 +27,9 @@ The Ubuntu community documentation contains an explanation of this setting, as
 it applies to systems that dual-boot with Windows. This is explained in greater
 detail here_.
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import salt libs
 from salt.exceptions import CommandExecutionError, SaltInvocationError
 
 
@@ -60,7 +63,7 @@ def system(name, utc=True):
         ret["result"] = False
         ret[
             "comment"
-        ] = "Unable to compare desired timezone '{}' to system timezone: {}".format(
+        ] = "Unable to compare desired timezone '{0}' to system timezone: {1}".format(
             name, exc
         )
         return ret
@@ -73,7 +76,7 @@ def system(name, utc=True):
     # Check the time zone
     if compzone is True:
         ret["result"] = True
-        messages.append("Timezone {} already set".format(name))
+        messages.append("Timezone {0} already set".format(name))
     else:
         do_zone = True
 
@@ -82,7 +85,7 @@ def system(name, utc=True):
         ret["result"] = None
         do_utc = True
     elif utc and utc == myutc:
-        messages.append("UTC already set to {}".format(name))
+        messages.append("UTC already set to {0}".format(name))
 
     if ret["result"] is True:
         ret["comment"] = ", ".join(messages)
@@ -91,9 +94,9 @@ def system(name, utc=True):
     if __opts__["test"]:
         messages = []
         if compzone is False:
-            messages.append("Timezone {} needs to be set".format(name))
+            messages.append("Timezone {0} needs to be set".format(name))
         if utc and myutc != utc:
-            messages.append("UTC needs to be set to {}".format(utc))
+            messages.append("UTC needs to be set to {0}".format(utc))
         ret["comment"] = ", ".join(messages)
         return ret
 
@@ -102,7 +105,7 @@ def system(name, utc=True):
     if do_zone:
         if __salt__["timezone.set_zone"](name):
             ret["changes"]["timezone"] = name
-            messages.append("Set timezone {}".format(name))
+            messages.append("Set timezone {0}".format(name))
             ret["result"] = True
         else:
             messages.append("Failed to set timezone")
@@ -114,10 +117,10 @@ def system(name, utc=True):
             clock = "UTC"
         if __salt__["timezone.set_hwclock"](clock):
             ret["changes"]["utc"] = utc
-            messages.append("Set UTC to {}".format(utc))
+            messages.append("Set UTC to {0}".format(utc))
             ret["result"] = True
         else:
-            messages.append("Failed to set UTC to {}".format(utc))
+            messages.append("Failed to set UTC to {0}".format(utc))
             ret["result"] = False
 
     ret["comment"] = ", ".join(messages)

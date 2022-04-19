@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Manage Lambda Functions
 =======================
@@ -59,6 +60,8 @@ config:
 
 """
 
+# Import Python Libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import hashlib
 import logging
@@ -69,6 +72,9 @@ import salt.utils.dictupdate as dictupdate
 import salt.utils.files
 import salt.utils.json
 from salt.exceptions import SaltInvocationError
+
+# Import Salt Libs
+from salt.ext import six
 
 log = logging.getLogger(__name__)
 
@@ -219,23 +225,22 @@ def function_present(
     ret = {"name": FunctionName, "result": True, "comment": "", "changes": {}}
 
     if Permissions is not None:
-        if isinstance(Permissions, str):
+        if isinstance(Permissions, six.string_types):
             Permissions = salt.utils.json.loads(Permissions)
-        required_keys = {"Action", "Principal"}
-        optional_keys = {"SourceArn", "SourceAccount", "Qualifier"}
-        for sid, permission in Permissions.items():
+        required_keys = set(("Action", "Principal"))
+        optional_keys = set(("SourceArn", "SourceAccount", "Qualifier"))
+        for sid, permission in six.iteritems(Permissions):
             keyset = set(permission.keys())
             if not keyset.issuperset(required_keys):
                 raise SaltInvocationError(
-                    "{} are required for each permission specification".format(
-                        ", ".join(required_keys)
-                    )
+                    "{0} are required for each permission "
+                    "specification".format(", ".join(required_keys))
                 )
             keyset = keyset - required_keys
             keyset = keyset - optional_keys
             if bool(keyset):
                 raise SaltInvocationError(
-                    "Invalid permission value {}".format(", ".join(keyset))
+                    "Invalid permission value {0}".format(", ".join(keyset))
                 )
 
     r = __salt__["boto_lambda.function_exists"](
@@ -244,12 +249,14 @@ def function_present(
 
     if "error" in r:
         ret["result"] = False
-        ret["comment"] = "Failed to create function: {}.".format(r["error"]["message"])
+        ret["comment"] = "Failed to create function: " "{0}.".format(
+            r["error"]["message"]
+        )
         return ret
 
     if not r.get("exists"):
         if __opts__["test"]:
-            ret["comment"] = "Function {} is set to be created.".format(FunctionName)
+            ret["comment"] = "Function {0} is set to be created.".format(FunctionName)
             ret["result"] = None
             return ret
         r = __salt__["boto_lambda.create_function"](
@@ -275,13 +282,13 @@ def function_present(
         )
         if not r.get("created"):
             ret["result"] = False
-            ret["comment"] = "Failed to create function: {}.".format(
+            ret["comment"] = "Failed to create function: " "{0}.".format(
                 r["error"]["message"]
             )
             return ret
 
         if Permissions:
-            for sid, permission in Permissions.items():
+            for sid, permission in six.iteritems(Permissions):
                 r = __salt__["boto_lambda.add_permission"](
                     FunctionName=FunctionName,
                     StatementId=sid,
@@ -293,7 +300,7 @@ def function_present(
                 )
                 if not r.get("updated"):
                     ret["result"] = False
-                    ret["comment"] = "Failed to create function: {}.".format(
+                    ret["comment"] = "Failed to create function: " "{0}.".format(
                         r["error"]["message"]
                     )
 
@@ -305,11 +312,11 @@ def function_present(
         )["permissions"]
         ret["changes"]["old"] = {"function": None}
         ret["changes"]["new"] = _describe
-        ret["comment"] = "Function {} created.".format(FunctionName)
+        ret["comment"] = "Function {0} created.".format(FunctionName)
         return ret
 
     ret["comment"] = os.linesep.join(
-        [ret["comment"], "Function {} is present.".format(FunctionName)]
+        [ret["comment"], "Function {0} is present.".format(FunctionName)]
     )
     ret["changes"] = {}
     # function exists, ensure config matches
@@ -373,11 +380,11 @@ def _get_role_arn(name, region=None, key=None, keyid=None, profile=None):
     account_id = __salt__["boto_iam.get_account_id"](
         region=region, key=key, keyid=keyid, profile=profile
     )
-    return "arn:aws:iam::{}:role/{}".format(account_id, name)
+    return "arn:aws:iam::{0}:role/{1}".format(account_id, name)
 
 
 def _resolve_vpcconfig(conf, region=None, key=None, keyid=None, profile=None):
-    if isinstance(conf, str):
+    if isinstance(conf, six.string_types):
         conf = salt.utils.json.loads(conf)
     if not conf:
         # if the conf is None, we should explicitly set the VpcConfig to
@@ -431,7 +438,7 @@ def _function_config_present(
         "MemorySize": MemorySize,
     }
 
-    for key, val in options.items():
+    for key, val in six.iteritems(options):
         if func[key] != val:
             need_update = True
             ret["changes"].setdefault("old", {})[key] = func[key]
@@ -461,7 +468,7 @@ def _function_config_present(
             [ret["comment"], "Function config to be modified"]
         )
         if __opts__["test"]:
-            ret["comment"] = "Function {} set to be modified.".format(FunctionName)
+            ret["comment"] = "Function {0} set to be modified.".format(FunctionName)
             ret["result"] = None
             return ret
         _r = __salt__["boto_lambda.update_function_config"](
@@ -482,7 +489,7 @@ def _function_config_present(
         )
         if not _r.get("updated"):
             ret["result"] = False
-            ret["comment"] = "Failed to update function: {}.".format(
+            ret["comment"] = "Failed to update function: " "{0}.".format(
                 _r["error"]["message"]
             )
             ret["changes"] = {}
@@ -502,7 +509,7 @@ def _function_code_present(
             dlZipFile = __salt__["cp.cache_file"](path=ZipFile)
             if dlZipFile is False:
                 ret["result"] = False
-                ret["comment"] = "Failed to cache ZipFile `{}`.".format(ZipFile)
+                ret["comment"] = "Failed to cache ZipFile `{0}`.".format(ZipFile)
                 return ret
             ZipFile = dlZipFile
         size = os.path.getsize(ZipFile)
@@ -522,7 +529,7 @@ def _function_code_present(
         update = True
     if update:
         if __opts__["test"]:
-            ret["comment"] = "Function {} set to be modified.".format(FunctionName)
+            ret["comment"] = "Function {0} set to be modified.".format(FunctionName)
             ret["result"] = None
             return ret
         ret["changes"]["old"] = {
@@ -542,7 +549,7 @@ def _function_code_present(
         )
         if not func.get("updated"):
             ret["result"] = False
-            ret["comment"] = "Failed to update function: {}.".format(
+            ret["comment"] = "Failed to update function: " "{0}.".format(
                 func["error"]["message"]
             )
             ret["changes"] = {}
@@ -580,10 +587,10 @@ def _function_permissions_present(
             [ret["comment"], "Function permissions to be modified"]
         )
         if __opts__["test"]:
-            ret["comment"] = "Function {} set to be modified.".format(FunctionName)
+            ret["comment"] = "Function {0} set to be modified.".format(FunctionName)
             ret["result"] = None
             return ret
-        for sid, diff in diffs.items():
+        for sid, diff in six.iteritems(diffs):
             if diff.get("old", "") != "":
                 # There's a permssion that needs to be removed
                 _r = __salt__["boto_lambda.remove_permission"](
@@ -621,7 +628,7 @@ def _function_permissions_present(
                     oldperms[sid] = {}
             if not _r.get("updated"):
                 ret["result"] = False
-                ret["comment"] = "Failed to update function: {}.".format(
+                ret["comment"] = "Failed to update function: " "{0}.".format(
                     _r["error"]["message"]
                 )
                 ret["changes"] = {}
@@ -661,15 +668,15 @@ def function_absent(
     )
     if "error" in r:
         ret["result"] = False
-        ret["comment"] = "Failed to delete function: {}.".format(r["error"]["message"])
+        ret["comment"] = "Failed to delete function: {0}.".format(r["error"]["message"])
         return ret
 
     if r and not r["exists"]:
-        ret["comment"] = "Function {} does not exist.".format(FunctionName)
+        ret["comment"] = "Function {0} does not exist.".format(FunctionName)
         return ret
 
     if __opts__["test"]:
-        ret["comment"] = "Function {} is set to be removed.".format(FunctionName)
+        ret["comment"] = "Function {0} is set to be removed.".format(FunctionName)
         ret["result"] = None
         return ret
     r = __salt__["boto_lambda.delete_function"](
@@ -677,11 +684,13 @@ def function_absent(
     )
     if not r["deleted"]:
         ret["result"] = False
-        ret["comment"] = "Failed to delete function: {}.".format(r["error"]["message"])
+        ret["comment"] = "Failed to delete function: " "{0}.".format(
+            r["error"]["message"]
+        )
         return ret
     ret["changes"]["old"] = {"function": FunctionName}
     ret["changes"]["new"] = {"function": None}
-    ret["comment"] = "Function {} deleted.".format(FunctionName)
+    ret["comment"] = "Function {0} deleted.".format(FunctionName)
     return ret
 
 
@@ -741,12 +750,12 @@ def alias_present(
 
     if "error" in r:
         ret["result"] = False
-        ret["comment"] = "Failed to create alias: {}.".format(r["error"]["message"])
+        ret["comment"] = "Failed to create alias: " "{0}.".format(r["error"]["message"])
         return ret
 
     if not r.get("exists"):
         if __opts__["test"]:
-            ret["comment"] = "Alias {} is set to be created.".format(Name)
+            ret["comment"] = "Alias {0} is set to be created.".format(Name)
             ret["result"] = None
             return ret
         r = __salt__["boto_lambda.create_alias"](
@@ -761,18 +770,20 @@ def alias_present(
         )
         if not r.get("created"):
             ret["result"] = False
-            ret["comment"] = "Failed to create alias: {}.".format(r["error"]["message"])
+            ret["comment"] = "Failed to create alias: " "{0}.".format(
+                r["error"]["message"]
+            )
             return ret
         _describe = __salt__["boto_lambda.describe_alias"](
             FunctionName, Name, region=region, key=key, keyid=keyid, profile=profile
         )
         ret["changes"]["old"] = {"alias": None}
         ret["changes"]["new"] = _describe
-        ret["comment"] = "Alias {} created.".format(Name)
+        ret["comment"] = "Alias {0} created.".format(Name)
         return ret
 
     ret["comment"] = os.linesep.join(
-        [ret["comment"], "Alias {} is present.".format(Name)]
+        [ret["comment"], "Alias {0} is present.".format(Name)]
     )
     ret["changes"] = {}
     _describe = __salt__["boto_lambda.describe_alias"](
@@ -782,7 +793,7 @@ def alias_present(
     need_update = False
     options = {"FunctionVersion": FunctionVersion, "Description": Description}
 
-    for key, val in options.items():
+    for key, val in six.iteritems(options):
         if _describe[key] != val:
             need_update = True
             ret["changes"].setdefault("old", {})[key] = _describe[key]
@@ -792,7 +803,7 @@ def alias_present(
             [ret["comment"], "Alias config to be modified"]
         )
         if __opts__["test"]:
-            ret["comment"] = "Alias {} set to be modified.".format(Name)
+            ret["comment"] = "Alias {0} set to be modified.".format(Name)
             ret["result"] = None
             return ret
         _r = __salt__["boto_lambda.update_alias"](
@@ -807,7 +818,7 @@ def alias_present(
         )
         if not _r.get("updated"):
             ret["result"] = False
-            ret["comment"] = "Failed to update alias: {}.".format(
+            ret["comment"] = "Failed to update alias: " "{0}.".format(
                 _r["error"]["message"]
             )
             ret["changes"] = {}
@@ -850,15 +861,15 @@ def alias_absent(
     )
     if "error" in r:
         ret["result"] = False
-        ret["comment"] = "Failed to delete alias: {}.".format(r["error"]["message"])
+        ret["comment"] = "Failed to delete alias: " "{0}.".format(r["error"]["message"])
         return ret
 
     if r and not r["exists"]:
-        ret["comment"] = "Alias {} does not exist.".format(Name)
+        ret["comment"] = "Alias {0} does not exist.".format(Name)
         return ret
 
     if __opts__["test"]:
-        ret["comment"] = "Alias {} is set to be removed.".format(Name)
+        ret["comment"] = "Alias {0} is set to be removed.".format(Name)
         ret["result"] = None
         return ret
     r = __salt__["boto_lambda.delete_alias"](
@@ -866,11 +877,11 @@ def alias_absent(
     )
     if not r["deleted"]:
         ret["result"] = False
-        ret["comment"] = "Failed to delete alias: {}.".format(r["error"]["message"])
+        ret["comment"] = "Failed to delete alias: " "{0}.".format(r["error"]["message"])
         return ret
     ret["changes"]["old"] = {"alias": Name}
     ret["changes"]["new"] = {"alias": None}
-    ret["comment"] = "Alias {} deleted.".format(Name)
+    ret["comment"] = "Alias {0} deleted.".format(Name)
     return ret
 
 
@@ -885,7 +896,7 @@ def _get_function_arn(name, region=None, key=None, keyid=None, profile=None):
         region = profile["region"]
     if region is None:
         region = "us-east-1"
-    return "arn:aws:lambda:{}:{}:function:{}".format(region, account_id, name)
+    return "arn:aws:lambda:{0}:{1}:function:{2}".format(region, account_id, name)
 
 
 def event_source_mapping_present(
@@ -962,14 +973,14 @@ def event_source_mapping_present(
 
     if "error" in r:
         ret["result"] = False
-        ret["comment"] = "Failed to create event source mapping: {}.".format(
+        ret["comment"] = "Failed to create event source mapping: " "{0}.".format(
             r["error"]["message"]
         )
         return ret
 
     if not r.get("exists"):
         if __opts__["test"]:
-            ret["comment"] = "Event source mapping {} is set to be created.".format(
+            ret["comment"] = "Event source mapping {0} is set " "to be created.".format(
                 FunctionName
             )
             ret["result"] = None
@@ -987,7 +998,7 @@ def event_source_mapping_present(
         )
         if not r.get("created"):
             ret["result"] = False
-            ret["comment"] = "Failed to create event source mapping: {}.".format(
+            ret["comment"] = "Failed to create event source mapping: " "{0}.".format(
                 r["error"]["message"]
             )
             return ret
@@ -1002,7 +1013,7 @@ def event_source_mapping_present(
         ret["name"] = _describe["event_source_mapping"]["UUID"]
         ret["changes"]["old"] = {"event_source_mapping": None}
         ret["changes"]["new"] = _describe
-        ret["comment"] = "Event source mapping {} created.".format(ret["name"])
+        ret["comment"] = "Event source mapping {0} " "created.".format(ret["name"])
         return ret
 
     ret["comment"] = os.linesep.join(
@@ -1021,7 +1032,7 @@ def event_source_mapping_present(
     need_update = False
     options = {"BatchSize": BatchSize}
 
-    for key, val in options.items():
+    for key, val in six.iteritems(options):
         if _describe[key] != val:
             need_update = True
             ret["changes"].setdefault("old", {})[key] = _describe[key]
@@ -1041,7 +1052,7 @@ def event_source_mapping_present(
             [ret["comment"], "Event source mapping to be modified"]
         )
         if __opts__["test"]:
-            ret["comment"] = "Event source mapping {} set to be modified.".format(
+            ret["comment"] = "Event source mapping {0} set to be modified.".format(
                 _describe["UUID"]
             )
             ret["result"] = None
@@ -1058,7 +1069,7 @@ def event_source_mapping_present(
         )
         if not _r.get("updated"):
             ret["result"] = False
-            ret["comment"] = "Failed to update mapping: {}.".format(
+            ret["comment"] = "Failed to update mapping: " "{0}.".format(
                 _r["error"]["message"]
             )
             ret["changes"] = {}
@@ -1106,7 +1117,7 @@ def event_source_mapping_absent(
     )
     if "error" in desc:
         ret["result"] = False
-        ret["comment"] = "Failed to delete event source mapping: {}.".format(
+        ret["comment"] = "Failed to delete event source mapping: " "{0}.".format(
             desc["error"]["message"]
         )
         return ret
@@ -1130,7 +1141,7 @@ def event_source_mapping_absent(
     )
     if not r["deleted"]:
         ret["result"] = False
-        ret["comment"] = "Failed to delete event source mapping: {}.".format(
+        ret["comment"] = "Failed to delete event source mapping: {0}.".format(
             r["error"]["message"]
         )
         return ret

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 # Copyright 2015 SUSE LLC
 #
@@ -13,14 +14,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Import Python libs
+from __future__ import absolute_import
 
 import os
 
 from salt.modules.inspectlib.dbhandle import DBHandle
+
+# Import Salt libs
 from salt.modules.inspectlib.exceptions import InspectorSnapshotException
 
 
-class EnvLoader:
+class EnvLoader(object):
     """
     Load environment.
     """

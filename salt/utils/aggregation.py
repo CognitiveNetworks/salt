@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     salt.utils.aggregation
     ~~~~~~~~~~~~~~~~~~~~~~
@@ -102,10 +103,16 @@
 
 """
 
+# Import python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import copy
 import logging
 
+# Import 3rd-party libs
+from salt.ext import six
+
+# Import Salt libs
 from salt.utils.odict import OrderedDict
 
 __all__ = ["aggregate", "Aggregate", "Map", "Scalar", "Sequence"]
@@ -113,7 +120,7 @@ __all__ = ["aggregate", "Aggregate", "Map", "Scalar", "Sequence"]
 log = logging.getLogger(__name__)
 
 
-class Aggregate:
+class Aggregate(object):
     """
     Aggregation base.
     """
@@ -214,7 +221,7 @@ def aggregate(obj_a, obj_b, level=False, map_class=Map, sequence_class=Sequence)
             # introspection on obj_b keys only
             response = copy.copy(obj_b)
 
-        for key, value in obj_b.items():
+        for key, value in six.iteritems(obj_b):
             if key in obj_a:
                 value = aggregate(obj_a[key], value, subdeep, map_class, sequence_class)
             response[key] = value

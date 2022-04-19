@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Create/Close an alert in OpsGenie
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -31,10 +32,13 @@ during state runs.
           - disk: used_space
 
 """
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import inspect
 import logging
 
+# Import Salt libs
 import salt.exceptions
 
 log = logging.getLogger(__name__)
@@ -75,10 +79,9 @@ def create_alert(name=None, api_key=None, reason=None, action_type="Create"):
         raise salt.exceptions.SaltInvocationError("API Key or Reason cannot be None.")
 
     if __opts__["test"] is True:
-        ret[
-            "comment"
-        ] = 'Test: {} alert request will be processed using the API Key="{}".'.format(
-            action_type, api_key
+        ret["comment"] = (
+            "Test: {0} alert request will be processed "
+            'using the API Key="{1}".'.format(action_type, api_key)
         )
 
         # Return ``None`` when running with ``test=true``.
@@ -96,10 +99,9 @@ def create_alert(name=None, api_key=None, reason=None, action_type="Create"):
             response_text,
             response_status_code,
         )
-        ret[
-            "comment"
-        ] = 'Test: {} alert request will be processed using the API Key="{}".'.format(
-            action_type, api_key
+        ret["comment"] = (
+            "Test: {0} alert request will be processed"
+            ' using the API Key="{1}".'.format(action_type, api_key)
         )
         ret["result"] = True
     else:

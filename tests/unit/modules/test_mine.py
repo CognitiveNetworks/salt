@@ -1,18 +1,24 @@
+# -*- coding: utf-8 -*-
 """
     :codeauthor: Rupesh Tare <rupesht@saltstack.com>
     :codeauthor: Herbert Buurman <herbert.buurman@ogd.nl>
 """
 
+# Import Python Libs
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import Salt Libs
 import salt.modules.mine as mine
 import salt.utils.mine
 from salt.utils.odict import OrderedDict
+
+# Import Salt Testing Libs
 from tests.support.mixins import LoaderModuleMockMixin
 from tests.support.mock import MagicMock, patch
 from tests.support.unit import TestCase
 
 
-class FakeCache:
+class FakeCache(object):
     def __init__(self):
         self.data = {}
 
@@ -24,7 +30,7 @@ class FakeCache:
         return self.data.get((bank, key), {})
 
     def debug(self):
-        print(__name__ + ":FakeCache dump:\n{}".format(self.data))
+        print(__name__ + ":FakeCache dump:\n" "{}".format(self.data))
 
 
 class MineTestCase(TestCase, LoaderModuleMockMixin):

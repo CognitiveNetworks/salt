@@ -71,7 +71,8 @@ def __virtual__():
     else:
         return (
             False,
-            "The netacl (napalm_acl) module cannot be loaded. Please install capirca and napalm.",
+            "The netacl (napalm_acl) module cannot be loaded: \
+                Please install capirca and napalm.",
         )
 
 

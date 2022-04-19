@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Management of PostgreSQL languages
 ==================================
@@ -20,6 +21,7 @@ Languages can be set as either absent or present
         - maintenance_db: testdb
 
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
 
 def __virtual__():
@@ -72,7 +74,7 @@ def present(
         "name": name,
         "changes": {},
         "result": True,
-        "comment": "Language {} is already installed".format(name),
+        "comment": "Language {0} is already installed".format(name),
     }
 
     dbargs = {
@@ -88,14 +90,14 @@ def present(
     if name not in languages:
         if __opts__["test"]:
             ret["result"] = None
-            ret["comment"] = "Language {} is set to be installed".format(name)
+            ret["comment"] = "Language {0} is set to be installed".format(name)
             return ret
 
         if __salt__["postgres.language_create"](name, maintenance_db, **dbargs):
-            ret["comment"] = "Language {} has been installed".format(name)
+            ret["comment"] = "Language {0} has been installed".format(name)
             ret["changes"][name] = "Present"
         else:
-            ret["comment"] = "Failed to install language {}".format(name)
+            ret["comment"] = "Failed to install language {0}".format(name)
             ret["result"] = False
 
     return ret
@@ -148,15 +150,17 @@ def absent(
     if __salt__["postgres.language_exists"](name, maintenance_db, **dbargs):
         if __opts__["test"]:
             ret["result"] = None
-            ret["comment"] = "Language {} is set to be removed".format(name)
+            ret["comment"] = "Language {0} is set to be removed".format(name)
             return ret
         if __salt__["postgres.language_remove"](name, **dbargs):
-            ret["comment"] = "Language {} has been removed".format(name)
+            ret["comment"] = "Language {0} has been removed".format(name)
             ret["changes"][name] = "Absent"
             return ret
         else:
-            ret["comment"] = "Failed to remove language {}".format(name)
+            ret["comment"] = "Failed to remove language {0}".format(name)
             ret["result"] = False
 
-    ret["comment"] = "Language {} is not present so it cannot be removed".format(name)
+    ret["comment"] = "Language {0} is not present " "so it cannot be removed".format(
+        name
+    )
     return ret

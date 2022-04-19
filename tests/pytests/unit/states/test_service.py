@@ -3,6 +3,7 @@
 """
 
 import logging
+import os
 
 import pytest
 import salt.modules.beacons as beaconmod
@@ -17,7 +18,7 @@ log = logging.getLogger(__name__)
 
 def func(name):
     """
-    Mock func method
+        Mock func method
     """
     return name
 
@@ -142,26 +143,19 @@ def test_running():
         },
         {
             "changes": "saltstack",
-            "comment": (
-                "Started service salt\nService masking not available on this minion"
-            ),
+            "comment": "Started service salt\nService masking not available on this minion",
             "name": "salt",
             "result": True,
         },
         {
             "changes": "saltstack",
-            "comment": (
-                "Started service salt\nService masking not available on this minion"
-            ),
+            "comment": "Started service salt\nService masking not available on this minion",
             "name": "salt",
             "result": True,
         },
         {
             "changes": {},
-            "comment": (
-                "The service salt is disabled but enable is not True. Set enable to"
-                " True to successfully start the service."
-            ),
+            "comment": "The service salt is disabled but enable is not True. Set enable to True to successfully start the service.",
             "name": "salt",
             "result": False,
         },
@@ -185,8 +179,7 @@ def test_running():
     with patch.object(service, "_available", tmock):
         with patch.dict(service.__opts__, {"test": False}):
             with patch.dict(
-                service.__salt__,
-                {"service.enabled": tmock, "service.status": tmock},
+                service.__salt__, {"service.enabled": tmock, "service.status": tmock},
             ):
                 assert service.running("salt") == ret[1]
 
@@ -329,22 +322,6 @@ def test_running():
                         assert service.__context__ == {"service.state": "running"}
 
 
-def test_running_in_offline_mode():
-    """
-    Tests the case in which a service.running state is executed on an offline environemnt
-
-    """
-    name = "thisisnotarealservice"
-    with patch.object(service, "_offline", MagicMock(return_value=True)):
-        ret = service.running(name=name)
-        assert ret == {
-            "changes": {},
-            "comment": "Running in OFFLINE mode. Nothing to do",
-            "result": True,
-            "name": name,
-        }
-
-
 def test_dead():
     """
     Test to ensure that the named service is dead
@@ -483,22 +460,6 @@ def test_dead_with_missing_service():
         }
 
 
-def test_dead_in_offline_mode():
-    """
-    Tests the case in which a service.dead state is executed on an offline environemnt
-
-    """
-    name = "thisisnotarealservice"
-    with patch.object(service, "_offline", MagicMock(return_value=True)):
-        ret = service.dead(name=name)
-        assert ret == {
-            "changes": {},
-            "comment": "Running in OFFLINE mode. Nothing to do",
-            "result": True,
-            "name": name,
-        }
-
-
 def test_enabled():
     """
     Test to verify that the service is enabled
@@ -566,7 +527,7 @@ def test_mod_watch():
         assert service.mod_watch("salt", "stack") == ret[1]
 
 
-def test_mod_beacon(tmp_path):
+def test_mod_beacon():
     """
     Test to create a beacon based on a service
     """
@@ -636,28 +597,34 @@ def test_mod_beacon(tmp_path):
 
     beacon_mod_mocks = {"event.fire": mock}
 
-    sock_dir = str(tmp_path / "test-socks")
-    with patch.dict(service.__states__, {"beacon.present": beaconstate.present}):
-        with patch.dict(beaconstate.__salt__, beacon_state_mocks):
-            with patch.dict(beaconmod.__salt__, beacon_mod_mocks):
-                with patch.dict(
-                    beaconmod.__opts__, {"beacons": {}, "sock_dir": sock_dir}
-                ):
-                    with patch.object(
-                        SaltEvent, "get_event", side_effect=event_returns
+    with pytest.helpers.temp_directory() as tempdir:
+        sock_dir = os.path.join(tempdir, "test-socks")
+        with patch.dict(service.__states__, {"beacon.present": beaconstate.present}):
+            with patch.dict(beaconstate.__salt__, beacon_state_mocks):
+                with patch.dict(beaconmod.__salt__, beacon_mod_mocks):
+                    with patch.dict(
+                        beaconmod.__opts__, {"beacons": {}, "sock_dir": sock_dir}
                     ):
-                        ret = service.mod_beacon(name, sfun="running", beacon="True")
-                        expected = {
-                            "name": "beacon_service_sshd",
-                            "changes": {},
-                            "result": True,
-                            "comment": "Adding beacon_service_sshd to beacons",
-                        }
+                        with patch.object(
+                            SaltEvent, "get_event", side_effect=event_returns
+                        ):
+                            ret = service.mod_beacon(
+                                name, sfun="running", beacon="True"
+                            )
+                            expected = {
+                                "name": "beacon_service_sshd",
+                                "changes": {},
+                                "result": True,
+                                "comment": "Adding beacon_service_sshd to beacons",
+                            }
 
-                        assert ret == expected
+                            assert ret == expected
 
 
-@pytest.mark.skip_on_darwin(reason="service.running is currently failing on OSX")
+@pytest.mark.skipif(
+    salt.utils.platform.is_darwin(),
+    reason="service.running is currently failing on OSX",
+)
 @pytest.mark.destructive_test
 @pytest.mark.slow_test
 def test_running_with_reload():
@@ -703,8 +670,6 @@ def test_running_with_reload():
             service.__utils__, utils
         ), patch.dict(
             service.__opts__, {"test": False}
-        ), patch(
-            "salt.utils.systemd.offline", MagicMock(return_value=False)
         ):
             service.dead(service_name, enable=False)
             result = service.running(name=service_name, enable=True, reload=False)

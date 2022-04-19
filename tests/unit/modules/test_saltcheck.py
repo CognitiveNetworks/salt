@@ -76,8 +76,7 @@ class SaltcheckTestCase(TestCase, LoaderModuleMockMixin):
             self.assertFalse(ret)
             self.assertEqual(
                 message,
-                "The saltcheck execution module failed to load: only available on"
-                " minions.",
+                "The saltcheck execution module failed to load: only available on minions.",
             )
 
     def test__assert_equal1(self):

@@ -1,15 +1,21 @@
+# -*- coding: utf-8 -*-
 """
 Helpers for testing man pages
 """
+# Import python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 import os
 import sys
 
+# Import Salt libs
 import salt.utils.files
 import salt.utils.path
 import salt.utils.stringutils
 from salt.exceptions import CommandExecutionError
+
+# Import Salt Tesing libs
 from tests.support.runtests import RUNTIME_VARS
 
 log = logging.getLogger(__name__)
@@ -23,7 +29,7 @@ def install(rootdir):
             sys.executable,
             os.path.join(RUNTIME_VARS.CODE_DIR, "setup.py"),
             "install",
-            "--root={}".format(rootdir),
+            "--root={0}".format(rootdir),
         ],
         redirect_stderr=True,
     )
@@ -45,7 +51,7 @@ def search(manpages, rootdir):
 
     if manpage_fns:
         raise CommandExecutionError(
-            "The following manpages were not found under {}: {}".format(
+            "The following manpages were not found under {0}: {1}".format(
                 rootdir, ", ".join(sorted(manpage_fns))
             )
         )
@@ -58,15 +64,15 @@ def search(manpages, rootdir):
         for search_string in manpages[manpage]:
             if search_string not in contents:
                 failed.setdefault(manpage, []).append(
-                    "No match for search string '{}' found in {}".format(
+                    "No match for search string '{0}' found in {1}".format(
                         search_string, manpage_paths[manpage]
                     )
                 )
         # Check for correct install dir
-        path = "/man{}/".format(manpage.rsplit(".", 1)[-1])
+        path = "/man{0}/".format(manpage.rsplit(".", 1)[-1])
         if path not in manpage_paths[manpage]:
             failed.setdefault(manpage, []).append(
-                "{} not found in manpage path {}".format(path, manpage_paths[manpage])
+                "{0} not found in manpage path {1}".format(path, manpage_paths[manpage])
             )
 
     if failed:

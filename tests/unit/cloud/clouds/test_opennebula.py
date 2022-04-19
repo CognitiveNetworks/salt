@@ -1708,5 +1708,6 @@ class OpenNebulaTestCase(TestCase, LoaderModuleMockMixin):
         self.assertRaises(
             SaltCloudSystemExit,
             opennebula._get_xml,
-            "[VirtualMachinePoolInfo] User couldn't be authenticated, aborting call.",
+            "[VirtualMachinePoolInfo] User couldn't be"
+            " authenticated, aborting call.",
         )

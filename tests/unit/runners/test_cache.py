@@ -1,12 +1,18 @@
+# -*- coding: utf-8 -*-
 """
 unit tests for the cache runner
 """
 
+# Import Python Libs
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import Salt Libs
 import salt.runners.cache as cache
 import salt.utils.master
 from tests.support.mixins import LoaderModuleMockMixin
 from tests.support.mock import patch
+
+# Import Salt Testing Libs
 from tests.support.runtests import RUNTIME_VARS
 from tests.support.unit import TestCase
 
@@ -37,7 +43,7 @@ class CacheTest(TestCase, LoaderModuleMockMixin):
 
         mock_data = "grain stuff"
 
-        class MockMaster:
+        class MockMaster(object):
             def __init__(self, *args, **kwargs):
                 pass
 

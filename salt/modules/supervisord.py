@@ -1,14 +1,22 @@
+# -*- coding: utf-8 -*-
 """
 Provide the service module for system supervisord or supervisord in a
 virtualenv
 """
 
 
-import configparser
+# Import python libs
+from __future__ import absolute_import, print_function, unicode_literals
+
 import os
 
+# Import salt libs
 import salt.utils.stringutils
 from salt.exceptions import CommandExecutionError, CommandNotFoundError
+
+# Import 3rd-party libs
+from salt.ext.six import string_types
+from salt.ext.six.moves import configparser  # pylint: disable=import-error
 
 
 def __virtual__():
@@ -27,7 +35,7 @@ def _get_supervisorctl_bin(bin_env):
     if not bin_env:
         which_result = __salt__["cmd.which_bin"]([cmd])
         if which_result is None:
-            raise CommandNotFoundError("Could not find a `{}` binary".format(cmd))
+            raise CommandNotFoundError("Could not find a `{0}` binary".format(cmd))
         return which_result
 
     # try to get binary from env
@@ -35,7 +43,7 @@ def _get_supervisorctl_bin(bin_env):
         cmd_bin = os.path.join(bin_env, "bin", cmd)
         if os.path.isfile(cmd_bin):
             return cmd_bin
-        raise CommandNotFoundError("Could not find a `{}` binary".format(cmd))
+        raise CommandNotFoundError("Could not find a `{0}` binary".format(cmd))
 
     return bin_env
 
@@ -85,9 +93,7 @@ def start(name="all", user=None, conf_file=None, bin_env=None):
     if name.endswith(":*"):
         name = name[:-1]
     ret = __salt__["cmd.run_all"](
-        _ctl_cmd("start", name, conf_file, bin_env),
-        runas=user,
-        python_shell=False,
+        _ctl_cmd("start", name, conf_file, bin_env), runas=user, python_shell=False,
     )
     return _get_return(ret)
 
@@ -115,9 +121,7 @@ def restart(name="all", user=None, conf_file=None, bin_env=None):
     if name.endswith(":*"):
         name = name[:-1]
     ret = __salt__["cmd.run_all"](
-        _ctl_cmd("restart", name, conf_file, bin_env),
-        runas=user,
-        python_shell=False,
+        _ctl_cmd("restart", name, conf_file, bin_env), runas=user, python_shell=False,
     )
     return _get_return(ret)
 
@@ -145,9 +149,7 @@ def stop(name="all", user=None, conf_file=None, bin_env=None):
     if name.endswith(":*"):
         name = name[:-1]
     ret = __salt__["cmd.run_all"](
-        _ctl_cmd("stop", name, conf_file, bin_env),
-        runas=user,
-        python_shell=False,
+        _ctl_cmd("stop", name, conf_file, bin_env), runas=user, python_shell=False,
     )
     return _get_return(ret)
 
@@ -175,9 +177,7 @@ def add(name, user=None, conf_file=None, bin_env=None):
     elif name.endswith(":*"):
         name = name[:-2]
     ret = __salt__["cmd.run_all"](
-        _ctl_cmd("add", name, conf_file, bin_env),
-        runas=user,
-        python_shell=False,
+        _ctl_cmd("add", name, conf_file, bin_env), runas=user, python_shell=False,
     )
     return _get_return(ret)
 
@@ -205,9 +205,7 @@ def remove(name, user=None, conf_file=None, bin_env=None):
     elif name.endswith(":*"):
         name = name[:-2]
     ret = __salt__["cmd.run_all"](
-        _ctl_cmd("remove", name, conf_file, bin_env),
-        runas=user,
-        python_shell=False,
+        _ctl_cmd("remove", name, conf_file, bin_env), runas=user, python_shell=False,
     )
     return _get_return(ret)
 
@@ -231,9 +229,7 @@ def reread(user=None, conf_file=None, bin_env=None):
         salt '*' supervisord.reread
     """
     ret = __salt__["cmd.run_all"](
-        _ctl_cmd("reread", None, conf_file, bin_env),
-        runas=user,
-        python_shell=False,
+        _ctl_cmd("reread", None, conf_file, bin_env), runas=user, python_shell=False,
     )
     return _get_return(ret)
 
@@ -260,16 +256,14 @@ def update(user=None, conf_file=None, bin_env=None, name=None):
         salt '*' supervisord.update
     """
 
-    if isinstance(name, str):
+    if isinstance(name, string_types):
         if name.endswith(":"):
             name = name[:-1]
         elif name.endswith(":*"):
             name = name[:-2]
 
     ret = __salt__["cmd.run_all"](
-        _ctl_cmd("update", name, conf_file, bin_env),
-        runas=user,
-        python_shell=False,
+        _ctl_cmd("update", name, conf_file, bin_env), runas=user, python_shell=False,
     )
     return _get_return(ret)
 
@@ -321,9 +315,7 @@ def status_raw(name=None, user=None, conf_file=None, bin_env=None):
         salt '*' supervisord.status_raw
     """
     ret = __salt__["cmd.run_all"](
-        _ctl_cmd("status", name, conf_file, bin_env),
-        runas=user,
-        python_shell=False,
+        _ctl_cmd("status", name, conf_file, bin_env), runas=user, python_shell=False,
     )
     return _get_return(ret)
 
@@ -347,9 +339,7 @@ def custom(command, user=None, conf_file=None, bin_env=None):
         salt '*' supervisord.custom "mstop '*gunicorn*'"
     """
     ret = __salt__["cmd.run_all"](
-        _ctl_cmd(command, None, conf_file, bin_env),
-        runas=user,
-        python_shell=False,
+        _ctl_cmd(command, None, conf_file, bin_env), runas=user, python_shell=False,
     )
     return _get_return(ret)
 
@@ -371,8 +361,10 @@ def _read_config(conf_file=None):
     config = configparser.ConfigParser()
     try:
         config.read(conf_file)
-    except OSError as exc:
-        raise CommandExecutionError("Unable to read from {}: {}".format(conf_file, exc))
+    except (IOError, OSError) as exc:
+        raise CommandExecutionError(
+            "Unable to read from {0}: {1}".format(conf_file, exc)
+        )
     return config
 
 
@@ -394,14 +386,14 @@ def options(name, conf_file=None):
         salt '*' supervisord.options foo
     """
     config = _read_config(conf_file)
-    section_name = "program:{}".format(name)
+    section_name = "program:{0}".format(name)
     if section_name not in config.sections():
-        raise CommandExecutionError("Process '{}' not found".format(name))
+        raise CommandExecutionError("Process '{0}' not found".format(name))
     ret = {}
     for key, val in config.items(section_name):
         val = salt.utils.stringutils.to_num(val.split(";")[0].strip())
         # pylint: disable=maybe-no-member
-        if isinstance(val, str):
+        if isinstance(val, string_types):
             if val.lower() == "true":
                 val = True
             elif val.lower() == "false":

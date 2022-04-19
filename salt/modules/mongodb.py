@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Module to provide MongoDB functionality to Salt
 
@@ -12,12 +13,19 @@ Module to provide MongoDB functionality to Salt
     This data can also be passed into pillar. Options passed into opts will
     overwrite options passed into pillar.
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
+# Import python libs
 import logging
 import re
+import sys
 
+# Import salt libs
 import salt.utils.json
 from salt.exceptions import get_error_message as _get_error_message
+
+# Import third party libs
+from salt.ext import six
 from salt.utils.versions import LooseVersion as _LooseVersion
 
 try:
@@ -39,8 +47,7 @@ def __virtual__():
     else:
         return (
             False,
-            "The mongodb execution module cannot be loaded: the pymongo library is not"
-            " available.",
+            "The mongodb execution module cannot be loaded: the pymongo library is not available.",
         )
 
 
@@ -79,11 +86,11 @@ def _to_dict(objects):
     Potentially interprets a string as JSON for usage with mongo
     """
     try:
-        if isinstance(objects, str):
+        if isinstance(objects, six.string_types):
             objects = salt.utils.json.loads(objects)
     except ValueError as err:
         log.error("Could not parse objects: %s", err)
-        raise
+        six.reraise(*sys.exc_info())
 
     return objects
 
@@ -107,7 +114,7 @@ def db_list(user=None, password=None, host=None, port=None, authdb=None):
         return conn.database_names()
     except pymongo.errors.PyMongoError as err:
         log.error(err)
-        return str(err)
+        return six.text_type(err)
 
 
 def db_exists(name, user=None, password=None, host=None, port=None, authdb=None):
@@ -122,7 +129,7 @@ def db_exists(name, user=None, password=None, host=None, port=None, authdb=None)
     """
     dbs = db_list(user, password, host, port, authdb=authdb)
 
-    if isinstance(dbs, str):
+    if isinstance(dbs, six.string_types):
         return False
 
     return name in dbs
@@ -147,7 +154,7 @@ def db_remove(name, user=None, password=None, host=None, port=None, authdb=None)
         conn.drop_database(name)
     except pymongo.errors.PyMongoError as err:
         log.error("Removing database %s failed with error: %s", name, err)
-        return str(err)
+        return six.text_type(err)
 
     return True
 
@@ -170,7 +177,7 @@ def version(
     """
     conn = _connect(user, password, host, port, authdb=authdb)
     if not conn:
-        err_msg = "Failed to connect to MongoDB database {}:{}".format(host, port)
+        err_msg = "Failed to connect to MongoDB database {0}:{1}".format(host, port)
         log.error(err_msg)
         return (False, err_msg)
 
@@ -179,7 +186,7 @@ def version(
         return _version(mdb)
     except pymongo.errors.PyMongoError as err:
         log.error("Listing users failed with error: %s", err)
-        return str(err)
+        return six.text_type(err)
 
 
 def user_find(
@@ -196,7 +203,7 @@ def user_find(
     """
     conn = _connect(user, password, host, port, authdb=authdb)
     if not conn:
-        err_msg = "Failed to connect to MongoDB database {}:{}".format(host, port)
+        err_msg = "Failed to connect to MongoDB database {0}:{1}".format(host, port)
         log.error(err_msg)
         return (False, err_msg)
 
@@ -205,7 +212,7 @@ def user_find(
         return mdb.command("usersInfo", name)["users"]
     except pymongo.errors.PyMongoError as err:
         log.error("Listing users failed with error: %s", err)
-        return (False, str(err))
+        return (False, six.text_type(err))
 
 
 def user_list(
@@ -243,7 +250,7 @@ def user_list(
 
     except pymongo.errors.PyMongoError as err:
         log.error("Listing users failed with error: %s", err)
-        return str(err)
+        return six.text_type(err)
 
 
 def user_exists(
@@ -260,7 +267,7 @@ def user_exists(
     """
     users = user_list(user, password, host, port, database, authdb)
 
-    if isinstance(users, str):
+    if isinstance(users, six.string_types):
         return "Failed to connect to mongo database"
 
     for user in users:
@@ -303,7 +310,7 @@ def user_create(
         mdb.add_user(name, passwd, roles=roles)
     except pymongo.errors.PyMongoError as err:
         log.error("Creating database %s failed with error: %s", name, err)
-        return str(err)
+        return six.text_type(err)
     return True
 
 
@@ -329,7 +336,7 @@ def user_remove(
         mdb.remove_user(name)
     except pymongo.errors.PyMongoError as err:
         log.error("Creating database %s failed with error: %s", name, err)
-        return str(err)
+        return six.text_type(err)
 
     return True
 
@@ -357,7 +364,7 @@ def user_roles_exists(
 
     users = user_list(user, password, host, port, database, authdb)
 
-    if isinstance(users, str):
+    if isinstance(users, six.string_types):
         return "Failed to connect to mongo database"
 
     for user in users:
@@ -406,7 +413,7 @@ def user_grant_roles(
         log.error(
             "Granting roles %s to user %s failed with error: %s", roles, name, err
         )
-        return str(err)
+        return six.text_type(err)
 
     return True
 
@@ -444,7 +451,7 @@ def user_revoke_roles(
         log.error(
             "Revoking roles %s from user %s failed with error: %s", roles, name, err
         )
-        return str(err)
+        return six.text_type(err)
 
     return True
 
@@ -516,7 +523,7 @@ def update_one(
     if not conn:
         return "Failed to connect to mongo database"
 
-    objects = str(objects)
+    objects = six.text_type(objects)
     objs = re.split(r"}\s+{", objects)
 
     if len(objs) != 2:
@@ -555,7 +562,7 @@ def update_one(
             col = getattr(mdb, collection)
             ids = col.update_one(_id_field, {"$set": _update_doc})
             nb_mod = ids.modified_count
-            return "{} objects updated".format(nb_mod)
+            return "{0} objects updated".format(nb_mod)
         except pymongo.errors.PyMongoError as err:
             log.error("Updating object %s failed with error %s", objects, err)
             return err
@@ -636,7 +643,7 @@ def remove(
         mdb = pymongo.database.Database(conn, database)
         col = getattr(mdb, collection)
         ret = col.remove(query, w=w)
-        return "{} objects removed".format(ret["n"])
+        return "{0} objects removed".format(ret["n"])
     except pymongo.errors.PyMongoError as err:
         log.error("Removing objects failed with error: %s", _get_error_message(err))
         return _get_error_message(err)

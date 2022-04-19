@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 InfluxDB - A distributed time series database
 
@@ -21,6 +22,8 @@ version 0.5-0.8)
     overwrite options passed into pillar.
 """
 
+# Import Python libs
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 

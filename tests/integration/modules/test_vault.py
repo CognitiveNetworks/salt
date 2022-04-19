@@ -28,10 +28,7 @@ class VaultTestCase(ModuleCase):
     @classmethod
     def setUpClass(cls):
         cls.sminion = sminion = create_sminion()
-        config = (
-            '{"backend": {"file": {"path": "/vault/file"}}, "default_lease_ttl":'
-            ' "168h", "max_lease_ttl": "720h", "disable_mlock": true}'
-        )
+        config = '{"backend": {"file": {"path": "/vault/file"}}, "default_lease_ttl": "168h", "max_lease_ttl": "720h", "disable_mlock": true}'
         sminion.states.docker_image.present(name="vault", tag="0.9.6")
         login_attempts = 1
         container_created = False
@@ -152,10 +149,7 @@ class VaultTestCaseCurrent(ModuleCase):
     @classmethod
     def setUpClass(cls):
         cls.sminion = sminion = create_sminion()
-        config = (
-            '{"backend": {"file": {"path": "/vault/file"}}, "default_lease_ttl":'
-            ' "168h", "max_lease_ttl": "720h", "disable_mlock": true}'
-        )
+        config = '{"backend": {"file": {"path": "/vault/file"}}, "default_lease_ttl": "168h", "max_lease_ttl": "720h", "disable_mlock": true}'
         sminion.states.docker_image.present(name="vault", tag="1.3.1")
         login_attempts = 1
         container_created = False
