@@ -14,7 +14,7 @@ backports.functools-lru-cache==1.5
     #   cheroot
 backports.ssl-match-hostname==3.7.0.1 ; python_version < "3.7"
     # via -r requirements/static/pkg/py3.5/linux.txt
-certifi==2020.6.20
+certifi>=2020.6.20
     # via
     #   -r requirements/static/pkg/py3.5/linux.txt
     #   requests

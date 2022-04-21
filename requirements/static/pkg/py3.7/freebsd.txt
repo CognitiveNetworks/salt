@@ -6,7 +6,7 @@
 #
 backports.functools-lru-cache==1.5
     # via cheroot
-certifi==2020.6.20
+certifi>=2020.6.20
     # via requests
 cffi==1.14.4
     # via cryptography
