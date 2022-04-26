@@ -746,7 +746,7 @@ pytest==6.1.2
     #   pytest-salt-factories
     #   pytest-subtests
     #   pytest-tempdir
-python-dateutil==2.8.0
+python-dateutil>=2.8.0
     # via
     #   -r requirements/static/pkg/py3.7/darwin.txt
     #   adal
