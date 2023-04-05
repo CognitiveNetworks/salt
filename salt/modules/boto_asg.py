@@ -50,7 +50,6 @@ import email.mime.multipart
 import logging
 import sys
 import time
-import re
 
 import salt.utils.compat
 import salt.utils.json
