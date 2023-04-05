@@ -59,7 +59,6 @@ import salt.utils.versions
 log = logging.getLogger(__name__)
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
-
 try:
     import boto
     import boto.ec2
@@ -76,7 +75,6 @@ try:
 except ImportError:
     HAS_BOTO = False
 
-client_boto3 = boto3.client('autoscaling')
 
 def __virtual__():
     """
@@ -132,6 +130,7 @@ def exists(name, region=None, key=None, keyid=None, profile=None):
             log.error(e)
             return False
 
+
 def fill_missing_values(ret, asg_details):
     if not ret['name']:
         ret['name'] = asg_details['AutoScalingGroupName']
@@ -171,6 +170,10 @@ def get_config(name, region=None, key=None, keyid=None, profile=None):
     retries = 30
     while True:
         try:
+            client_boto3 = _get_conn_autoscaling_boto3(region=region,
+                                                       key=key,
+                                                       keyid=keyid,
+                                                       profile=profile)
             asg_details = client_boto3.describe_auto_scaling_groups(AutoScalingGroupNames=[name])
             if asg_details['AutoScalingGroups']:
                 vpc_zone_identifier = asg_details['AutoScalingGroups'][0]['VPCZoneIdentifier']
