@@ -145,15 +145,12 @@ def get_config(name, region=None, key=None, keyid=None, profile=None):
     """
     conn = _get_conn(region=region, key=key, keyid=keyid, profile=profile)
 
-    asg_details = client_boto3.describe_auto_scaling_groups(AutoScalingGroupNames=[name])
-    vpc_zone_identifier = asg_details['AutoScalingGroups'][0]['VPCZoneIdentifier']
-
     retries = 30
     while True:
         try:
-            asg = conn.get_all_groups(names=[name])
-            if asg:
-                asg = asg[0]
+            asg_details = client_boto3.describe_auto_scaling_groups(AutoScalingGroupNames=[name])
+            if asg_details['AutoScalingGroups']:
+                vpc_zone_identifier = asg_details['AutoScalingGroups'][0]['VPCZoneIdentifier']
             else:
                 return {}
             ret = odict.OrderedDict()
@@ -196,7 +193,7 @@ def get_config(name, region=None, key=None, keyid=None, profile=None):
                     suspended_processes = asg_details['AutoScalingGroups'][0]['SuspendedProcesses']
                     ret[attr] = sorted([x.process_name for x in suspended_processes])
                 else:
-                    ret[attr] = getattr(asg, attr)
+                    ret[attr] = asg_details['AutoScalingGroups'][0]['SuspendedProcesses']
             # scaling policies
             policies = conn.get_all_policies(as_group=name)
             ret["scaling_policies"] = []
