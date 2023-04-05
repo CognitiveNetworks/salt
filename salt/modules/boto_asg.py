@@ -76,6 +76,7 @@ try:
 except ImportError:
     HAS_BOTO = False
 
+client_boto3 = boto3.client('autoscaling')
 
 def __virtual__():
     """
@@ -143,12 +144,13 @@ def get_config(name, region=None, key=None, keyid=None, profile=None):
         salt myminion boto_asg.get_config myasg region=us-east-1
     """
     conn = _get_conn(region=region, key=key, keyid=keyid, profile=profile)
+
     retries = 30
     while True:
         try:
-            asg = conn.get_all_groups(names=[name])
-            if asg:
-                asg = asg[0]
+            asg_details = client_boto3.describe_auto_scaling_groups(AutoScalingGroupNames=[name])
+            if asg_details['AutoScalingGroups']:
+                vpc_zone_identifier = asg_details['AutoScalingGroups'][0]['VPCZoneIdentifier']
             else:
                 return {}
             ret = odict.OrderedDict()
@@ -173,24 +175,25 @@ def get_config(name, region=None, key=None, keyid=None, profile=None):
                 # Tags are objects, so we need to turn them into dicts.
                 if attr == "tags":
                     _tags = []
-                    for tag in asg.tags:
+                    for tag in asg_details['AutoScalingGroups'][0]['Tags']:
                         _tag = odict.OrderedDict()
-                        _tag["key"] = tag.key
-                        _tag["value"] = tag.value
-                        _tag["propagate_at_launch"] = tag.propagate_at_launch
+                        _tag["key"] = tag['Key']
+                        _tag["value"] = tag['Value']
+                        _tag["propagate_at_launch"] = tag['PropagateAtLaunch']
                         _tags.append(_tag)
                     ret["tags"] = _tags
                 # Boto accepts a string or list as input for vpc_zone_identifier,
                 # but always returns a comma separated list. We require lists in
                 # states.
+
                 elif attr == "vpc_zone_identifier":
-                    ret[attr] = getattr(asg, attr).split(",")
+                    ret[attr] = vpc_zone_identifier.split(",")
                 # convert SuspendedProcess objects to names
                 elif attr == "suspended_processes":
-                    suspended_processes = getattr(asg, attr)
+                    suspended_processes = asg_details['AutoScalingGroups'][0]['SuspendedProcesses']
                     ret[attr] = sorted([x.process_name for x in suspended_processes])
                 else:
-                    ret[attr] = getattr(asg, attr)
+                    ret[attr] = asg_details['AutoScalingGroups'][0]['SuspendedProcesses']
             # scaling policies
             policies = conn.get_all_policies(as_group=name)
             ret["scaling_policies"] = []
