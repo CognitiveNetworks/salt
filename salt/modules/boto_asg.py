@@ -132,6 +132,29 @@ def exists(name, region=None, key=None, keyid=None, profile=None):
             log.error(e)
             return False
 
+def fill_missing_values(ret, asg_details):
+    if not ret['name']:
+        ret['name'] = asg_details['AutoScalingGroupName']
+    if not ret['availability_zones']:
+        ret['availability_zones'] = asg_details['AvailabilityZones']
+    if not ret['default_cooldown']:
+        ret['default_cooldown'] = asg_details['DefaultCooldown']
+    if not ret['desired_capacity']:
+        ret['desired_capacity'] = asg_details['DesiredCapacity']
+    if not ret['health_check_period']:
+        ret['health_check_period'] = asg_details['HealthCheckGracePeriod']
+    if not ret['health_check_type']:
+        ret['health_check_type'] = asg_details['HealthCheckType']
+    if not ret['launch_config_name']:
+        ret['launch_config_name'] = asg_details['LaunchConfigurationName']
+    if not ret['load_balancers']:
+        ret['load_balancers'] = asg_details['LoadBalancerNames']
+    if not ret['max_size']:
+        ret['max_size'] = asg_details['MaxSize']
+    if not ret['min_size']:
+        ret['min_size'] = asg_details['MinSize']
+    return ret
+
 
 def get_config(name, region=None, key=None, keyid=None, profile=None):
     """
@@ -171,6 +194,7 @@ def get_config(name, region=None, key=None, keyid=None, profile=None):
                 "termination_policies",
                 "suspended_processes",
             ]
+
             for attr in attrs:
                 # Tags are objects, so we need to turn them into dicts.
                 if attr == "tags":
@@ -227,6 +251,8 @@ def get_config(name, region=None, key=None, keyid=None, profile=None):
                         ("recurrence", action.recurrence),
                     ]
                 )
+
+            ret = fill_missing_values(ret, asg_details['AutoScalingGroups'][0])
             return ret
         except boto.exception.BotoServerError as e:
             if retries and e.code == "Throttling":
@@ -470,6 +496,7 @@ def update(
                 vpc_zone_identifier=vpc_zone_identifier,
                 termination_policies=termination_policies,
             )
+
             if notification_arn and notification_types:
                 conn.put_notification_configuration(
                     _asg, notification_arn, notification_types
