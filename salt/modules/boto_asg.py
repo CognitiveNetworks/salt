@@ -59,7 +59,6 @@ import salt.utils.versions
 log = logging.getLogger(__name__)
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
-
 try:
     import boto
     import boto.ec2
@@ -132,6 +131,48 @@ def exists(name, region=None, key=None, keyid=None, profile=None):
             return False
 
 
+def fill_missing_values(ret, asg_details):
+    # Add here the ones which old names do not match with the new
+    ret['name'] = asg_details['AutoScalingGroupName']
+    ret['health_check_period'] = asg_details['HealthCheckGracePeriod']
+    ret['load_balancers'] = asg_details['LoadBalancerNames']
+    ret['launch_config_name'] = asg_details['LaunchConfigurationName']
+    ret['vpc_zone_identifier'] = asg_details['VPCZoneIdentifier'].split(",")
+
+    attrs = [
+        "availability_zones",
+        "default_cooldown",
+        "desired_capacity",
+        "health_check_type",
+        "max_size",
+        "min_size",
+        "tags",
+        "termination_policies",
+        "suspended_processes",
+        "max_size",
+        "min_size",
+    ]
+    for attr in attrs:
+        # Tags are objects, so we need to turn them into dicts.
+        if attr == "tags":
+            _tags = []
+            for tag in asg_details['Tags']:
+                _tag = odict.OrderedDict()
+                _tag["key"] = tag['Key']
+                _tag["value"] = tag['Value']
+                _tag["propagate_at_launch"] = tag['PropagateAtLaunch']
+                _tags.append(_tag)
+            ret["tags"] = _tags
+        # convert SuspendedProcess objects to names
+        elif attr == "suspended_processes":
+            suspended_processes = asg_details['SuspendedProcesses']
+            ret[attr] = sorted([x.process_name for x in suspended_processes])
+        else:
+            ret[attr] = asg_details[''.join(x.capitalize() or '_' for x in attr.split('_'))]
+
+    return ret
+
+
 def get_config(name, region=None, key=None, keyid=None, profile=None):
     """
     Get the configuration for an autoscale group.
@@ -143,54 +184,22 @@ def get_config(name, region=None, key=None, keyid=None, profile=None):
         salt myminion boto_asg.get_config myasg region=us-east-1
     """
     conn = _get_conn(region=region, key=key, keyid=keyid, profile=profile)
+
     retries = 30
     while True:
         try:
-            asg = conn.get_all_groups(names=[name])
-            if asg:
-                asg = asg[0]
+            client_boto3 = _get_conn_autoscaling_boto3(region=region,
+                                                       key=key,
+                                                       keyid=keyid,
+                                                       profile=profile)
+            asg_details = client_boto3.describe_auto_scaling_groups(AutoScalingGroupNames=[name])
+            if asg_details['AutoScalingGroups']:
+                ret = odict.OrderedDict()
             else:
                 return {}
-            ret = odict.OrderedDict()
-            attrs = [
-                "name",
-                "availability_zones",
-                "default_cooldown",
-                "desired_capacity",
-                "health_check_period",
-                "health_check_type",
-                "launch_config_name",
-                "load_balancers",
-                "max_size",
-                "min_size",
-                "placement_group",
-                "vpc_zone_identifier",
-                "tags",
-                "termination_policies",
-                "suspended_processes",
-            ]
-            for attr in attrs:
-                # Tags are objects, so we need to turn them into dicts.
-                if attr == "tags":
-                    _tags = []
-                    for tag in asg.tags:
-                        _tag = odict.OrderedDict()
-                        _tag["key"] = tag.key
-                        _tag["value"] = tag.value
-                        _tag["propagate_at_launch"] = tag.propagate_at_launch
-                        _tags.append(_tag)
-                    ret["tags"] = _tags
-                # Boto accepts a string or list as input for vpc_zone_identifier,
-                # but always returns a comma separated list. We require lists in
-                # states.
-                elif attr == "vpc_zone_identifier":
-                    ret[attr] = getattr(asg, attr).split(",")
-                # convert SuspendedProcess objects to names
-                elif attr == "suspended_processes":
-                    suspended_processes = getattr(asg, attr)
-                    ret[attr] = sorted([x.process_name for x in suspended_processes])
-                else:
-                    ret[attr] = getattr(asg, attr)
+
+            ret = fill_missing_values(ret, asg_details['AutoScalingGroups'][0])
+
             # scaling policies
             policies = conn.get_all_policies(as_group=name)
             ret["scaling_policies"] = []
@@ -467,6 +476,7 @@ def update(
                 vpc_zone_identifier=vpc_zone_identifier,
                 termination_policies=termination_policies,
             )
+
             if notification_arn and notification_types:
                 conn.put_notification_configuration(
                     _asg, notification_arn, notification_types

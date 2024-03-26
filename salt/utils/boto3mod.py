@@ -203,12 +203,12 @@ def get_connection(
         conn = session.client(module)
         if conn is None:
             raise SaltInvocationError('Region "{}" is not ' "valid.".format(region))
-    except boto.exception.NoAuthHandlerFound:
+    except boto.exception.NoAuthHandlerFound as exp:
         raise SaltInvocationError(
             "No authentication credentials found when "
             "attempting to make boto {} connection to "
             'region "{}".'.format(service, region)
-        )
+        ) from exp
     __context__[cxkey] = conn
     return conn
 
@@ -303,7 +303,13 @@ def paged_call(function, *args, **kwargs):
 
 def ordered(obj):
     if isinstance(obj, (list, tuple)):
-        return sorted(ordered(x) for x in obj)
+        try:
+            return sorted(ordered(x) for x in obj)
+        except TypeError as exc:
+            log.warning(
+                "No key defined for sorting dictionaries. Trying to sort with a key"
+            )
+            return sorted((ordered(x) for x in obj), key=lambda d: sorted(d.items()))
     elif isinstance(obj, dict):
         return {str(k) if isinstance(k, str) else k: ordered(v) for k, v in obj.items()}
     elif isinstance(obj, str):

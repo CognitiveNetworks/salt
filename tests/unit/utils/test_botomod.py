@@ -1,25 +1,16 @@
-# -*- coding: utf-8 -*-
-
-# Import python libs
-from __future__ import absolute_import, print_function, unicode_literals
-
 import os
+import sys
 
 import salt.utils.boto3mod as boto3mod
-
-# Import Salt libs
 import salt.utils.botomod as botomod
 from salt.exceptions import SaltInvocationError
-from salt.ext import six
+from salt.utils.odict import OrderedDict
 from salt.utils.versions import LooseVersion
-
-# Import Salt Testing libs
 from tests.support.mixins import LoaderModuleMockMixin
 from tests.support.mock import MagicMock, patch
 from tests.support.runtests import RUNTIME_VARS
 from tests.support.unit import TestCase, skipIf
 
-# Import 3rd-party libs
 # pylint: disable=import-error
 try:
     import boto
@@ -62,6 +53,11 @@ except ImportError:
         return stub_function
 
 
+if sys.version_info[0] < 3:
+    PYTHON_VER = 2
+else:
+    PYTHON_VER = 3
+
 required_boto_version = "2.0.0"
 required_boto3_version = "1.2.1"
 region = "us-east-1"
@@ -77,7 +73,6 @@ conn_parameters = {
 service = "ec2"
 resource_name = "test-instance"
 resource_id = "i-a1b2c3"
-
 
 error_body = """
 <Response>
@@ -125,7 +120,7 @@ def _has_required_boto3():
         else:
             return True
     except AttributeError as exc:
-        if "has no attribute '__version__'" not in six.text_type(exc):
+        if "has no attribute '__version__'" not in str(exc):
             raise
         return False
 
@@ -194,7 +189,7 @@ class BotoUtilsCacheIdTestCase(BotoUtilsTestCaseBase):
 @skipIf(
     _has_required_boto() is False,
     "The boto module must be greater than"
-    " or equal to version {0}".format(required_boto_version),
+    " or equal to version {}".format(required_boto_version),
 )
 class BotoUtilsGetConnTestCase(BotoUtilsTestCaseBase):
     @mock_ec2
@@ -210,7 +205,7 @@ class BotoUtilsGetConnTestCase(BotoUtilsTestCaseBase):
     @mock_ec2
     def test_get_conn_with_no_auth_params_raises_invocation_error(self):
         with patch(
-            "boto.{0}.connect_to_region".format(service),
+            "boto.{}.connect_to_region".format(service),
             side_effect=boto.exception.NoAuthHandlerFound(),
         ):
             with self.assertRaises(SaltInvocationError):
@@ -219,7 +214,7 @@ class BotoUtilsGetConnTestCase(BotoUtilsTestCaseBase):
     @mock_ec2
     def test_get_conn_error_raises_command_execution_error(self):
         with patch(
-            "boto.{0}.connect_to_region".format(service),
+            "boto.{}.connect_to_region".format(service),
             side_effect=BotoServerError(400, "Mocked error", body=error_body),
         ):
             with self.assertRaises(BotoServerError):
@@ -236,7 +231,7 @@ class BotoUtilsGetConnTestCase(BotoUtilsTestCaseBase):
 @skipIf(
     _has_required_boto() is False,
     "The boto module must be greater than"
-    " or equal to version {0}".format(required_boto_version),
+    " or equal to version {}".format(required_boto_version),
 )
 class BotoUtilsGetErrorTestCase(BotoUtilsTestCaseBase):
     def test_error_message(self):
@@ -276,13 +271,13 @@ class BotoUtilsGetErrorTestCase(BotoUtilsTestCaseBase):
 @skipIf(
     _has_required_boto() is False,
     "The boto module must be greater than"
-    " or equal to version {0}".format(required_boto_version),
+    " or equal to version {}".format(required_boto_version),
 )
 @skipIf(HAS_BOTO3 is False, "The boto3 module must be installed.")
 @skipIf(
     _has_required_boto3() is False,
     "The boto3 module must be greater than"
-    " or equal to version {0}".format(required_boto3_version),
+    " or equal to version {}".format(required_boto3_version),
 )
 class BotoBoto3CacheContextCollisionTest(BotoUtilsTestCaseBase):
     def test_context_conflict_between_boto_and_boto3_utils(self):
@@ -298,3 +293,41 @@ class BotoBoto3CacheContextCollisionTest(BotoUtilsTestCaseBase):
 
         # These should *not* be the same object!
         self.assertNotEqual(id(boto_ec2_conn), id(boto3_ec2_conn))
+
+
+@skipIf(PYTHON_VER == 2, "Test needed for Python V3")
+@skipIf(HAS_BOTO3 is False, "The boto3 module must be installed.")
+@skipIf(
+    _has_required_boto3() is False,
+    "The boto3 module must be greater than"
+    " or equal to version {}".format(required_boto3_version),
+)
+class Boto3UtilsTestOrdering(BotoUtilsTestCaseBase):
+    def test_sorting_of_dictionaries(self):
+        passed_list = [
+            OrderedDict(
+                [("key", "Name"), ("value", "test-name"), ("propagate_at_launch", True)]
+            ),
+            OrderedDict(
+                [("key", "Type"), ("value", "test-type"), ("propagate_at_launch", True)]
+            ),
+            OrderedDict(
+                [("key", "Owner"), ("value", "salt"), ("propagate_at_launch", True)]
+            ),
+            OrderedDict(
+                [
+                    ("key", "Monitoring"),
+                    ("value", "development"),
+                    ("propagate_at_launch", True),
+                ]
+            ),
+        ]
+
+        expected = [
+            {"propagate_at_launch": True, "value": "development", "key": "Monitoring"},
+            {"propagate_at_launch": True, "value": "test-name", "key": "Name"},
+            {"propagate_at_launch": True, "value": "salt", "key": "Owner"},
+            {"propagate_at_launch": True, "value": "test-type", "key": "Type"},
+        ]
+        result = boto3mod.ordered(passed_list)
+        self.assertEqual(result, expected)
