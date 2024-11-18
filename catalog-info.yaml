@@ -1,0 +1,12 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: salt
+  description: Local fork of SALT with Inscape-related patches
+  annotations:
+    github.com/project-slug: CognitiveNetworks/salt
+    backstage.io/techdocs-ref: dir:.
+spec:
+  type: iac
+  lifecycle: production
+  owner: inscape-ops
