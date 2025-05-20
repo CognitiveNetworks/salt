@@ -95,7 +95,7 @@ class ReqServerChannel:
         # other things needed for _auth
         # Create the event manager
         self.event = salt.utils.event.get_master_event(
-            self.opts, self.opts["sock_dir"], listen=False
+            self.opts, self.opts["sock_dir"], listen=False, io_loop=io_loop
         )
         self.auto_key = salt.daemons.masterapi.AutoKey(self.opts)
         # only create a con_cache-client if the con_cache is active
@@ -1043,7 +1043,7 @@ class MasterPubServerChannel:
             )
             os.nice(self.opts["event_publisher_niceness"])
         self.io_loop = tornado.ioloop.IOLoop.current()
-        tcp_master_pool_port = 4520
+        tcp_master_pool_port = self.opts["cluster_pool_port"]
         self.pushers = []
         self.auth_errors = {}
         for peer in self.opts.get("cluster_peers", []):

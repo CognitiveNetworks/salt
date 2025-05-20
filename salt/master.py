@@ -226,6 +226,11 @@ class Maintenance(salt.utils.process.SignalHandlingProcess):
         self.loop_interval = int(self.opts["loop_interval"])
         # A serializer for general maint operations
         self.restart_interval = int(self.opts["maintenance_interval"])
+        # Initializes pki_dir with the correct option for clustered environments
+        if "cluster_id" in self.opts and self.opts["cluster_id"]:
+            self.pki_dir = self.opts["cluster_pki_dir"]
+        else:
+            self.pki_dir = self.opts.get("pki_dir", "")
 
     def _post_fork_init(self):
         """
@@ -382,7 +387,7 @@ class Maintenance(salt.utils.process.SignalHandlingProcess):
                         self.opts["cachedir"], self.opts["user"], self.opts["id"]
                     )
                     # There is currently no concept of a leader in a master
-                    # cluster. Lets fake it till we make it with a little
+                    # cluster. Let's fake it till we make it with a little
                     # waiting period.
                     time.sleep(drop_file_wait)
                     to_rotate = (
@@ -814,6 +819,10 @@ class Master(SMaster):
             for _, opts in iter_transport_opts(self.opts):
                 chan = salt.channel.server.PubServerChannel.factory(opts)
                 chan.pre_fork(self.process_manager, kwargs={"secrets": SMaster.secrets})
+                if not chan.transport.started.wait(60):
+                    raise salt.exceptions.SaltMasterError(
+                        "Publish server did not start within 60 seconds. Something went wrong.",
+                    )
                 pub_channels.append(chan)
 
             log.info("Creating master event publisher process")
@@ -821,6 +830,10 @@ class Master(SMaster):
                 self.opts
             )
             ipc_publisher.pre_fork(self.process_manager)
+            if not ipc_publisher.transport.started.wait(30):
+                raise salt.exceptions.SaltMasterError(
+                    "IPC publish server did not start within 30 seconds. Something went wrong."
+                )
             self.process_manager.add_process(
                 EventMonitor,
                 args=[self.opts, ipc_publisher],
@@ -1109,8 +1122,8 @@ class MWorker(salt.utils.process.SignalHandlingProcess):
         Create a salt master worker process
 
         :param dict opts: The salt options
-        :param dict mkey: The user running the salt master and the AES key
-        :param dict key: The user running the salt master and the RSA key
+        :param dict mkey: The user running the salt master and the RSA key
+        :param dict key: The user running the salt master and the AES key
 
         :rtype: MWorker
         :return: Master worker

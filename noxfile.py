@@ -1284,7 +1284,10 @@ def decompress_dependencies(session):
                 if not os.path.isabs(resolved_link):
                     # Relative symlinks, resolve them
                     resolved_link = os.path.join(scan_path, resolved_link)
-                if not os.path.exists(resolved_link):
+                prefix_check = False
+                if platform == "windows":
+                    prefix_check = resolved_link.startswith("\\\\?")
+                if not os.path.exists(resolved_link) or prefix_check:
                     session.log("The symlink %r looks to be broken", resolved_link)
                     # This is a broken link, fix it
                     resolved_link_suffix = resolved_link.split(
@@ -1839,13 +1842,24 @@ def ci_test_onedir_pkgs(session):
     session_warn(session, "Replacing VirtualEnv instance...")
 
     ci_test_onedir_path = REPO_ROOT / ".nox" / "ci-test-onedir"
-    session._runner.venv = VirtualEnv(
-        str(ci_test_onedir_path.relative_to(REPO_ROOT)),
-        interpreter=session._runner.func.python,
-        reuse_existing=True,
-        venv=session._runner.venv.venv_or_virtualenv == "venv",
-        venv_params=session._runner.venv.venv_params,
-    )
+    if hasattr(session._runner.venv, "venv_or_virtualenv"):
+        venv = session._runner.venv.venv_or_virtualenv == "venv"
+        session._runner.venv = VirtualEnv(
+            str(ci_test_onedir_path.relative_to(REPO_ROOT)),
+            interpreter=session._runner.func.python,
+            reuse_existing=True,
+            venv=venv,
+            venv_params=session._runner.venv.venv_params,
+        )
+    else:
+        venv = session._runner.venv.venv_backend in ("venv", "virtualenv")
+        session._runner.venv = VirtualEnv(  # pylint: disable=unexpected-keyword-arg
+            str(ci_test_onedir_path.relative_to(REPO_ROOT)),
+            interpreter=session._runner.func.python,
+            reuse_existing=True,
+            venv_backend=session._runner.venv.venv_backend,
+            venv_params=session._runner.venv.venv_params,
+        )
     os.environ["VIRTUAL_ENV"] = session._runner.venv.location
     session._runner.venv.create()
 
@@ -1864,21 +1878,18 @@ def ci_test_onedir_pkgs(session):
         "--pkg-system-service",
     ]
 
+    # Upgrade and downgrade tests run with no-uninstall. The intergration tests
+    # will use the results of the upgrade downgrade tests. So, for upgrade
+    # tests the intergration tests will be testing the current version after
+    # and upgrade was performed. For downgrade tests, the integration tests are
+    # testing the previous version after a downgrade was performed.
     chunks = {
         "install": [],
         "upgrade": [
             "--upgrade",
             "--no-uninstall",
         ],
-        "upgrade-classic": [
-            "--upgrade",
-            "--no-uninstall",
-        ],
         "downgrade": [
-            "--downgrade",
-            "--no-uninstall",
-        ],
-        "downgrade-classic": [
             "--downgrade",
             "--no-uninstall",
         ],
@@ -1912,9 +1923,6 @@ def ci_test_onedir_pkgs(session):
         "PKG_TEST_TYPE": chunk,
     }
 
-    if chunk in ("upgrade-classic", "downgrade-classic"):
-        cmd_args.append("--classic")
-
     pytest_args = (
         common_pytest_args[:]
         + cmd_args[:]
@@ -1940,7 +1948,7 @@ def ci_test_onedir_pkgs(session):
     except CommandFailed:
         if os.environ.get("RERUN_FAILURES", "0") == "0":
             # Don't rerun on failures
-            return
+            sys.exit(1)
 
         # Don't print the system information, not the test selection on reruns
         global PRINT_TEST_SELECTION
@@ -1968,6 +1976,8 @@ def ci_test_onedir_pkgs(session):
             on_rerun=True,
         )
 
+    # The upgrade/downgrad tests passed, now run the integration tests against
+    # the results.
     if chunk not in ("install", "download-pkgs"):
         cmd_args = chunks["install"]
         pytest_args = (
@@ -1982,8 +1992,6 @@ def ci_test_onedir_pkgs(session):
         )
         if "downgrade" in chunk:
             pytest_args.append("--use-prev-version")
-        if chunk in ("upgrade-classic", "downgrade-classic"):
-            pytest_args.append("--classic")
         if append_tests_path:
             pytest_args.append("tests/pytests/pkg/")
         try:
@@ -1991,7 +1999,7 @@ def ci_test_onedir_pkgs(session):
         except CommandFailed:
             if os.environ.get("RERUN_FAILURES", "0") == "0":
                 # Don't rerun on failures
-                return
+                sys.exit(1)
             cmd_args = chunks["install"]
             pytest_args = (
                 common_pytest_args[:]
@@ -2006,8 +2014,6 @@ def ci_test_onedir_pkgs(session):
             )
             if "downgrade" in chunk:
                 pytest_args.append("--use-prev-version")
-            if chunk in ("upgrade-classic", "downgrade-classic"):
-                pytest_args.append("--classic")
             if append_tests_path:
                 pytest_args.append("tests/pytests/pkg/")
             _pytest(

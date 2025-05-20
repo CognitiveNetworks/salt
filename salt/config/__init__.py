@@ -196,6 +196,8 @@ VALID_OPTS = immutabletypes.freeze(
         # to define where minion keys and the cluster private key will be
         # stored.
         "cluster_pki_dir": str,
+        # The port required to be open for a master cluster to properly function
+        "cluster_pool_port": int,
         # Use a module function to determine the unique identifier. If this is
         # set and 'id' is not set, it will allow invocation of a module function
         # to determine the value of 'id'. For simple invocations without function
@@ -1674,6 +1676,7 @@ DEFAULT_MASTER_OPTS = immutabletypes.freeze(
         "cluster_id": None,
         "cluster_peers": [],
         "cluster_pki_dir": None,
+        "cluster_pool_port": 4520,
         "features": {},
         "publish_signing_algorithm": "PKCS1v15-SHA1",
     }
@@ -2519,7 +2522,7 @@ def syndic_config(
                 ),
             )
         ),
-        "user": opts.get("syndic_user", opts["user"]),
+        "user": opts.get("syndic_user", master_opts["user"]),
         "sock_dir": os.path.join(
             opts["cachedir"], opts.get("syndic_sock_dir", opts["sock_dir"])
         ),
@@ -2527,6 +2530,7 @@ def syndic_config(
         "cachedir": master_opts["cachedir"],
     }
     opts.update(syndic_opts)
+
     # Prepend root_dir to other paths
     prepend_root_dirs = [
         "pki_dir",
@@ -4115,7 +4119,7 @@ def apply_master_config(overrides=None, defaults=None):
 
     prepend_root_dir(opts, prepend_root_dirs)
 
-    # When a cluster id is defined, make sure the other nessicery bits a
+    # When a cluster id is defined, make sure the other necessary bits are
     # defined.
     if "cluster_id" not in opts:
         opts["cluster_id"] = None
@@ -4133,7 +4137,7 @@ def apply_master_config(overrides=None, defaults=None):
             log.warning("Cluster peers defined without a cluster_id, ignoring.")
             opts["cluster_peers"] = []
         if opts.get("cluster_pki_dir", None):
-            log.warning("Cluster pki defined without a cluster_id, ignoring.")
+            log.warning("Cluster pki dir defined without a cluster_id, ignoring.")
             opts["cluster_pki_dir"] = None
 
     # Enabling open mode requires that the value be set to True, and
