@@ -87,7 +87,7 @@ on the IAM role to be persistent. This functionality was added in 2015.8.0.
 """
 
 import logging
-
+import six
 import salt.utils.dictdiffer
 import salt.utils.dictupdate as dictupdate
 from salt.utils.odict import OrderedDict
@@ -357,10 +357,13 @@ def _sort_policy(doc):
     state runs.  We'll sort any list-type subitems before comparison to reduce
     the likelihood of false negatives.
     """
-    if isinstance(doc, list):
-        return sorted(_sort_policy(i) for i in doc)
-    elif isinstance(doc, (dict, OrderedDict)):
-        return {k: _sort_policy(v) for k, v in doc.items()}
+    try:
+        if isinstance(doc, list):
+            return sorted((_sort_policy(i) for i in doc), key=lambda d: sorted(d.items()))
+        elif isinstance(doc, (dict, OrderedDict)):
+            return dict([(k, _sort_policy(v)) for k, v in six.iteritems(doc)])
+    except Exception as e:
+        log.info('Can not sort, returning unsorted')
     return doc
 
 
