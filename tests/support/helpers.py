@@ -1748,11 +1748,13 @@ class VirtualEnv:
         return data
 
     def _create_virtualenv(self):
-        virtualenv = shutil.which("virtualenv")
-        if not virtualenv:
-            pytest.fail("'virtualenv' binary not found")
+        pyexec = shutil.which("python")
+        if not pyexec:
+            pytest.fail("'python' binary not found for virtualenv")
         cmd = [
-            virtualenv,
+            pyexec,
+            "-m",
+            "virtualenv",
             f"--python={self.get_real_python()}",
         ]
         if self.system_site_packages:
@@ -1905,3 +1907,15 @@ class Keys:
 
     def __exit__(self, *_):
         shutil.rmtree(str(self.priv_path.parent), ignore_errors=True)
+
+
+@functools.cache
+def system_python_version():
+    if salt.utils.platform.is_windows():
+        binary = "python3.exe"
+    else:
+        binary = "/usr/bin/python3"
+    proc = subprocess.run([binary, "--version"], capture_output=True, check=True)
+    return tuple(
+        int(_) for _ in proc.stdout.decode().split(" ", 1)[1].strip().split(".")
+    )

@@ -12,11 +12,10 @@ on:
         required: true
         type: string
         description: JSON string containing information about what and how to run the test suite
-      python-version:
-        required: false
+      ci-python-version:
+        required: true
         type: string
         description: The python version to run tests with
-        default: "3.10"
       salt-version:
         type: string
         required: true
@@ -94,10 +93,10 @@ jobs:
       - name: Checkout Source Code
         uses: actions/checkout@v4
 
-      - name: Setup Python ${{ inputs.python-version }}
+      - name: Setup Python ${{ inputs.ci-python-version }}
         uses: actions/setup-python@v5
         with:
-          python-version: "${{ inputs.python-version }}"
+          python-version: "${{ inputs.ci-python-version }}"
 
       - name: Setup Python Tools Scripts
         uses: ./.github/actions/setup-python-tools-scripts
@@ -274,14 +273,14 @@ jobs:
 
       - name: Run Changed Tests
         id: run-fast-changed-tests
-        if: ${{ fromJSON(inputs.testrun)['type'] != 'full' }}
+        if: ${{ !cancelled() && fromJSON(inputs.testrun)['type'] != 'full' }}
         run: |
           docker exec ${{ github.run_id}}_salt-test python3 -m nox --force-color -e ${{ inputs.nox-session }} -- ${{ matrix.tests-chunk }} -- \
             --core-tests --slow-tests --suppress-no-test-exit-code --from-filenames=testrun-changed-files.txt
 
       - name: Run Fast Tests
         id: run-fast-tests
-        if: ${{ fromJSON(inputs.testrun)['type'] != 'full' && fromJSON(inputs.testrun)['selected_tests']['fast'] }}
+        if: ${{ !cancelled() && fromJSON(inputs.testrun)['type'] != 'full' && fromJSON(inputs.testrun)['selected_tests']['fast'] }}
         run: |
           docker exec ${{ github.run_id}}_salt-test \
             python3 -m nox --force-color -e ${{ inputs.nox-session }} -- ${{ matrix.tests-chunk }} -- \
@@ -289,7 +288,7 @@ jobs:
 
       - name: Run Slow Tests
         id: run-slow-tests
-        if: ${{ fromJSON(inputs.testrun)['type'] != 'full' && fromJSON(inputs.testrun)['selected_tests']['slow'] }}
+        if: ${{ !cancelled() && fromJSON(inputs.testrun)['type'] != 'full' && fromJSON(inputs.testrun)['selected_tests']['slow'] }}
         run: |
           docker exec ${{ github.run_id}}_salt-test \
             python3 -m nox --force-color -e ${{ inputs.nox-session }} -- ${{ matrix.tests-chunk }} -- \
@@ -297,7 +296,7 @@ jobs:
 
       - name: Run Core Tests
         id: run-core-tests
-        if: ${{ fromJSON(inputs.testrun)['type'] != 'full' && fromJSON(inputs.testrun)['selected_tests']['core'] }}
+        if: ${{ !cancelled() && fromJSON(inputs.testrun)['type'] != 'full' && fromJSON(inputs.testrun)['selected_tests']['core'] }}
         run: |
           docker exec ${{ github.run_id}}_salt-test \
             python3 -m nox --force-color -e ${{ inputs.nox-session }} -- ${{ matrix.tests-chunk }} -- \
@@ -305,7 +304,7 @@ jobs:
 
       - name: Run Flaky Tests
         id: run-flaky-tests
-        if: ${{ fromJSON(inputs.testrun)['selected_tests']['flaky'] }}
+        if: ${{ !cancelled() && fromJSON(inputs.testrun)['selected_tests']['flaky'] }}
         run: |
           docker exec ${{ github.run_id}}_salt-test \
             python3 -m nox --force-color -e ${{ inputs.nox-session }} -- ${{ matrix.tests-chunk }} -- \
@@ -313,7 +312,7 @@ jobs:
 
       - name: Run Full Tests
         id: run-full-tests
-        if: ${{ fromJSON(inputs.testrun)['type'] == 'full' }}
+        if: ${{ !cancelled() && fromJSON(inputs.testrun)['type'] == 'full' }}
         run: |
           docker exec ${{ github.run_id}}_salt-test \
             python3 -m nox --force-color -e ${{ inputs.nox-session }} -- ${{ matrix.tests-chunk }} -- \
@@ -406,10 +405,10 @@ jobs:
       - name: Checkout Source Code
         uses: actions/checkout@v4
 
-      - name: Setup Python ${{ inputs.python-version }}
+      - name: Setup Python ${{ inputs.ci-python-version }}
         uses: actions/setup-python@v5
         with:
-          python-version: "${{ inputs.python-version }}"
+          python-version: "${{ inputs.ci-python-version }}"
 
       - name: Setup Python Tools Scripts
         uses: ./.github/actions/setup-python-tools-scripts
@@ -591,14 +590,14 @@ jobs:
 
       - name: Run Changed Tests
         id: run-fast-changed-tests
-        if: ${{ fromJSON(inputs.testrun)['type'] != 'full' }}
+        if: ${{ !cancelled() && fromJSON(inputs.testrun)['type'] != 'full' }}
         run: |
           docker exec ${{ github.run_id}}_salt-test python3 -m nox --force-color -e ${{ inputs.nox-session }} -- ${{ matrix.tests-chunk }} -- \
             --core-tests --slow-tests --suppress-no-test-exit-code --from-filenames=testrun-changed-files.txt
 
       - name: Run Fast Tests
         id: run-fast-tests
-        if: ${{ fromJSON(inputs.testrun)['type'] != 'full' && fromJSON(inputs.testrun)['selected_tests']['fast'] }}
+        if: ${{ !cancelled() && fromJSON(inputs.testrun)['type'] != 'full' && fromJSON(inputs.testrun)['selected_tests']['fast'] }}
         run: |
           docker exec ${{ github.run_id}}_salt-test \
             python3 -m nox --force-color -e ${{ inputs.nox-session }} -- ${{ matrix.tests-chunk }} -- \
@@ -606,7 +605,7 @@ jobs:
 
       - name: Run Slow Tests
         id: run-slow-tests
-        if: ${{ fromJSON(inputs.testrun)['type'] != 'full' && fromJSON(inputs.testrun)['selected_tests']['slow'] }}
+        if: ${{ !cancelled() && fromJSON(inputs.testrun)['type'] != 'full' && fromJSON(inputs.testrun)['selected_tests']['slow'] }}
         run: |
           docker exec ${{ github.run_id}}_salt-test \
             python3 -m nox --force-color -e ${{ inputs.nox-session }} -- ${{ matrix.tests-chunk }} -- \
@@ -614,7 +613,7 @@ jobs:
 
       - name: Run Core Tests
         id: run-core-tests
-        if: ${{ fromJSON(inputs.testrun)['type'] != 'full' && fromJSON(inputs.testrun)['selected_tests']['core'] }}
+        if: ${{ !cancelled() && fromJSON(inputs.testrun)['type'] != 'full' && fromJSON(inputs.testrun)['selected_tests']['core'] }}
         run: |
           docker exec ${{ github.run_id}}_salt-test \
             python3 -m nox --force-color -e ${{ inputs.nox-session }} -- ${{ matrix.tests-chunk }} -- \
@@ -622,7 +621,7 @@ jobs:
 
       - name: Run Flaky Tests
         id: run-flaky-tests
-        if: ${{ fromJSON(inputs.testrun)['selected_tests']['flaky'] }}
+        if: ${{ !cancelled() && fromJSON(inputs.testrun)['selected_tests']['flaky'] }}
         run: |
           docker exec ${{ github.run_id}}_salt-test \
             python3 -m nox --force-color -e ${{ inputs.nox-session }} -- ${{ matrix.tests-chunk }} -- \
@@ -630,7 +629,7 @@ jobs:
 
       - name: Run Full Tests
         id: run-full-tests
-        if: ${{ fromJSON(inputs.testrun)['type'] == 'full' }}
+        if: ${{ !cancelled() && fromJSON(inputs.testrun)['type'] == 'full' }}
         run: |
           docker exec ${{ github.run_id}}_salt-test \
             python3 -m nox --force-color -e ${{ inputs.nox-session }} -- ${{ matrix.tests-chunk }} -- \
@@ -722,10 +721,10 @@ jobs:
       - name: Checkout Source Code
         uses: actions/checkout@v4
 
-      - name: Setup Python ${{ inputs.python-version }}
+      - name: Setup Python ${{ inputs.ci-python-version }}
         uses: actions/setup-python@v5
         with:
-          python-version: "${{ inputs.python-version }}"
+          python-version: "${{ inputs.ci-python-version }}"
 
       - name: Setup Salt Version
         run: |
@@ -777,7 +776,7 @@ jobs:
 
       - name: Run Changed Tests
         id: run-fast-changed-tests
-        if: ${{ fromJSON(inputs.testrun)['type'] != 'full' }}
+        if: ${{ !cancelled() && fromJSON(inputs.testrun)['type'] != 'full' }}
         env:
           SKIP_REQUIREMENTS_INSTALL: "1"
           PRINT_TEST_SELECTION: "0"
@@ -803,7 +802,7 @@ jobs:
 
       - name: Run Fast Tests
         id: run-fast-tests
-        if: ${{ fromJSON(inputs.testrun)['type'] != 'full' && fromJSON(inputs.testrun)['selected_tests']['fast'] }}
+        if: ${{ !cancelled() && fromJSON(inputs.testrun)['type'] != 'full' && fromJSON(inputs.testrun)['selected_tests']['fast'] }}
         env:
           SKIP_REQUIREMENTS_INSTALL: "1"
           PRINT_TEST_SELECTION: "0"
@@ -828,7 +827,7 @@ jobs:
 
       - name: Run Slow Tests
         id: run-slow-tests
-        if: ${{ fromJSON(inputs.testrun)['type'] != 'full' && fromJSON(inputs.testrun)['selected_tests']['slow'] }}
+        if: ${{ !cancelled() && fromJSON(inputs.testrun)['type'] != 'full' && fromJSON(inputs.testrun)['selected_tests']['slow'] }}
         env:
           SKIP_REQUIREMENTS_INSTALL: "1"
           PRINT_TEST_SELECTION: "0"
@@ -853,7 +852,7 @@ jobs:
 
       - name: Run Core Tests
         id: run-core-tests
-        if: ${{ fromJSON(inputs.testrun)['type'] != 'full' && fromJSON(inputs.testrun)['selected_tests']['core'] }}
+        if: ${{ !cancelled() && fromJSON(inputs.testrun)['type'] != 'full' && fromJSON(inputs.testrun)['selected_tests']['core'] }}
         env:
           SKIP_REQUIREMENTS_INSTALL: "1"
           PRINT_TEST_SELECTION: "0"
@@ -878,7 +877,7 @@ jobs:
 
       - name: Run Flaky Tests
         id: run-flaky-tests
-        if: ${{ fromJSON(inputs.testrun)['selected_tests']['flaky'] }}
+        if: ${{ !cancelled() && fromJSON(inputs.testrun)['selected_tests']['flaky'] }}
         env:
           SKIP_REQUIREMENTS_INSTALL: "1"
           PRINT_TEST_SELECTION: "0"
@@ -903,7 +902,7 @@ jobs:
 
       - name: Run Full Tests
         id: run-full-tests
-        if: ${{ fromJSON(inputs.testrun)['type'] == 'full' }}
+        if: ${{ !cancelled() && fromJSON(inputs.testrun)['type'] == 'full' }}
         env:
           SKIP_REQUIREMENTS_INSTALL: "1"
           PRINT_TEST_SELECTION: "0"
@@ -988,9 +987,11 @@ jobs:
       matrix:
         include: ${{ fromJSON(inputs.matrix)['windows'] }}
     steps:
-      - uses: actions/setup-python@v5
+
+      - name: Setup Python ${{ inputs.ci-python-version }}
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: ${{ inputs.ci-python-version }}
 
       - name: "Throttle Builds"
         shell: bash
@@ -1025,11 +1026,6 @@ jobs:
       - name: Install System Dependencies
         run: |
           echo true
-
-      - name: Setup Python ${{ inputs.python-version }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: "${{ inputs.python-version }}"
 
       - name: Install Nox
         run: |
@@ -1066,7 +1062,7 @@ jobs:
 
       - name: Run Changed Tests
         id: run-fast-changed-tests
-        if: ${{ fromJSON(inputs.testrun)['type'] != 'full' }}
+        if: ${{ !cancelled() && fromJSON(inputs.testrun)['type'] != 'full' }}
         env:
           SKIP_REQUIREMENTS_INSTALL: "1"
           PRINT_TEST_SELECTION: "0"
@@ -1094,7 +1090,7 @@ jobs:
 
       - name: Run Fast Tests
         id: run-fast-tests
-        if: ${{ fromJSON(inputs.testrun)['type'] != 'full' && fromJSON(inputs.testrun)['selected_tests']['fast'] }}
+        if: ${{ !cancelled() && fromJSON(inputs.testrun)['type'] != 'full' && fromJSON(inputs.testrun)['selected_tests']['fast'] }}
         env:
           SKIP_REQUIREMENTS_INSTALL: "1"
           PRINT_TEST_SELECTION: "0"
@@ -1121,7 +1117,7 @@ jobs:
 
       - name: Run Slow Tests
         id: run-slow-tests
-        if: ${{ fromJSON(inputs.testrun)['type'] != 'full' && fromJSON(inputs.testrun)['selected_tests']['slow'] }}
+        if: ${{ !cancelled() && fromJSON(inputs.testrun)['type'] != 'full' && fromJSON(inputs.testrun)['selected_tests']['slow'] }}
         env:
           SKIP_REQUIREMENTS_INSTALL: "1"
           PRINT_TEST_SELECTION: "0"
@@ -1148,7 +1144,7 @@ jobs:
 
       - name: Run Core Tests
         id: run-core-tests
-        if: ${{ fromJSON(inputs.testrun)['type'] != 'full' && fromJSON(inputs.testrun)['selected_tests']['core'] }}
+        if: ${{ !cancelled() && fromJSON(inputs.testrun)['type'] != 'full' && fromJSON(inputs.testrun)['selected_tests']['core'] }}
         env:
           SKIP_REQUIREMENTS_INSTALL: "1"
           PRINT_TEST_SELECTION: "0"
@@ -1175,7 +1171,7 @@ jobs:
 
       - name: Run Flaky Tests
         id: run-flaky-tests
-        if: ${{ fromJSON(inputs.testrun)['selected_tests']['flaky'] }}
+        if: ${{ !cancelled() && fromJSON(inputs.testrun)['selected_tests']['flaky'] }}
         env:
           SKIP_REQUIREMENTS_INSTALL: "1"
           PRINT_TEST_SELECTION: "0"
@@ -1202,7 +1198,7 @@ jobs:
 
       - name: Run Full Tests
         id: run-full-tests
-        if: ${{ fromJSON(inputs.testrun)['type'] == 'full' }}
+        if: ${{ !cancelled() && fromJSON(inputs.testrun)['type'] == 'full' }}
         env:
           SKIP_REQUIREMENTS_INSTALL: "1"
           PRINT_TEST_SELECTION: "0"
@@ -1295,7 +1291,7 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: "${{ inputs.ci-python-version }}"
 
       - name: "Throttle Builds"
         shell: bash
@@ -1344,10 +1340,10 @@ jobs:
         run: |
           tree -a artifacts
 
-      - name: Setup Python ${{ inputs.python-version }}
+      - name: Setup Python ${{ inputs.ci-python-version }}
         uses: actions/setup-python@v5
         with:
-          python-version: "${{ inputs.python-version }}"
+          python-version: "${{ inputs.ci-python-version }}"
 
       - name: Install Nox
         run: |
